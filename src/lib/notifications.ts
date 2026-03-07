@@ -7,7 +7,7 @@ interface CreateNotificationParams {
   title: string
   message: string
   link?: string
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, string | number | boolean | null>
 }
 
 export async function createNotification(params: CreateNotificationParams) {

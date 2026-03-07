@@ -1,0 +1,526 @@
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { toast } from "sonner"
+import {
+  ArrowRight, ArrowLeft, CheckCircle, Upload, X, Loader2
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
+import { CATEGORIAS, CATEGORIAS_MAP, type Categoria } from "@/constants/categorias"
+import { DISTRITOS } from "@/constants/distritos"
+import { cn } from "@/lib/utils"
+
+// ─── Schema de validación ─────────────────────────────────────────
+
+const schema = z.object({
+  title: z.string().min(10, "Describe brevemente qué necesitas (min. 10 caracteres)").max(100),
+  categorySlug: z.string().min(1, "Selecciona una categoría"),
+  subcategorySlug: z.string().optional(),
+  description: z.string().min(30, "Cuéntanos más detalles (min. 30 caracteres)").max(1000),
+  district: z.string().min(1, "Selecciona tu distrito"),
+  urgency: z.enum(["TODAY", "THIS_WEEK", "THIS_MONTH", "FLEXIBLE"]),
+  budgetMin: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+    z.number().min(0).optional()
+  ),
+  budgetMax: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+    z.number().min(0).optional()
+  ),
+  preferredTime: z.string().max(100).optional(),
+})
+
+// Definición manual para evitar conflictos de inferencia con z.preprocess
+type FormData = {
+  title: string
+  categorySlug: string
+  subcategorySlug?: string
+  description: string
+  district: string
+  urgency: "TODAY" | "THIS_WEEK" | "THIS_MONTH" | "FLEXIBLE"
+  budgetMin?: number
+  budgetMax?: number
+  preferredTime?: string
+}
+
+// ─── Pasos del formulario ─────────────────────────────────────────
+
+const PASOS = [
+  { numero: 1, label: "Servicio" },
+  { numero: 2, label: "Detalles" },
+  { numero: 3, label: "Ubicación" },
+  { numero: 4, label: "Confirmar" },
+]
+
+const URGENCIA_OPTS = [
+  { value: "TODAY", label: "Hoy mismo", desc: "Lo necesito urgente", color: "border-red-300 bg-red-50 text-red-700" },
+  { value: "THIS_WEEK", label: "Esta semana", desc: "En los próximos días", color: "border-orange-300 bg-orange-50 text-orange-700" },
+  { value: "THIS_MONTH", label: "Este mes", desc: "Sin mucha prisa", color: "border-blue-300 bg-blue-50 text-blue-700" },
+  { value: "FLEXIBLE", label: "Sin prisa", desc: "Cuando haya disponibilidad", color: "border-gray-300 bg-gray-50 text-gray-600" },
+]
+
+interface Props {
+  defaultCategoria?: string  // slug pre-seleccionado via query param
+}
+
+export function SolicitudForm({ defaultCategoria }: Props) {
+  const router = useRouter()
+  const [step, setStep] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [fotos, setFotos] = useState<string[]>([])
+  const [uploadingFoto, setUploadingFoto] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    trigger,
+    formState: { errors },
+  } = useForm<FormData>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(schema) as any,
+    defaultValues: {
+      categorySlug: defaultCategoria ?? "",
+      urgency: "FLEXIBLE",
+      title: "",
+      description: "",
+      district: "",
+    },
+  })
+
+  const categorySlug = watch("categorySlug")
+  const urgency = watch("urgency")
+  const selectedCat = CATEGORIAS_MAP[categorySlug]
+
+  // ─── Upload de fotos a Cloudinary ────────────────────────────────
+
+  async function handleFotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || fotos.length >= 3) return
+    e.target.value = ""
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Solo se permiten imágenes")
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("La imagen no debe superar 5MB")
+      return
+    }
+
+    setUploadingFoto(true)
+    try {
+      const sigRes = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ folder: "solicitudes" }),
+      })
+      const { signature, timestamp, folder, cloudName, apiKey } = await sigRes.json()
+
+      const fd = new FormData()
+      fd.append("file", file)
+      fd.append("signature", signature)
+      fd.append("timestamp", String(timestamp))
+      fd.append("folder", folder)
+      fd.append("api_key", apiKey)
+
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: fd,
+      })
+      const result = await res.json()
+      setFotos((prev) => [...prev, result.secure_url])
+      toast.success("Foto agregada")
+    } catch {
+      toast.error("Error al subir la foto")
+    } finally {
+      setUploadingFoto(false)
+    }
+  }
+
+  // ─── Validar paso antes de avanzar ───────────────────────────────
+
+  async function handleSiguiente() {
+    const fieldsPerStep: Record<number, (keyof FormData)[]> = {
+      1: ["categorySlug", "title"],
+      2: ["description", "urgency"],
+      3: ["district"],
+    }
+    const ok = await trigger(fieldsPerStep[step])
+    if (ok) {
+      setStep((s) => s + 1)
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+  }
+
+  // ─── Enviar solicitud ─────────────────────────────────────────────
+
+  async function onSubmit(data: FormData) {
+    setLoading(true)
+    try {
+      const res = await fetch("/api/solicitudes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, photos: fotos }),
+      })
+
+      const json = await res.json()
+      if (!res.ok) {
+        toast.error(json.error ?? "Error al publicar la solicitud")
+        return
+      }
+
+      toast.success("¡Solicitud publicada! Los profesionales recibirán una notificación.")
+      router.push(`/solicitudes/${json.id}`)
+    } catch {
+      toast.error("Error de conexión. Intenta de nuevo.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      {/* Header con progreso */}
+      <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-6 pt-5 pb-4">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-white font-bold">Nueva solicitud</h1>
+          <span className="text-orange-100 text-sm">{step}/{PASOS.length}</span>
+        </div>
+        <div className="w-full bg-orange-400/40 rounded-full h-1.5">
+          <div
+            className="bg-white rounded-full h-1.5 transition-all duration-500"
+            style={{ width: `${(step / PASOS.length) * 100}%` }}
+          />
+        </div>
+        <div className="flex justify-between mt-3">
+          {PASOS.map((p) => (
+            <span
+              key={p.numero}
+              className={cn(
+                "text-[10px]",
+                p.numero <= step ? "text-white font-medium" : "text-orange-200"
+              )}
+            >
+              {p.label}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Contenido */}
+      <div className="p-5">
+        {/* ── PASO 1: Categoría y título ── */}
+        {step === 1 && (
+          <div className="space-y-5">
+            <div>
+              <Label className="mb-2 block">¿Qué tipo de servicio necesitas? <span className="text-red-500">*</span></Label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {CATEGORIAS.map((cat) => (
+                  <button
+                    key={cat.slug}
+                    type="button"
+                    onClick={() => {
+                      setValue("categorySlug", cat.slug)
+                      setValue("subcategorySlug", "")
+                    }}
+                    className={cn(
+                      "flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-center transition-all",
+                      categorySlug === cat.slug
+                        ? "border-orange-500 bg-orange-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    )}
+                  >
+                    <span className="text-2xl">{cat.icon}</span>
+                    <span className="text-xs font-medium text-gray-700 leading-tight">{cat.name}</span>
+                  </button>
+                ))}
+              </div>
+              {errors.categorySlug && (
+                <p className="text-xs text-red-500 mt-1">{errors.categorySlug.message}</p>
+              )}
+            </div>
+
+            {/* Subcategoría */}
+            {selectedCat && (
+              <div>
+                <Label className="mb-2 block">Subcategoría (opcional)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {selectedCat.subcategorias.map((sub) => (
+                    <button
+                      key={sub.slug}
+                      type="button"
+                      onClick={() => setValue("subcategorySlug", sub.slug)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-full text-xs border transition-all",
+                        watch("subcategorySlug") === sub.slug
+                          ? "border-orange-500 bg-orange-50 text-orange-700"
+                          : "border-gray-200 text-gray-600 hover:border-gray-300"
+                      )}
+                    >
+                      {sub.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Título */}
+            <div>
+              <Label htmlFor="title" className="mb-1.5 block">
+                ¿Qué necesitas hacer? <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="title"
+                {...register("title")}
+                placeholder="Ej: Reparar filtración en el baño del segundo piso"
+                className={errors.title ? "border-red-400" : ""}
+              />
+              {errors.title && (
+                <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>
+              )}
+            </div>
+
+            <Button
+              type="button"
+              onClick={handleSiguiente}
+              disabled={!categorySlug}
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white h-11"
+            >
+              Siguiente <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
+          </div>
+        )}
+
+        {/* ── PASO 2: Descripción, urgencia, fotos ── */}
+        {step === 2 && (
+          <div className="space-y-5">
+            {/* Descripción */}
+            <div>
+              <Label htmlFor="description" className="mb-1.5 block">
+                Describe el problema con detalle <span className="text-red-500">*</span>
+              </Label>
+              <Textarea
+                id="description"
+                {...register("description")}
+                placeholder="Cuéntanos qué pasó, cuándo ocurrió, qué has intentado hacer... Mientras más detalle, mejores presupuestos recibirás."
+                rows={4}
+                className={errors.description ? "border-red-400" : ""}
+              />
+              {errors.description && (
+                <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>
+              )}
+            </div>
+
+            {/* Urgencia */}
+            <div>
+              <Label className="mb-2 block">¿Qué tan urgente es? <span className="text-red-500">*</span></Label>
+              <div className="grid grid-cols-2 gap-2">
+                {URGENCIA_OPTS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setValue("urgency", opt.value as FormData["urgency"])}
+                    className={cn(
+                      "text-left p-3 rounded-xl border-2 transition-all",
+                      urgency === opt.value
+                        ? `border-current ${opt.color}`
+                        : "border-gray-200 hover:border-gray-300"
+                    )}
+                  >
+                    <p className="text-sm font-semibold">{opt.label}</p>
+                    <p className="text-xs opacity-75 mt-0.5">{opt.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Horario preferido */}
+            <div>
+              <Label htmlFor="preferredTime" className="mb-1.5 block">
+                Horario preferido (opcional)
+              </Label>
+              <Input
+                id="preferredTime"
+                {...register("preferredTime")}
+                placeholder="Ej: Mañanas, fines de semana, después de las 6pm"
+              />
+            </div>
+
+            {/* Presupuesto */}
+            <div>
+              <Label className="mb-1.5 block">Presupuesto estimado en S/. (opcional)</Label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <Input
+                    {...register("budgetMin")}
+                    type="number"
+                    placeholder="Mínimo"
+                    min={0}
+                    inputMode="numeric"
+                  />
+                </div>
+                <span className="text-gray-400">—</span>
+                <div className="flex-1">
+                  <Input
+                    {...register("budgetMax")}
+                    type="number"
+                    placeholder="Máximo"
+                    min={0}
+                    inputMode="numeric"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                Puedes dejarlo en blanco para recibir cualquier presupuesto
+              </p>
+            </div>
+
+            {/* Fotos */}
+            <div>
+              <Label className="mb-1.5 block">Fotos del problema (opcional, máx. 3)</Label>
+              <div className="flex gap-2 flex-wrap">
+                {fotos.map((url, i) => (
+                  <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setFotos((prev) => prev.filter((_, j) => j !== i))}
+                      className="absolute top-1 right-1 bg-black/50 rounded-full p-0.5"
+                    >
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                ))}
+                {fotos.length < 3 && (
+                  <label className={cn(
+                    "w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-orange-400 transition-colors",
+                    uploadingFoto && "opacity-50 pointer-events-none"
+                  )}>
+                    {uploadingFoto
+                      ? <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                      : <Upload className="w-5 h-5 text-gray-400" />}
+                    <span className="text-[9px] text-gray-400">Agregar</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFotoUpload}
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={() => setStep(1)} className="flex-1 h-11">
+                <ArrowLeft className="mr-2 w-4 h-4" /> Volver
+              </Button>
+              <Button type="button" onClick={handleSiguiente} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white h-11">
+                Siguiente <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* ── PASO 3: Ubicación ── */}
+        {step === 3 && (
+          <div className="space-y-5">
+            <div>
+              <Label className="mb-2 block">¿En qué distrito necesitas el servicio? <span className="text-red-500">*</span></Label>
+              <div className="max-h-80 overflow-y-auto rounded-xl border border-gray-200 divide-y divide-gray-100">
+                {DISTRITOS.map((d) => (
+                  <button
+                    key={d.slug}
+                    type="button"
+                    onClick={() => setValue("district", d.slug)}
+                    className={cn(
+                      "w-full text-left px-4 py-3 text-sm transition-colors",
+                      watch("district") === d.slug
+                        ? "bg-orange-50 text-orange-700 font-medium"
+                        : "text-gray-700 hover:bg-gray-50"
+                    )}
+                  >
+                    {d.name}
+                    <span className="text-xs text-gray-400 ml-2">{d.provincia}</span>
+                  </button>
+                ))}
+              </div>
+              {errors.district && (
+                <p className="text-xs text-red-500 mt-1">{errors.district.message}</p>
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={() => setStep(2)} className="flex-1 h-11">
+                <ArrowLeft className="mr-2 w-4 h-4" /> Volver
+              </Button>
+              <Button type="button" onClick={handleSiguiente} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white h-11">
+                Siguiente <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* ── PASO 4: Confirmar ── */}
+        {step === 4 && (
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <p className="text-sm text-gray-500 mb-4">Revisa los detalles antes de publicar:</p>
+
+            {[
+              { label: "Categoría", value: `${selectedCat?.icon} ${selectedCat?.name}` },
+              { label: "Solicitud", value: watch("title") },
+              { label: "Descripción", value: watch("description") },
+              { label: "Distrito", value: DISTRITOS.find((d) => d.slug === watch("district"))?.name },
+              { label: "Urgencia", value: URGENCIA_OPTS.find((o) => o.value === urgency)?.label },
+              {
+                label: "Presupuesto",
+                value: watch("budgetMin") || watch("budgetMax")
+                  ? `S/. ${watch("budgetMin") ?? 0} - S/. ${watch("budgetMax") ?? "?"}`
+                  : "A convenir",
+              },
+              ...(watch("preferredTime") ? [{ label: "Horario", value: watch("preferredTime") }] : []),
+            ].map(({ label, value }) => (
+              <div key={label} className="flex gap-3 py-2 border-b border-gray-100 last:border-0">
+                <span className="text-xs font-medium text-gray-400 w-24 shrink-0">{label}</span>
+                <span className="text-sm text-gray-900">{value}</span>
+              </div>
+            ))}
+
+            {fotos.length > 0 && (
+              <div className="flex gap-2 pt-1">
+                {fotos.map((url, i) => (
+                  <img key={i} src={url} alt="" className="w-14 h-14 rounded-lg object-cover border border-gray-200" />
+                ))}
+              </div>
+            )}
+
+            <div className="bg-blue-50 rounded-xl p-3 text-xs text-blue-700">
+              Tu solicitud será visible para profesionales verificados en <strong>{DISTRITOS.find((d) => d.slug === watch("district"))?.name}</strong>.
+              Recibirás hasta <strong>5 presupuestos</strong>.
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setStep(3)} disabled={loading} className="flex-1 h-11">
+                <ArrowLeft className="mr-2 w-4 h-4" /> Volver
+              </Button>
+              <Button type="submit" disabled={loading} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white h-11">
+                {loading ? "Publicando..." : "Publicar solicitud"}
+                {!loading && <CheckCircle className="ml-2 w-4 h-4" />}
+              </Button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}

@@ -42,7 +42,7 @@ export function OnboardingWizard({ currentStep: initialStep, categoryMap, initia
   const [loading, setLoading] = useState(false)
   const [completado, setCompletado] = useState(false)
 
-  async function saveStep(stepNumber: number, data: Record<string, unknown>) {
+  async function saveStep(stepNumber: number, data: object) {
     setLoading(true)
     try {
       const res = await fetch("/api/profesionales/onboarding", {
@@ -67,7 +67,7 @@ export function OnboardingWizard({ currentStep: initialStep, categoryMap, initia
     }
   }
 
-  async function handleNext(stepNumber: number, data: Record<string, unknown>) {
+  async function handleNext(stepNumber: number, data: object) {
     const ok = await saveStep(stepNumber, data)
     if (!ok) return
 

@@ -1,31 +1,23 @@
-import { redirect } from "next/navigation"
 import Link from "next/link"
-import { requireProfessional } from "@/lib/auth"
+import { requireAuth } from "@/lib/auth"
 import { UserButton } from "@clerk/nextjs"
-import {
-  LayoutDashboard,
-  Search,
-  FileText,
-  Coins,
-  Star,
-  Bell,
-} from "lucide-react"
+import { LayoutDashboard, PlusCircle, ClipboardList, Heart } from "lucide-react"
 
 const NAV_ITEMS = [
-  { href: "/profesional/dashboard", icon: LayoutDashboard, label: "Panel" },
-  { href: "/profesional/oportunidades", icon: Search, label: "Oportunidades" },
-  { href: "/profesional/mis-aplicaciones", icon: FileText, label: "Mis aplicaciones" },
-  { href: "/profesional/creditos", icon: Coins, label: "Créditos" },
+  { href: "/dashboard", icon: LayoutDashboard, label: "Inicio" },
+  { href: "/solicitudes/nueva", icon: PlusCircle, label: "Nueva solicitud" },
+  { href: "/solicitudes", icon: ClipboardList, label: "Mis solicitudes" },
+  { href: "/favoritos", icon: Heart, label: "Favoritos" },
 ]
 
-export default async function ProfesionalLayout({ children }: { children: React.ReactNode }) {
-  await requireProfessional()
+export default async function ClientLayout({ children }: { children: React.ReactNode }) {
+  await requireAuth()
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header móvil */}
       <header className="bg-white border-b border-gray-100 px-4 h-14 flex items-center justify-between lg:hidden sticky top-0 z-10">
-        <Link href="/profesional/dashboard" className="font-bold text-orange-500 text-lg">
+        <Link href="/dashboard" className="font-bold text-orange-500 text-lg">
           ChambaPe
         </Link>
         <UserButton />
@@ -34,7 +26,7 @@ export default async function ProfesionalLayout({ children }: { children: React.
       <div className="lg:flex">
         {/* Sidebar desktop */}
         <aside className="hidden lg:flex flex-col w-56 min-h-screen bg-white border-r border-gray-100 p-4 gap-1 sticky top-0">
-          <Link href="/profesional/dashboard" className="font-bold text-orange-500 text-xl mb-6 px-2">
+          <Link href="/dashboard" className="font-bold text-orange-500 text-xl mb-6 px-2">
             ChambaPe 🔧
           </Link>
 
@@ -54,7 +46,6 @@ export default async function ProfesionalLayout({ children }: { children: React.
           </div>
         </aside>
 
-        {/* Contenido principal */}
         <main className="flex-1 min-h-screen">{children}</main>
       </div>
 
@@ -72,7 +63,6 @@ export default async function ProfesionalLayout({ children }: { children: React.
         ))}
       </nav>
 
-      {/* Padding inferior para nav móvil */}
       <div className="h-16 lg:hidden" />
     </div>
   )
