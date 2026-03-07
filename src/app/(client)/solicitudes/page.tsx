@@ -13,14 +13,15 @@ const STATUS_TABS = [
 ]
 
 interface Props {
-  searchParams: { status?: string; page?: string }
+  searchParams: Promise<{ status?: string; page?: string }>
 }
 
 export default async function MisSolicitudesPage({ searchParams }: Props) {
   const user = await requireAuth()
+  const { status: statusParam, page: pageParam } = await searchParams
 
-  const status = searchParams.status ?? ""
-  const page = parseInt(searchParams.page ?? "1")
+  const status = statusParam ?? ""
+  const page = parseInt(pageParam ?? "1")
   const pageSize = 10
 
   const where = {

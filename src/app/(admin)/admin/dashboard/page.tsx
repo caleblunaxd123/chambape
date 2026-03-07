@@ -57,7 +57,7 @@ export default async function AdminDashboardPage() {
   })
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Panel de administración</h1>
         <p className="text-gray-500 text-sm mt-0.5">
@@ -118,7 +118,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Stats secundarias */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-2 text-gray-400 text-xs mb-2">
             <TrendingUp className="w-3.5 h-3.5" />

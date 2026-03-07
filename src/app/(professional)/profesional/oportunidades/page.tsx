@@ -7,11 +7,12 @@ import Link from "next/link"
 import { CATEGORIAS_MAP } from "@/constants/categorias"
 
 interface Props {
-  searchParams: { categoria?: string; urgencia?: string }
+  searchParams: Promise<{ categoria?: string; urgencia?: string }>
 }
 
 export default async function OportunidadesPage({ searchParams }: Props) {
   const user = await requireRole("PROFESSIONAL")
+  const { categoria: categoriaParam, urgencia: urgenciaParam } = await searchParams
 
   const profile = await db.professionalProfile.findUnique({
     where: { userId: user.id },
@@ -51,8 +52,8 @@ export default async function OportunidadesPage({ searchParams }: Props) {
   }
 
   const categoryIds = profile.categories.map((c) => c.categoryId)
-  const filterCategoryId = searchParams.categoria
-    ? profile.categories.find((c) => c.category.slug === searchParams.categoria)?.categoryId
+  const filterCategoryId = categoriaParam
+    ? profile.categories.find((c) => c.category.slug === categoriaParam)?.categoryId
     : undefined
 
   // Solicitudes abiertas que coinciden con las categorías y distritos del profesional
@@ -62,7 +63,7 @@ export default async function OportunidadesPage({ searchParams }: Props) {
       expiresAt: { gt: new Date() },
       categoryId: filterCategoryId ?? { in: categoryIds },
       district: { in: profile.districts },
-      ...(searchParams.urgencia ? { urgency: searchParams.urgencia as never } : {}),
+      ...(urgenciaParam ? { urgency: urgenciaParam as never } : {}),
       // Excluir las ya aplicadas
       NOT: {
         applications: {
@@ -87,8 +88,8 @@ export default async function OportunidadesPage({ searchParams }: Props) {
     { label: "Flexible", value: "FLEXIBLE" },
   ]
 
-  const activeUrgency = searchParams.urgencia ?? ""
-  const activeCategoria = searchParams.categoria ?? ""
+  const activeUrgency = urgenciaParam ?? ""
+  const activeCategoria = categoriaParam ?? ""
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
@@ -203,7 +204,7 @@ export default async function OportunidadesPage({ searchParams }: Props) {
 
       {/* Low credits banner */}
       {profile.credits < 5 && (
-        <div className="fixed bottom-20 md:bottom-6 inset-x-4 max-w-sm mx-auto bg-orange-500 text-white rounded-2xl px-4 py-3 shadow-lg flex items-center justify-between">
+        <div className="fixed bottom-20 lg:bottom-6 inset-x-4 max-w-sm mx-auto bg-orange-500 text-white rounded-2xl px-4 py-3 shadow-lg flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm">
             <Coins className="w-4 h-4 shrink-0" />
             <span>

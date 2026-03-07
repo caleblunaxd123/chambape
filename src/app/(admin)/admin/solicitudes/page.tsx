@@ -43,7 +43,7 @@ export default async function AdminSolicitudesPage({ searchParams }: Props) {
   const statuses = ["OPEN", "IN_PROGRESS", "COMPLETED", "CANCELLED", "EXPIRED"]
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-5">
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto space-y-5">
       <h1 className="text-2xl font-bold text-gray-900">Solicitudes</h1>
 
       {/* Filtros */}
@@ -87,8 +87,8 @@ export default async function AdminSolicitudesPage({ searchParams }: Props) {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 flex-shrink-0 ml-4">
-                  <span className="text-xs text-gray-400">{s._count.applications} propuestas</span>
+                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 ml-3">
+                  <span className="hidden sm:inline text-xs text-gray-400">{s._count.applications} propuestas</span>
                   <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLORS[s.status]}`}>
                     {STATUS_LABELS[s.status]}
                   </span>

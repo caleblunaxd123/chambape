@@ -69,7 +69,7 @@ const STATUS_TABS = [
 ]
 
 interface Props {
-  searchParams: { status?: string; page?: string }
+  searchParams: Promise<{ status?: string; page?: string }>
 }
 
 export default async function MisAplicacionesPage({ searchParams }: Props) {
@@ -86,8 +86,9 @@ export default async function MisAplicacionesPage({ searchParams }: Props) {
     )
   }
 
-  const status = searchParams.status ?? ""
-  const page = Math.max(1, parseInt(searchParams.page ?? "1"))
+  const { status: statusParam, page: pageParam } = await searchParams
+  const status = statusParam ?? ""
+  const page = Math.max(1, parseInt(pageParam ?? "1"))
   const pageSize = 15
 
   const where = {

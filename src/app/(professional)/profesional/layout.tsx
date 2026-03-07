@@ -13,7 +13,7 @@ import {
 const NAV_ITEMS = [
   { href: "/profesional/dashboard", icon: LayoutDashboard, label: "Panel" },
   { href: "/profesional/oportunidades", icon: Search, label: "Oportunidades" },
-  { href: "/profesional/mis-aplicaciones", icon: FileText, label: "Aplicaciones" },
+  { href: "/profesional/aplicaciones", icon: FileText, label: "Aplicaciones" },
   { href: "/profesional/creditos", icon: Coins, label: "Créditos" },
   { href: "/profesional/perfil/editar", icon: User, label: "Mi perfil" },
 ]
