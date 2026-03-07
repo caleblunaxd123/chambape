@@ -12,17 +12,17 @@ interface PropuestaCardProps {
   aplicacion: {
     id: string
     message: string
-    price: number | null
-    estimatedDays: number | null
+    proposedBudget?: number | null
+    creditsSpent?: number
     status: string
     createdAt: Date | string
     professional: {
       id: string
-      bio: string | null
-      avatarUrl: string | null
-      rating: number
-      totalReviews: number
-      jobsCompleted: number
+      bio?: string | null
+      avatarUrl?: string | null
+      rating?: number
+      totalReviews?: number
+      jobsCompleted?: number
       user: { name: string; email: string }
       portfolioImages: Array<{ url: string; caption: string | null }>
     }
@@ -111,15 +111,15 @@ export function PropuestaCard({
                 <div className="flex items-center gap-0.5 text-xs text-yellow-500">
                   <Star className="w-3 h-3 fill-current" />
                   <span className="font-medium text-gray-700">
-                    {prof.rating > 0 ? prof.rating.toFixed(1) : "Nuevo"}
+                    {(prof.rating ?? 0) > 0 ? (prof.rating ?? 0).toFixed(1) : "Nuevo"}
                   </span>
-                  {prof.totalReviews > 0 && (
+                  {(prof.totalReviews ?? 0) > 0 && (
                     <span className="text-gray-400">({prof.totalReviews})</span>
                   )}
                 </div>
                 <span className="text-xs text-gray-400 flex items-center gap-1">
                   <Award className="w-3 h-3" />
-                  {prof.jobsCompleted} trabajos
+                  {prof.jobsCompleted ?? 0} trabajos
                 </span>
               </div>
             </div>
@@ -133,20 +133,12 @@ export function PropuestaCard({
       </div>
 
       {/* Pricing + timeline */}
-      {(aplicacion.price || aplicacion.estimatedDays) && (
+      {aplicacion.proposedBudget && (
         <div className="flex items-center gap-4 mt-3 text-sm">
-          {aplicacion.price && (
-            <div className="flex items-center gap-1.5">
-              <span className="text-gray-400 text-xs">Precio:</span>
-              <span className="font-bold text-gray-900">{formatSoles(aplicacion.price)}</span>
-            </div>
-          )}
-          {aplicacion.estimatedDays && (
-            <div className="flex items-center gap-1.5 text-xs text-gray-500">
-              <Clock className="w-3 h-3" />
-              {aplicacion.estimatedDays} {aplicacion.estimatedDays === 1 ? "día" : "días"}
-            </div>
-          )}
+          <div className="flex items-center gap-1.5">
+            <span className="text-gray-400 text-xs">Precio propuesto:</span>
+            <span className="font-bold text-gray-900">{formatSoles(aplicacion.proposedBudget)}</span>
+          </div>
         </div>
       )}
 

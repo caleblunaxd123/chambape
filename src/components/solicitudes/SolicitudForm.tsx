@@ -27,12 +27,29 @@ const schema = z.object({
   description: z.string().min(30, "Cuéntanos más detalles (min. 30 caracteres)").max(1000),
   district: z.string().min(1, "Selecciona tu distrito"),
   urgency: z.enum(["TODAY", "THIS_WEEK", "THIS_MONTH", "FLEXIBLE"]),
-  budgetMin: z.coerce.number().min(0).optional(),
-  budgetMax: z.coerce.number().min(0).optional(),
+  budgetMin: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+    z.number().min(0).optional()
+  ),
+  budgetMax: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+    z.number().min(0).optional()
+  ),
   preferredTime: z.string().max(100).optional(),
 })
 
-type FormData = z.infer<typeof schema>
+// Definición manual para evitar conflictos de inferencia con z.preprocess
+type FormData = {
+  title: string
+  categorySlug: string
+  subcategorySlug?: string
+  description: string
+  district: string
+  urgency: "TODAY" | "THIS_WEEK" | "THIS_MONTH" | "FLEXIBLE"
+  budgetMin?: number
+  budgetMax?: number
+  preferredTime?: string
+}
 
 // ─── Pasos del formulario ─────────────────────────────────────────
 
@@ -69,7 +86,8 @@ export function SolicitudForm({ defaultCategoria }: Props) {
     trigger,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: zodResolver(schema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(schema) as any,
     defaultValues: {
       categorySlug: defaultCategoria ?? "",
       urgency: "FLEXIBLE",

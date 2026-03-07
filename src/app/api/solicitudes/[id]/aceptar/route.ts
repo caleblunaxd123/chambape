@@ -19,8 +19,9 @@ const schema = z.object({
 
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const { userId } = await auth()
   if (!userId) return new NextResponse("No autorizado", { status: 401 })
 
@@ -29,7 +30,7 @@ export async function POST(
 
   // Verificar que la solicitud pertenece al cliente
   const solicitud = await db.serviceRequest.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       category: true,
       applications: {
@@ -95,7 +96,7 @@ export async function POST(
 
     // Cambiar estado de la solicitud
     await tx.serviceRequest.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: "IN_PROGRESS" },
     })
   })
@@ -104,7 +105,7 @@ export async function POST(
   notifyAplicacionAceptada(
     aplicacion.professional.userId,
     solicitud.title,
-    params.id
+    id
   ).catch((err) => console.error("[NOTIFY_ACEPTADA]", err))
 
   // Notificar a los rechazados
@@ -114,10 +115,11 @@ export async function POST(
   for (const r of rechazados) {
     createNotification({
       userId: r.professional.userId,
-      type: "GENERAL",
+      type: "APPLICATION_REJECTED",
       title: "Propuesta no seleccionada",
       message: `El cliente eligió a otro profesional para "${solicitud.title}". ¡Sigue aplicando!`,
-      data: { requestId: params.id },
+      link: `/profesional/aplicaciones`,
+      metadata: { requestId: id },
     }).catch(() => {})
   }
 

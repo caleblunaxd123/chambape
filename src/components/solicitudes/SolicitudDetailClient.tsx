@@ -8,17 +8,17 @@ import { useState } from "react"
 interface Aplicacion {
   id: string
   message: string
-  price: number | null
-  estimatedDays: number | null
+  proposedBudget?: number | null
+  creditsSpent?: number
   status: string
   createdAt: Date | string
   professional: {
     id: string
-    bio: string | null
-    avatarUrl: string | null
-    rating: number
-    totalReviews: number
-    jobsCompleted: number
+    bio?: string | null
+    avatarUrl?: string | null
+    rating?: number
+    totalReviews?: number
+    jobsCompleted?: number
     user: { name: string; email: string }
     portfolioImages: Array<{ url: string; caption: string | null }>
   }

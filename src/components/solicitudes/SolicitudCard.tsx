@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { formatFechaRelativa, formatSoles, URGENCY_LABELS, STATUS_LABELS } from "@/lib/utils"
+import { formatFechaRelativa, formatSoles, URGENCIA_LABELS, REQUEST_STATUS_LABELS } from "@/lib/utils"
 import { MapPin, Clock, Users, ChevronRight, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -16,7 +16,7 @@ interface SolicitudCardProps {
     budgetMin: number | null
     budgetMax: number | null
     createdAt: Date | string
-    expiresAt: Date | string
+    expiresAt: Date | string | null
     category: { name: string; slug: string }
     subcategory?: { name: string } | null
     _count: { applications: number }
@@ -41,6 +41,7 @@ const URGENCY_COLORS: Record<string, string> = {
 export function SolicitudCard({ solicitud }: SolicitudCardProps) {
   const isExpiringSoon =
     solicitud.status === "OPEN" &&
+    solicitud.expiresAt != null &&
     new Date(solicitud.expiresAt).getTime() - Date.now() < 3 * 24 * 60 * 60 * 1000
 
   return (
@@ -68,7 +69,7 @@ export function SolicitudCard({ solicitud }: SolicitudCardProps) {
                 STATUS_COLORS[solicitud.status] ?? "bg-gray-100 text-gray-500"
               )}
             >
-              {STATUS_LABELS[solicitud.status as keyof typeof STATUS_LABELS] ?? solicitud.status}
+              {REQUEST_STATUS_LABELS[solicitud.status as keyof typeof REQUEST_STATUS_LABELS] ?? solicitud.status}
             </span>
           </div>
         </div>
@@ -89,7 +90,7 @@ export function SolicitudCard({ solicitud }: SolicitudCardProps) {
             )}
           >
             <Clock className="w-3 h-3" />
-            {URGENCY_LABELS[solicitud.urgency as keyof typeof URGENCY_LABELS] ?? solicitud.urgency}
+            {URGENCIA_LABELS[solicitud.urgency as keyof typeof URGENCIA_LABELS] ?? solicitud.urgency}
           </span>
           {(solicitud.budgetMin || solicitud.budgetMax) && (
             <span className="text-gray-500">

@@ -5,8 +5,8 @@ import { db } from "@/lib/db"
 import {
   formatFechaCompleta,
   formatSoles,
-  URGENCY_LABELS,
-  STATUS_LABELS,
+  URGENCIA_LABELS,
+  REQUEST_STATUS_LABELS,
 } from "@/lib/utils"
 import {
   MapPin,
@@ -94,7 +94,7 @@ export default async function SolicitudDetailPage({ params }: Props) {
             STATUS_COLORS[solicitud.status] ?? "bg-gray-100 text-gray-500"
           )}
         >
-          {STATUS_LABELS[solicitud.status as keyof typeof STATUS_LABELS] ?? solicitud.status}
+          {REQUEST_STATUS_LABELS[solicitud.status as keyof typeof REQUEST_STATUS_LABELS] ?? solicitud.status}
         </span>
       </div>
 
@@ -113,7 +113,7 @@ export default async function SolicitudDetailPage({ params }: Props) {
             Urgencia
           </div>
           <p className="text-sm font-medium text-gray-800">
-            {URGENCY_LABELS[solicitud.urgency as keyof typeof URGENCY_LABELS] ?? solicitud.urgency}
+            {URGENCIA_LABELS[solicitud.urgency as keyof typeof URGENCIA_LABELS] ?? solicitud.urgency}
           </p>
         </div>
         {(solicitud.budgetMin || solicitud.budgetMax) && (
@@ -169,8 +169,10 @@ export default async function SolicitudDetailPage({ params }: Props) {
 
       {/* Dates */}
       <p className="text-xs text-gray-400 mb-6">
-        Publicada el {formatFechaCompleta(new Date(solicitud.createdAt))} · Expira el{" "}
-        {formatFechaCompleta(new Date(solicitud.expiresAt))}
+        Publicada el {formatFechaCompleta(new Date(solicitud.createdAt))}
+        {solicitud.expiresAt && (
+          <> · Expira el {formatFechaCompleta(new Date(solicitud.expiresAt))}</>
+        )}
       </p>
 
       {/* Proposals section — client component for interactivity */}

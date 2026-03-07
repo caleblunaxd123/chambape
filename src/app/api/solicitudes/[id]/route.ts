@@ -8,8 +8,9 @@ import { db } from "@/lib/db"
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const { userId } = await auth()
   if (!userId) return new NextResponse("No autorizado", { status: 401 })
 
@@ -17,7 +18,7 @@ export async function GET(
   if (!user) return new NextResponse("Usuario no encontrado", { status: 404 })
 
   const solicitud = await db.serviceRequest.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       category: true,
       subcategory: true,
@@ -25,9 +26,7 @@ export async function GET(
         include: {
           professional: {
             include: {
-              user: {
-                select: { name: true, email: true },
-              },
+              user: { select: { name: true, email: true } },
               portfolioImages: { take: 3 },
             },
           },
@@ -43,7 +42,6 @@ export async function GET(
     return NextResponse.json({ error: "Solicitud no encontrada" }, { status: 404 })
   }
 
-  // Solo el cliente dueño o un profesional que aplicó puede verla
   const esCliente = solicitud.clientId === user.id
   const esProfesional =
     user.role === "PROFESSIONAL" &&
@@ -53,8 +51,6 @@ export async function GET(
     return NextResponse.json({ error: "Acceso denegado" }, { status: 403 })
   }
 
-  // Si es profesional (no el cliente), ocultamos contacto de otros profesionales
-  // y solo retornamos su propia aplicación
   if (!esCliente && user.role === "PROFESSIONAL") {
     const miAplicacion = solicitud.applications.find(
       (a) => a.professional.userId === user.id
@@ -69,17 +65,16 @@ export async function GET(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const { userId } = await auth()
   if (!userId) return new NextResponse("No autorizado", { status: 401 })
 
   const user = await db.user.findUnique({ where: { clerkId: userId } })
   if (!user) return new NextResponse("Usuario no encontrado", { status: 404 })
 
-  const solicitud = await db.serviceRequest.findUnique({
-    where: { id: params.id },
-  })
+  const solicitud = await db.serviceRequest.findUnique({ where: { id } })
 
   if (!solicitud) {
     return NextResponse.json({ error: "Solicitud no encontrada" }, { status: 404 })
@@ -97,7 +92,7 @@ export async function PATCH(
   }
 
   const updated = await db.serviceRequest.update({
-    where: { id: params.id },
+    where: { id },
     data: { status: "CANCELLED" },
   })
 
