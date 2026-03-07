@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ChambaPe Dev",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm", "run", "dev"],
+      "port": 3000,
+      "autoPort": false
+    },
+    {
+      "name": "Prisma Studio",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npm", "run", "db:studio"],
+      "port": 5555
+    }
+  ]
+}
