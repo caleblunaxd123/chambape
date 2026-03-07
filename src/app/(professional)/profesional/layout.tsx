@@ -28,7 +28,7 @@ export default async function ProfesionalLayout({ children }: { children: React.
         <Link href="/profesional/dashboard" className="font-bold text-orange-500 text-lg">
           ChambaPe
         </Link>
-        <UserButton afterSignOutUrl="/" />
+        <UserButton />
       </header>
 
       <div className="lg:flex">
@@ -50,7 +50,7 @@ export default async function ProfesionalLayout({ children }: { children: React.
           ))}
 
           <div className="mt-auto pt-4 border-t border-gray-100">
-            <UserButton afterSignOutUrl="/" showName />
+            <UserButton showName />
           </div>
         </aside>
 
