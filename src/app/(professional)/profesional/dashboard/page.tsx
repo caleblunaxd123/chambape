@@ -102,7 +102,7 @@ export default async function DashboardProfesionalPage() {
       {/* CTA créditos bajos */}
       {profile.credits <= 3 && (
         <Link
-          href="/profesional/creditos/recargar"
+          href="/profesional/creditos"
           className="flex items-center justify-between bg-orange-50 border border-orange-200 rounded-xl p-4 hover:bg-orange-100 transition-colors"
         >
           <div className="flex gap-2 items-center">
@@ -159,7 +159,7 @@ export default async function DashboardProfesionalPage() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-gray-900">Mis últimas aplicaciones</h2>
-            <Link href="/profesional/mis-aplicaciones" className="text-xs text-orange-500 font-medium">
+            <Link href="/profesional/aplicaciones" className="text-xs text-orange-500 font-medium">
               Ver todas →
             </Link>
           </div>
