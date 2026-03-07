@@ -1,0 +1,42 @@
+// POST /api/upload — genera firma para upload directo a Cloudinary desde el cliente
+// El cliente sube directamente a Cloudinary (no pasa por nuestro servidor → más rápido)
+import { auth } from "@clerk/nextjs/server"
+import { NextResponse } from "next/server"
+import { z } from "zod"
+import { cloudinary, CLOUDINARY_FOLDERS } from "@/lib/cloudinary"
+
+const schema = z.object({
+  folder: z.enum([
+    "avatares",
+    "dniFrente",
+    "dniReverso",
+    "selfieDni",
+    "portfolio",
+    "solicitudes",
+  ]),
+})
+
+export async function POST(req: Request) {
+  const { userId } = await auth()
+  if (!userId) return new NextResponse("No autorizado", { status: 401 })
+
+  const body = await req.json()
+  const parsed = schema.safeParse(body)
+  if (!parsed.success) return new NextResponse("Carpeta inválida", { status: 400 })
+
+  const folder = CLOUDINARY_FOLDERS[parsed.data.folder]
+  const timestamp = Math.round(Date.now() / 1000)
+
+  const signature = cloudinary.utils.api_sign_request(
+    { timestamp, folder },
+    process.env.CLOUDINARY_API_SECRET!
+  )
+
+  return NextResponse.json({
+    signature,
+    timestamp,
+    folder,
+    cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+  })
+}

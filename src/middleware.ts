@@ -9,6 +9,8 @@ const isProtectedRoute = createRouteMatcher([
   "/favoritos(.*)",
   "/profesional(.*)",
   "/admin(.*)",
+  "/registrarse/tipo(.*)",
+  "/registrarse/profesional(.*)",
 ])
 
 // Rutas exclusivas para admin
