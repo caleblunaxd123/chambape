@@ -30,17 +30,19 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 interface Props {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export default async function SolicitudDetailPage({ params }: Props) {
+  const { id } = await params
   const user = await requireAuth()
 
   const solicitud = await db.serviceRequest.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       category: true,
       subcategory: true,
+      review: { select: { id: true } },
       applications: {
         include: {
           professional: {
@@ -177,10 +179,11 @@ export default async function SolicitudDetailPage({ params }: Props) {
 
       {/* Proposals section — client component for interactivity */}
       <SolicitudDetailClient
-        solicitudId={params.id}
+        solicitudId={id}
         solicitudStatus={solicitud.status}
         aplicaciones={solicitud.applications}
         totalAplicaciones={solicitud._count.applications}
+        existingReview={!!solicitud.review}
       />
     </div>
   )

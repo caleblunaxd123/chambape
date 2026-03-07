@@ -20,6 +20,22 @@ export async function POST(req: Request) {
   const { userId } = await auth()
   if (!userId) return new NextResponse("No autorizado", { status: 401 })
 
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+  const apiKey = process.env.CLOUDINARY_API_KEY
+  const apiSecret = process.env.CLOUDINARY_API_SECRET
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    console.error("[UPLOAD] Faltan variables de entorno de Cloudinary:", {
+      cloudName: !!cloudName,
+      apiKey: !!apiKey,
+      apiSecret: !!apiSecret,
+    })
+    return new NextResponse(
+      "Cloudinary no configurado. Agrega NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY y CLOUDINARY_API_SECRET al .env",
+      { status: 500 }
+    )
+  }
+
   const body = await req.json()
   const parsed = schema.safeParse(body)
   if (!parsed.success) return new NextResponse("Carpeta inválida", { status: 400 })
@@ -29,14 +45,14 @@ export async function POST(req: Request) {
 
   const signature = cloudinary.utils.api_sign_request(
     { timestamp, folder },
-    process.env.CLOUDINARY_API_SECRET!
+    apiSecret
   )
 
   return NextResponse.json({
     signature,
     timestamp,
     folder,
-    cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-    apiKey: process.env.CLOUDINARY_API_KEY,
+    cloudName,
+    apiKey,
   })
 }

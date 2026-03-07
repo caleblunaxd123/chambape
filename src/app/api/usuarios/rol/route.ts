@@ -1,5 +1,5 @@
 // POST /api/usuarios/rol — asigna rol inicial al usuario recién registrado
-import { auth } from "@clerk/nextjs/server"
+import { auth, currentUser } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { db } from "@/lib/db"
@@ -18,10 +18,26 @@ export async function POST(req: Request) {
 
   const { role } = parsed.data
 
-  const user = await db.user.findUnique({ where: { clerkId: userId } })
-  if (!user) return new NextResponse("Usuario no encontrado", { status: 404 })
+  // Buscar usuario; si no existe aún (webhook no disparó), lo creamos desde Clerk
+  let user = await db.user.findUnique({ where: { clerkId: userId } })
+  if (!user) {
+    const clerkUser = await currentUser()
+    if (!clerkUser) return new NextResponse("No autorizado", { status: 401 })
 
-  // Solo permite asignar rol si aún es CLIENT (estado por defecto)
+    const email = clerkUser.emailAddresses[0]?.emailAddress
+    if (!email) return new NextResponse("Sin email", { status: 400 })
+
+    const name =
+      [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ").trim() ||
+      email.split("@")[0]
+
+    user = await db.user.upsert({
+      where: { email },
+      update: { clerkId: userId, name, avatarUrl: clerkUser.imageUrl ?? null },
+      create: { clerkId: userId, email, name, avatarUrl: clerkUser.imageUrl ?? null, role: "CLIENT" },
+    })
+  }
+
   // No permite degradar un admin
   if (user.role === "ADMIN") {
     return new NextResponse("No permitido", { status: 403 })
@@ -41,7 +57,7 @@ export async function POST(req: Request) {
       await db.professionalProfile.create({
         data: {
           userId: user.id,
-          dni: "",           // Se completará en Step 1
+          dni: "",
           districts: [],
           onboardingStep: 1,
         },

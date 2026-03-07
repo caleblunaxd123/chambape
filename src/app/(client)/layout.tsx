@@ -2,6 +2,7 @@ import Link from "next/link"
 import { requireAuth } from "@/lib/auth"
 import { UserButton } from "@clerk/nextjs"
 import { LayoutDashboard, PlusCircle, ClipboardList, Heart } from "lucide-react"
+import { redirect } from "next/navigation"
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Inicio" },
@@ -11,7 +12,8 @@ const NAV_ITEMS = [
 ]
 
 export default async function ClientLayout({ children }: { children: React.ReactNode }) {
-  await requireAuth()
+  const user = await requireAuth()
+  if (user.role === "ADMIN") redirect("/admin/dashboard")
 
   return (
     <div className="min-h-screen bg-gray-50">

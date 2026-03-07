@@ -1,7 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
-import { NextResponse } from "next/server"
 
 // Rutas que requieren autenticación
+// IMPORTANTE: /registrarse/tipo y /registrarse/profesional NO van aquí
+// porque son hijas de /registrarse/[[...rest]] (SignUp de Clerk) y el middleware
+// las bloquearía. Ambas páginas manejan su propia auth internamente.
 const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
   "/solicitudes/nueva(.*)",
@@ -9,12 +11,7 @@ const isProtectedRoute = createRouteMatcher([
   "/favoritos(.*)",
   "/profesional(.*)",
   "/admin(.*)",
-  "/registrarse/tipo(.*)",
-  "/registrarse/profesional(.*)",
 ])
-
-// Rutas exclusivas para admin
-const isAdminRoute = createRouteMatcher(["/admin(.*)"])
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {

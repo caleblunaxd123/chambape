@@ -1,6 +1,6 @@
 import { SignUp } from "@clerk/nextjs"
 
-export const metadata = { title: "Crear cuenta" }
+export const metadata = { title: "Crear cuenta — ChambaPe" }
 
 export default function RegistrarsePage() {
   return (

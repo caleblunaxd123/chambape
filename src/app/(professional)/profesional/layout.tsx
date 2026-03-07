@@ -7,15 +7,15 @@ import {
   Search,
   FileText,
   Coins,
-  Star,
-  Bell,
+  User,
 } from "lucide-react"
 
 const NAV_ITEMS = [
   { href: "/profesional/dashboard", icon: LayoutDashboard, label: "Panel" },
   { href: "/profesional/oportunidades", icon: Search, label: "Oportunidades" },
-  { href: "/profesional/mis-aplicaciones", icon: FileText, label: "Mis aplicaciones" },
+  { href: "/profesional/mis-aplicaciones", icon: FileText, label: "Aplicaciones" },
   { href: "/profesional/creditos", icon: Coins, label: "Créditos" },
+  { href: "/profesional/perfil/editar", icon: User, label: "Mi perfil" },
 ]
 
 export default async function ProfesionalLayout({ children }: { children: React.ReactNode }) {

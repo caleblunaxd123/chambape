@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { toast } from "sonner"
-import { Star, MessageCircle, CheckCircle2, Clock, Award } from "lucide-react"
+import { Star, MessageCircle, CheckCircle2, Award, ExternalLink } from "lucide-react"
 import { formatSoles, formatFechaRelativa } from "@/lib/utils"
 import { getInitials } from "@/lib/utils"
 import { cn } from "@/lib/utils"
@@ -106,7 +107,17 @@ export function PropuestaCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h4 className="font-semibold text-gray-900 text-sm">{prof.user.name}</h4>
+              <div className="flex items-center gap-1.5">
+                <h4 className="font-semibold text-gray-900 text-sm">{prof.user.name}</h4>
+                <Link
+                  href={`/profesionales/${prof.id}`}
+                  target="_blank"
+                  className="text-gray-300 hover:text-orange-400 transition-colors"
+                  title="Ver perfil completo"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                </Link>
+              </div>
               <div className="flex items-center gap-2 mt-0.5">
                 <div className="flex items-center gap-0.5 text-xs text-yellow-500">
                   <Star className="w-3 h-3 fill-current" />

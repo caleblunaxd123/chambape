@@ -75,25 +75,22 @@ export async function POST(req: Request) {
   const role: UserRole = data.public_metadata?.role ?? (isAdminEmail ? "ADMIN" : "CLIENT")
 
   try {
-    if (type === "user.created") {
-      await db.user.create({
-        data: {
+    if (type === "user.created" || type === "user.updated") {
+      await db.user.upsert({
+        where: { clerkId: data.id },
+        update: {
+          email: primaryEmail,
+          name,
+          phone,
+          avatarUrl: data.image_url,
+        },
+        create: {
           clerkId: data.id,
           email: primaryEmail,
           name,
           phone,
           avatarUrl: data.image_url,
           role,
-        },
-      })
-    } else if (type === "user.updated") {
-      await db.user.update({
-        where: { clerkId: data.id },
-        data: {
-          email: primaryEmail,
-          name,
-          phone,
-          avatarUrl: data.image_url,
         },
       })
     } else if (type === "user.deleted") {

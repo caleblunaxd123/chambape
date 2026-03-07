@@ -71,7 +71,10 @@ export function ImageUpload({
         body: JSON.stringify({ folder }),
       })
 
-      if (!sigRes.ok) throw new Error("No se pudo obtener la firma de upload")
+      if (!sigRes.ok) {
+        const msg = await sigRes.text()
+        throw new Error(msg || "No se pudo obtener la firma de upload")
+      }
 
       const { signature, timestamp, folder: folderPath, cloudName, apiKey } = await sigRes.json()
 
@@ -97,7 +100,7 @@ export function ImageUpload({
       onChange(secureUrl)
       toast.success("Imagen subida correctamente")
     } catch (error) {
-      toast.error("Error al subir la imagen. Intenta de nuevo.")
+      toast.error(error instanceof Error ? error.message : "Error al subir la imagen. Intenta de nuevo.")
     } finally {
       setLoading(false)
     }

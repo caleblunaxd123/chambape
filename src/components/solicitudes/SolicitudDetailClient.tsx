@@ -1,8 +1,9 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { Users, Loader2 } from "lucide-react"
+import { Users, Loader2, Star } from "lucide-react"
 import { PropuestaCard } from "./PropuestaCard"
+import { ReviewForm } from "@/components/resenas/ReviewForm"
 import { useState } from "react"
 
 interface Aplicacion {
@@ -29,6 +30,7 @@ interface Props {
   solicitudStatus: string
   aplicaciones: Aplicacion[]
   totalAplicaciones: number
+  existingReview?: boolean
 }
 
 export function SolicitudDetailClient({
@@ -36,9 +38,12 @@ export function SolicitudDetailClient({
   solicitudStatus,
   aplicaciones,
   totalAplicaciones,
+  existingReview,
 }: Props) {
   const router = useRouter()
   const [cancelling, setCancelling] = useState(false)
+
+  const aplicacionAceptada = aplicaciones.find((a) => a.status === "ACCEPTED")
 
   async function handleCancelar() {
     if (!confirm("¿Seguro que deseas cancelar esta solicitud?")) return
@@ -54,9 +59,29 @@ export function SolicitudDetailClient({
   }
 
   return (
-    <div>
+    <div className="space-y-4">
+      {/* Formulario de reseña — solo si hay profesional aceptado y aún no hay reseña */}
+      {aplicacionAceptada &&
+        (solicitudStatus === "IN_PROGRESS" || solicitudStatus === "COMPLETED") &&
+        !existingReview && (
+          <ReviewForm
+            requestId={solicitudId}
+            applicationId={aplicacionAceptada.id}
+            profesionalNombre={aplicacionAceptada.professional.user.name.split(" ")[0]}
+            onSuccess={() => router.refresh()}
+          />
+        )}
+
+      {/* Reseña ya dejada */}
+      {existingReview && (
+        <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-xl px-4 py-3 text-sm text-green-700">
+          <Star className="w-4 h-4 fill-current" />
+          Ya dejaste tu reseña para este trabajo. ¡Gracias!
+        </div>
+      )}
+
       {/* Header propuestas */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between">
         <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
           <Users className="w-4 h-4 text-orange-500" />
           Propuestas recibidas

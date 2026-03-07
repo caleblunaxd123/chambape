@@ -27,13 +27,11 @@ export default async function DashboardProfesionalPage() {
   const solicitudesDisponibles = await db.serviceRequest.findMany({
     where: {
       status: "OPEN",
+      expiresAt: { gt: new Date() },
       district: { in: profile.districts },
-      category: {
-        professionals: { some: { professionalId: profile.id } },
-      },
-      applications: {
-        none: { professionalId: profile.id },
-        some: {},   // que ya tenga al menos 1 aplicación pero no del profesional actual
+      category: { professionals: { some: { professionalId: profile.id } } },
+      NOT: {
+        applications: { some: { professionalId: profile.id } },
       },
     },
     include: { category: true },

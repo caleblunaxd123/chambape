@@ -1,7 +1,8 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useAuth } from "@clerk/nextjs"
 import { toast } from "sonner"
 import { Wrench, User, ArrowRight, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -11,8 +12,13 @@ type Tipo = "CLIENT" | "PROFESSIONAL"
 
 export default function SeleccionarTipoPage() {
   const router = useRouter()
+  const { isLoaded, isSignedIn } = useAuth()
   const [selected, setSelected] = useState<Tipo | null>(null)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) router.replace("/iniciar-sesion")
+  }, [isLoaded, isSignedIn, router])
 
   async function handleContinuar() {
     if (!selected) return

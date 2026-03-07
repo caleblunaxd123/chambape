@@ -1,6 +1,6 @@
 import { SignIn } from "@clerk/nextjs"
 
-export const metadata = { title: "Iniciar sesión" }
+export const metadata = { title: "Iniciar sesión — ChambaPe" }
 
 export default function IniciarSesionPage() {
   return (
