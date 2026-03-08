@@ -9,6 +9,8 @@ import {
   Coins,
   User,
 } from "lucide-react"
+import { db } from "@/lib/db"
+import { NotificationBell } from "@/components/ui/NotificationBell"
 
 const NAV_ITEMS = [
   { href: "/profesional/dashboard", icon: LayoutDashboard, label: "Panel" },
@@ -19,7 +21,11 @@ const NAV_ITEMS = [
 ]
 
 export default async function ProfesionalLayout({ children }: { children: React.ReactNode }) {
-  await requireProfessional()
+  const { user } = await requireProfessional()
+
+  const unreadCount = await db.notification.count({
+    where: { userId: user.id, read: false },
+  })
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -28,7 +34,10 @@ export default async function ProfesionalLayout({ children }: { children: React.
         <Link href="/profesional/dashboard" className="font-bold text-orange-500 text-lg">
           ChambaPe
         </Link>
-        <UserButton />
+        <div className="flex items-center gap-1">
+          <NotificationBell count={unreadCount} href="/profesional/notificaciones" />
+          <UserButton />
+        </div>
       </header>
 
       <div className="lg:flex">
@@ -49,7 +58,8 @@ export default async function ProfesionalLayout({ children }: { children: React.
             </Link>
           ))}
 
-          <div className="mt-auto pt-4 border-t border-gray-100">
+          <div className="mt-auto pt-4 border-t border-gray-100 space-y-2">
+            <NotificationBell count={unreadCount} href="/profesional/notificaciones" />
             <UserButton showName />
           </div>
         </aside>

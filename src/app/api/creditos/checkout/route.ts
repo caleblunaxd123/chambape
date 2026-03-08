@@ -44,7 +44,7 @@ export async function POST(req: Request) {
   const culqiRes = await fetch("https://api.culqi.com/v2/charges", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${process.env.CULQI_SECRET_KEY}`,
+      Authorization: `Bearer ${process.env.CULQI_PRIVATE_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({

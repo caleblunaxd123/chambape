@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import Link from "next/link"
 import { PlusCircle, ClipboardList } from "lucide-react"
 import { SolicitudCard } from "@/components/solicitudes/SolicitudCard"
+import { expireSolicitudesVencidas } from "@/lib/expiracion"
 
 const STATUS_TABS = [
   { label: "Todas", value: "" },
@@ -18,6 +19,7 @@ interface Props {
 
 export default async function MisSolicitudesPage({ searchParams }: Props) {
   const user = await requireAuth()
+  await expireSolicitudesVencidas()
   const { status: statusParam, page: pageParam } = await searchParams
 
   const status = statusParam ?? ""

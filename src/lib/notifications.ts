@@ -46,7 +46,7 @@ export async function notifyAplicacionAceptada(
     type: "APPLICATION_ACCEPTED",
     title: "¡Te eligieron! 🎉",
     message: `${nombreCliente} te ha seleccionado para su trabajo`,
-    link: `/profesional/mis-aplicaciones`,
+    link: `/profesional/aplicaciones`,
     metadata: { requestId },
   })
 }
