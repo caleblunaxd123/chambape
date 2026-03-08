@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { Users, Loader2, Star } from "lucide-react"
+import { Users, Loader2, Star, CheckCircle2 } from "lucide-react"
 import { PropuestaCard } from "./PropuestaCard"
 import { ReviewForm } from "@/components/resenas/ReviewForm"
 import { useState } from "react"
@@ -42,6 +42,7 @@ export function SolicitudDetailClient({
 }: Props) {
   const router = useRouter()
   const [cancelling, setCancelling] = useState(false)
+  const [completing, setCompleting] = useState(false)
 
   const aplicacionAceptada = aplicaciones.find((a) => a.status === "ACCEPTED")
 
@@ -49,12 +50,29 @@ export function SolicitudDetailClient({
     if (!confirm("¿Seguro que deseas cancelar esta solicitud?")) return
     setCancelling(true)
     try {
-      const res = await fetch(`/api/solicitudes/${solicitudId}`, { method: "PATCH" })
-      if (res.ok) {
-        router.refresh()
-      }
+      const res = await fetch(`/api/solicitudes/${solicitudId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "cancelar" }),
+      })
+      if (res.ok) router.refresh()
     } finally {
       setCancelling(false)
+    }
+  }
+
+  async function handleCompletar() {
+    if (!confirm("¿Confirmas que el trabajo fue completado satisfactoriamente?")) return
+    setCompleting(true)
+    try {
+      const res = await fetch(`/api/solicitudes/${solicitudId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "completar" }),
+      })
+      if (res.ok) router.refresh()
+    } finally {
+      setCompleting(false)
     }
   }
 
@@ -78,6 +96,22 @@ export function SolicitudDetailClient({
           <Star className="w-4 h-4 fill-current" />
           Ya dejaste tu reseña para este trabajo. ¡Gracias!
         </div>
+      )}
+
+      {/* Marcar como completado */}
+      {solicitudStatus === "IN_PROGRESS" && aplicacionAceptada && (
+        <button
+          onClick={handleCompletar}
+          disabled={completing}
+          className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white font-semibold px-4 py-3 rounded-xl transition-colors text-sm"
+        >
+          {completing ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4" />
+          )}
+          Marcar trabajo como completado
+        </button>
       )}
 
       {/* Header propuestas */}

@@ -3,6 +3,8 @@ import { requireAuth } from "@/lib/auth"
 import { UserButton } from "@clerk/nextjs"
 import { LayoutDashboard, PlusCircle, ClipboardList, Heart } from "lucide-react"
 import { redirect } from "next/navigation"
+import { db } from "@/lib/db"
+import { NotificationBell } from "@/components/ui/NotificationBell"
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Inicio" },
@@ -15,6 +17,10 @@ export default async function ClientLayout({ children }: { children: React.React
   const user = await requireAuth()
   if (user.role === "ADMIN") redirect("/admin/dashboard")
 
+  const unreadCount = await db.notification.count({
+    where: { userId: user.id, read: false },
+  })
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header móvil */}
@@ -22,7 +28,10 @@ export default async function ClientLayout({ children }: { children: React.React
         <Link href="/dashboard" className="font-bold text-orange-500 text-lg">
           ChambaPe
         </Link>
-        <UserButton />
+        <div className="flex items-center gap-1">
+          <NotificationBell count={unreadCount} href="/notificaciones" />
+          <UserButton />
+        </div>
       </header>
 
       <div className="lg:flex">
@@ -43,7 +52,8 @@ export default async function ClientLayout({ children }: { children: React.React
             </Link>
           ))}
 
-          <div className="mt-auto pt-4 border-t border-gray-100">
+          <div className="mt-auto pt-4 border-t border-gray-100 space-y-2">
+            <NotificationBell count={unreadCount} href="/notificaciones" />
             <UserButton showName />
           </div>
         </aside>

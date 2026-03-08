@@ -5,6 +5,7 @@ import { Coins, SearchX, Zap, ArrowRight } from "lucide-react"
 import { OportunidadCard } from "@/components/profesionales/OportunidadCard"
 import Link from "next/link"
 import { CATEGORIAS_MAP } from "@/constants/categorias"
+import { expireSolicitudesVencidas } from "@/lib/expiracion"
 
 interface Props {
   searchParams: Promise<{ categoria?: string; urgencia?: string }>
@@ -12,6 +13,7 @@ interface Props {
 
 export default async function OportunidadesPage({ searchParams }: Props) {
   const user = await requireRole("PROFESSIONAL")
+  await expireSolicitudesVencidas()
   const { categoria: categoriaParam, urgencia: urgenciaParam } = await searchParams
 
   const profile = await db.professionalProfile.findUnique({

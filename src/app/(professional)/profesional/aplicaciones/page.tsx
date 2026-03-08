@@ -15,6 +15,8 @@ import {
   MapPin,
   Coins,
   ChevronRight,
+  Mail,
+  Phone,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -31,7 +33,9 @@ interface AplicacionItem {
     title: string
     district: string
     urgency: string
+    status: string
     category: { name: string }
+    client: { name: string; email: string }
   }
 }
 
@@ -103,6 +107,7 @@ export default async function MisAplicacionesPage({ searchParams }: Props) {
         request: {
           include: {
             category: true,
+            client: { select: { name: true, email: true } },
           },
         },
       },
@@ -239,10 +244,19 @@ export default async function MisAplicacionesPage({ searchParams }: Props) {
                   )}
                 </div>
 
-                {/* Accepted: show contact info hint */}
+                {/* Accepted: show client contact info */}
                 {a.status === "ACCEPTED" && (
-                  <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-3 text-xs text-green-700 font-medium">
-                    🎉 ¡El cliente te eligió! Revisa la solicitud para ver su contacto.
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-3">
+                    <p className="text-xs font-bold text-green-700 mb-2">🎉 ¡El cliente te eligió! Contáctalo:</p>
+                    <div className="flex flex-col gap-1">
+                      <a
+                        href={`mailto:${a.request.client.email}`}
+                        className="flex items-center gap-1.5 text-xs text-green-700 hover:text-green-900 transition-colors"
+                      >
+                        <Mail className="w-3 h-3 flex-shrink-0" />
+                        {a.request.client.email}
+                      </a>
+                    </div>
                   </div>
                 )}
 
@@ -252,7 +266,7 @@ export default async function MisAplicacionesPage({ searchParams }: Props) {
                     Aplicaste {formatFechaRelativa(new Date(a.createdAt))}
                   </span>
                   <Link
-                    href={`/solicitudes/${a.requestId}`}
+                    href={`/profesional/solicitudes/${a.requestId}`}
                     className="text-xs font-semibold text-orange-500 hover:text-orange-600 flex items-center gap-0.5 transition-colors"
                   >
                     Ver solicitud <ChevronRight className="w-3.5 h-3.5" />

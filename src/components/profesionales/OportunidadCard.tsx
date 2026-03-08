@@ -6,6 +6,7 @@ import { formatFechaRelativa, formatSoles, URGENCIA_LABELS } from "@/lib/utils"
 import { CATEGORIAS_MAP } from "@/constants/categorias"
 import { AplicarModal } from "./AplicarModal"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 interface OportunidadCardProps {
   solicitud: {
@@ -140,30 +141,39 @@ export function OportunidadCard({
             {creditCost} créditos para aplicar
           </div>
 
-          {/* Action button */}
-          {applied ? (
-            <span className="text-xs text-gray-400">Propuesta enviada</span>
-          ) : (
-            <button
-              onClick={() => setShowModal(true)}
-              className={cn(
-                "flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-xl transition-colors",
-                canApply
-                  ? "bg-orange-500 hover:bg-orange-600 text-white"
-                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
-              )}
-              disabled={!canApply}
+          {/* Action buttons */}
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/profesional/oportunidades/${solicitud.id}`}
+              className="flex items-center gap-1 text-xs text-gray-400 hover:text-orange-500 transition-colors px-2 py-1.5"
             >
-              {canApply ? (
-                <>
-                  Aplicar
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </>
-              ) : (
-                "Sin créditos"
-              )}
-            </button>
-          )}
+              Ver detalle
+              <ChevronRight className="w-3 h-3" />
+            </Link>
+            {applied ? (
+              <span className="text-xs text-gray-400">Propuesta enviada</span>
+            ) : (
+              <button
+                onClick={() => setShowModal(true)}
+                className={cn(
+                  "flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-xl transition-colors",
+                  canApply
+                    ? "bg-orange-500 hover:bg-orange-600 text-white"
+                    : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                )}
+                disabled={!canApply}
+              >
+                {canApply ? (
+                  <>
+                    Aplicar
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </>
+                ) : (
+                  "Sin créditos"
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

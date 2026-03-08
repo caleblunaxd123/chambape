@@ -16,6 +16,8 @@ import {
 } from "lucide-react"
 import { formatFechaCompleta, PROFESSIONAL_STATUS_LABELS } from "@/lib/utils"
 import { AdminVerificacionActions } from "@/components/admin/AdminVerificacionActions"
+import { AdminCreditosActions } from "@/components/admin/AdminCreditosActions"
+import { AdminEstadoActions } from "@/components/admin/AdminEstadoActions"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -212,6 +214,20 @@ export default async function AdminProfesionalDetailPage({ params }: Props) {
           <p className="text-sm font-semibold text-red-700 mb-1">Motivo de rechazo</p>
           <p className="text-sm text-red-600">{profesional.rejectionReason}</p>
         </div>
+      )}
+
+      {/* Gestión de créditos (admin) */}
+      <AdminCreditosActions
+        profesionalId={profesional.id}
+        currentCredits={profesional.credits}
+      />
+
+      {/* Suspender / Reactivar */}
+      {profesional.status !== "PENDING_VERIFICATION" && profesional.status !== "REJECTED" && (
+        <AdminEstadoActions
+          profesionalId={profesional.id}
+          currentStatus={profesional.status}
+        />
       )}
 
       {/* Reseñas recibidas */}

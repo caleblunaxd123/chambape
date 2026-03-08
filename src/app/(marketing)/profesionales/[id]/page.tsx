@@ -7,6 +7,8 @@ import { formatFechaCompleta } from "@/lib/utils"
 import { ReviewCard } from "@/components/resenas/ReviewCard"
 import { cn } from "@/lib/utils"
 import { getInitials } from "@/lib/utils"
+import { auth } from "@clerk/nextjs/server"
+import { FavoriteButton } from "@/components/ui/FavoriteButton"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -27,6 +29,24 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function PerfilPublicoPage({ params }: Props) {
   const { id } = await params
+  const { userId: clerkId } = await auth()
+
+  // Verificar si el usuario autenticado ya tiene este profesional en favoritos
+  let isFavorite = false
+  let currentUserId: string | null = null
+  if (clerkId) {
+    const currentUser = await db.user.findUnique({
+      where: { clerkId },
+      select: { id: true },
+    })
+    if (currentUser) {
+      currentUserId = currentUser.id
+      const existing = await db.favorite.findUnique({
+        where: { userId_professionalId: { userId: currentUser.id, professionalId: id } },
+      })
+      isFavorite = !!existing
+    }
+  }
 
   const profile = await db.professionalProfile.findUnique({
     where: { id },
@@ -141,10 +161,13 @@ export default async function PerfilPublicoPage({ params }: Props) {
           )}
 
           {/* CTA */}
-          <div className="mt-4">
+          <div className="mt-4 flex gap-2">
+            {currentUserId && (
+              <FavoriteButton professionalId={id} isFavorite={isFavorite} iconOnly />
+            )}
             <Link
               href="/solicitudes/nueva"
-              className="flex items-center justify-center gap-2 w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl transition-colors"
+              className="flex items-center justify-center gap-2 flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl transition-colors"
             >
               <MessageCircle className="w-4 h-4" />
               Solicitar este servicio
