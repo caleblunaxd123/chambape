@@ -221,6 +221,9 @@ model ServiceRequest {
   photos        String[]
 
   district      String
+  address       String?  // Dirección de referencia (calle, número, referencia)
+  latitude      Float?
+  longitude     Float?
   urgency       Urgency @default(FLEXIBLE)
   budgetMin     Int?
   budgetMax     Int?

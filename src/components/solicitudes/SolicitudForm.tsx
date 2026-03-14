@@ -6,8 +6,9 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
+import dynamic from "next/dynamic"
 import {
-  ArrowRight, ArrowLeft, CheckCircle, Upload, X, Loader2
+  ArrowRight, ArrowLeft, CheckCircle, Upload, X, Loader2, MapPin
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,6 +18,17 @@ import { Badge } from "@/components/ui/badge"
 import { CATEGORIAS, CATEGORIAS_MAP, type Categoria } from "@/constants/categorias"
 import { DISTRITOS } from "@/constants/distritos"
 import { cn } from "@/lib/utils"
+import type { MapLocation } from "./MapPickerInner"
+
+// Importación dinámica para evitar SSR (Leaflet necesita window)
+const MapPickerInner = dynamic(() => import("./MapPickerInner"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-56 bg-gray-100 rounded-2xl flex items-center justify-center">
+      <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+    </div>
+  ),
+})
 
 // ─── Schema de validación ─────────────────────────────────────────
 
@@ -26,6 +38,7 @@ const schema = z.object({
   subcategorySlug: z.string().optional(),
   description: z.string().min(30, "Cuéntanos más detalles (min. 30 caracteres)").max(1000),
   district: z.string().min(1, "Selecciona tu distrito"),
+  address: z.string().max(200).optional(),
   urgency: z.enum(["TODAY", "THIS_WEEK", "THIS_MONTH", "FLEXIBLE"]),
   budgetMin: z.preprocess(
     (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
@@ -45,6 +58,7 @@ type FormData = {
   subcategorySlug?: string
   description: string
   district: string
+  address?: string
   urgency: "TODAY" | "THIS_WEEK" | "THIS_MONTH" | "FLEXIBLE"
   budgetMin?: number
   budgetMax?: number
@@ -77,6 +91,8 @@ export function SolicitudForm({ defaultCategoria }: Props) {
   const [loading, setLoading] = useState(false)
   const [fotos, setFotos] = useState<string[]>([])
   const [uploadingFoto, setUploadingFoto] = useState(false)
+  const [mapLocation, setMapLocation] = useState<MapLocation | null>(null)
+  const [detecting, setDetecting] = useState(false)
 
   const {
     register,
@@ -147,6 +163,40 @@ export function SolicitudForm({ defaultCategoria }: Props) {
     }
   }
 
+  // ─── Manejar selección de ubicación en el mapa ───────────────────
+
+  function handleMapChange(loc: MapLocation) {
+    setMapLocation(loc)
+    if (loc.district) setValue("district", loc.district)
+    if (loc.address) setValue("address", loc.address)
+  }
+
+  async function handleDetectLocation() {
+    if (!navigator.geolocation) {
+      toast.error("Tu navegador no soporta geolocalización")
+      return
+    }
+    setDetecting(true)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords
+        // El mapa hará el geocoding al recibir las nuevas coordenadas via handleMapChange
+        setMapLocation((prev) => ({
+          lat: latitude,
+          lng: longitude,
+          address: prev?.address ?? "",
+          district: prev?.district ?? "",
+        }))
+        setDetecting(false)
+      },
+      () => {
+        toast.error("No se pudo obtener tu ubicación. Selecciónala en el mapa.")
+        setDetecting(false)
+      },
+      { timeout: 10000, maximumAge: 0 }
+    )
+  }
+
   // ─── Validar paso antes de avanzar ───────────────────────────────
 
   async function handleSiguiente() {
@@ -170,7 +220,12 @@ export function SolicitudForm({ defaultCategoria }: Props) {
       const res = await fetch("/api/solicitudes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, photos: fotos }),
+        body: JSON.stringify({
+          ...data,
+          photos: fotos,
+          latitude: mapLocation?.lat,
+          longitude: mapLocation?.lng,
+        }),
       })
 
       const json = await res.json()
@@ -440,9 +495,46 @@ export function SolicitudForm({ defaultCategoria }: Props) {
         {/* ── PASO 3: Ubicación ── */}
         {step === 3 && (
           <div className="space-y-5">
+            {/* Mapa interactivo */}
             <div>
-              <Label className="mb-2 block">¿En qué distrito necesitas el servicio? <span className="text-red-500">*</span></Label>
-              <div className="max-h-80 overflow-y-auto rounded-xl border border-gray-200 divide-y divide-gray-100">
+              <Label className="mb-2 block">
+                Marca tu ubicación en el mapa <span className="text-red-500">*</span>
+              </Label>
+              <MapPickerInner
+                value={mapLocation}
+                onChange={handleMapChange}
+                detecting={detecting}
+                onDetect={handleDetectLocation}
+              />
+            </div>
+
+            {/* Dirección de referencia */}
+            <div>
+              <Label htmlFor="address" className="mb-1.5 block">
+                Dirección de referencia (opcional)
+              </Label>
+              <Input
+                id="address"
+                {...register("address")}
+                placeholder="Ej: Av. Pardo 342, frente al parque"
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                Solo visible para el profesional que aceptes
+              </p>
+            </div>
+
+            {/* Distrito (auto-detectado o manual) */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label>Distrito <span className="text-red-500">*</span></Label>
+                {watch("district") && (
+                  <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                    <MapPin className="w-3 h-3" />
+                    {DISTRITOS.find((d) => d.slug === watch("district"))?.name ?? watch("district")}
+                  </span>
+                )}
+              </div>
+              <div className="max-h-52 overflow-y-auto rounded-xl border border-gray-200 divide-y divide-gray-100">
                 {DISTRITOS.map((d) => (
                   <button
                     key={d.slug}
@@ -451,7 +543,7 @@ export function SolicitudForm({ defaultCategoria }: Props) {
                     className={cn(
                       "w-full text-left px-4 py-3 text-sm transition-colors",
                       watch("district") === d.slug
-                        ? "bg-orange-50 text-orange-700 font-medium"
+                        ? "bg-orange-50 text-orange-700 font-semibold"
                         : "text-gray-700 hover:bg-gray-50"
                     )}
                   >
@@ -486,6 +578,7 @@ export function SolicitudForm({ defaultCategoria }: Props) {
               { label: "Solicitud", value: watch("title") },
               { label: "Descripción", value: watch("description") },
               { label: "Distrito", value: DISTRITOS.find((d) => d.slug === watch("district"))?.name },
+              ...(watch("address") ? [{ label: "Dirección", value: watch("address") }] : []),
               { label: "Urgencia", value: URGENCIA_OPTS.find((o) => o.value === urgency)?.label },
               {
                 label: "Presupuesto",
