@@ -16,8 +16,8 @@ import {
   Wallet,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import Image from "next/image"
 import { SolicitudDetailClient } from "@/components/solicitudes/SolicitudDetailClient"
+import { PhotoGallery } from "@/components/ui/PhotoGallery"
 
 const STATUS_COLORS: Record<string, string> = {
   OPEN: "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -164,20 +164,10 @@ export default async function SolicitudDetailPage({ params }: Props) {
           {solicitud.description}
         </p>
 
-        {/* Photos */}
+        {/* Photos — con lightbox expandible */}
         {solicitud.photos.length > 0 && (
           <div className="mt-8 pt-6 border-t border-gray-100">
-            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Fotos adjuntas</h3>
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hidden">
-              {solicitud.photos.map((url, i) => (
-                <div
-                  key={i}
-                  className="relative w-32 h-32 rounded-2xl overflow-hidden flex-shrink-0 border border-gray-200 shadow-sm"
-                >
-                  <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover hover:scale-105 transition-transform duration-500" />
-                </div>
-              ))}
-            </div>
+            <PhotoGallery photos={solicitud.photos} label="Fotos adjuntas" />
           </div>
         )}
       </div>

@@ -38,7 +38,7 @@ const PACKAGES = [
     color: "border-gray-200 hover:border-blue-300",
     bg: "bg-blue-50 border border-blue-100",
     popular: false,
-    features: ["10 créditos", "Ideal para empezar", "Válidos por 1 año"],
+    features: ["10 créditos", "Pago único — no es suscripción", "Sin fecha de vencimiento"],
     btn: "bg-gray-900 hover:bg-gray-800",
   },
   {
@@ -51,7 +51,7 @@ const PACKAGES = [
     color: "border-orange-400 shadow-[0_4px_24px_rgba(249,115,22,0.15)] scale-105 z-10",
     bg: "bg-orange-50 border border-orange-100",
     popular: true,
-    features: ["30 créditos", "Ahorro de S/.10", "Recomendado para activos", "Soporte prioritario"],
+    features: ["30 créditos", "Ahorro de S/.10", "Pago único — no es suscripción", "Sin fecha de vencimiento"],
     btn: "bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md",
   },
   {
@@ -64,7 +64,7 @@ const PACKAGES = [
     color: "border-gray-200 hover:border-purple-300",
     bg: "bg-purple-50 border border-purple-100",
     popular: false,
-    features: ["70 créditos", "Mejor precio por crédito", "Para profesionales top"],
+    features: ["70 créditos", "Precio más bajo por crédito", "Pago único — no es suscripción", "Sin fecha de vencimiento"],
     btn: "bg-gray-900 hover:bg-gray-800",
   },
 ]
@@ -209,7 +209,8 @@ export default function CreditosPage() {
           <div className="sm:col-span-2 grid sm:grid-cols-2 gap-4 mt-2 sm:mt-0">
             {[
               "Cada aplicación cuesta entre 3 y 8 créditos según la categoría.",
-              "Los créditos no expiran nunca. Son tuyos hasta que los uses.",
+              "Pago único — no es suscripción mensual ni anual.",
+              "Los créditos no vencen nunca. Son tuyos hasta que los uses.",
               "No cobramos comisión. Lo que ganes con el cliente es 100% tuyo.",
               "Aceptamos todas las tarjetas de crédito, débito y Yape.",
             ].map((t, i) => (

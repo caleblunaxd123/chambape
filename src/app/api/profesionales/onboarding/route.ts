@@ -106,6 +106,34 @@ export async function POST(req: Request) {
           )
         }
 
+        // 🔍 Validar DNI contra RENIEC vía apis.net.pe (si la API key está configurada)
+        const RENIEC_API_KEY = process.env.RENIEC_API_KEY
+        let nombreReniec: string | null = null
+        if (RENIEC_API_KEY) {
+          try {
+            const reniecRes = await fetch(
+              `https://api.apis.net.pe/v2/reniec/dni?numero=${data.dni}`,
+              {
+                headers: { Authorization: `Bearer ${RENIEC_API_KEY}` },
+                signal: AbortSignal.timeout(5000),
+              }
+            )
+            if (reniecRes.ok) {
+              const reniecData = await reniecRes.json()
+              if (!reniecData?.nombreCompleto) {
+                return NextResponse.json(
+                  { error: "DNI no encontrado en RENIEC. Verifica el número." },
+                  { status: 400 }
+                )
+              }
+              nombreReniec = reniecData.nombreCompleto
+            }
+          } catch {
+            // Si la API de RENIEC falla, continuamos sin bloquear al usuario
+            console.warn("[RENIEC] API no disponible, se omite validación")
+          }
+        }
+
         await db.professionalProfile.update({
           where: { id: profileId },
           data: {
@@ -114,12 +142,20 @@ export async function POST(req: Request) {
           },
         })
 
-        // Actualizar teléfono del usuario
+        // Actualizar teléfono del usuario (y nombre si RENIEC lo confirmó)
         await db.user.update({
           where: { id: user.id },
-          data: { phone: data.phone },
+          data: {
+            phone: data.phone,
+            ...(nombreReniec ? { name: nombreReniec } : {}),
+          },
         })
-        break
+
+        return NextResponse.json({
+          ok: true,
+          nextStep: 2,
+          ...(nombreReniec ? { nombreVerificado: nombreReniec } : {}),
+        })
       }
 
       case 2: {
@@ -203,10 +239,15 @@ export async function POST(req: Request) {
           })
         }
 
-        // Marcar onboarding como completado
+        // Marcar onboarding como completado y APROBAR AUTOMÁTICAMENTE
+        // El profesional queda ACTIVE sin necesitar revisión manual del admin
         await db.professionalProfile.update({
           where: { id: profileId },
-          data: { onboardingStep: 6 },
+          data: {
+            onboardingStep: 6,
+            status: "ACTIVE",
+            verifiedAt: new Date(),
+          },
         })
 
         // 🎁 Regalar 25 créditos de bienvenida (solo la primera vez)
