@@ -107,15 +107,45 @@ export default function CreditosPage() {
   const [activeTab, setActiveTab] = useState<"SUBS" | "RECARGAS">("SUBS")
 
   useEffect(() => {
-    // Avisos de redirección de MP
     const status = searchParams.get("status")
-    if (status === "success") toast.success("¡Pago completado! Tus créditos han sido añadidos.")
-    if (status === "success_sub") toast.success("¡Suscripción activa! Ya tienes tus créditos mensuales.")
-    if (status === "failure") toast.error("Hubo un problema con tu pago.")
+    const collectionId = searchParams.get("collection_id")
+    const collectionStatus = searchParams.get("collection_status")
+
     if (status) {
-      // Limpiar URL
       router.replace("/profesional/creditos", { scroll: false })
     }
+
+    if (status === "failure") {
+      toast.error("Hubo un problema con tu pago.")
+      fetch("/api/creditos/balance")
+        .then((r) => r.json())
+        .then((data) => setProfile(data))
+        .finally(() => setLoadingProfile(false))
+      return
+    }
+
+    // Si MP redirige de vuelta con un pago aprobado, procesarlo inmediatamente
+    if (collectionId && collectionStatus === "approved") {
+      setLoadingProfile(true)
+      fetch(`/api/creditos/verificar-mp?payment_id=${collectionId}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.ok) {
+            toast.success(`¡Créditos añadidos! Saldo actualizado.`)
+          } else if (status === "success") {
+            toast.success("¡Pago completado! Tus créditos han sido añadidos.")
+          }
+          // Recargar saldo actualizado
+          return fetch("/api/creditos/balance").then((r) => r.json())
+        })
+        .then((data) => setProfile(data))
+        .catch(() => toast.error("Error al verificar el pago"))
+        .finally(() => setLoadingProfile(false))
+      return
+    }
+
+    if (status === "success") toast.success("¡Pago completado! Tus créditos han sido añadidos.")
+    if (status === "success_sub") toast.success("¡Suscripción activa! Ya tienes tus créditos mensuales.")
 
     fetch("/api/creditos/balance")
       .then((r) => r.json())

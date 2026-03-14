@@ -67,6 +67,7 @@ export async function POST(req: Request) {
           },
           auto_return: "approved",
           statement_descriptor: "CHAMBAPE",
+          notification_url: `${APP_URL}/api/webhooks/mercadopago`,
         },
       })
 
