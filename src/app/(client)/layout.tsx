@@ -1,10 +1,11 @@
 import Link from "next/link"
 import { requireAuth } from "@/lib/auth"
 import { UserButton } from "@clerk/nextjs"
-import { LayoutDashboard, PlusCircle, ClipboardList, Heart } from "lucide-react"
+import { LayoutDashboard, PlusCircle, ClipboardList, Heart, Bell } from "lucide-react"
 import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
 import { NotificationBell } from "@/components/ui/NotificationBell"
+import { ClientSidebarContent } from "@/components/layout/ClientSidebarContent"
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Inicio" },
@@ -22,60 +23,60 @@ export default async function ClientLayout({ children }: { children: React.React
   })
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header móvil */}
-      <header className="bg-white border-b border-gray-100 px-4 h-14 flex items-center justify-between lg:hidden sticky top-0 z-10">
-        <Link href="/dashboard" className="font-bold text-orange-500 text-lg">
-          ChambaPe
+    <div className="min-h-screen bg-[#f8f7f5]">
+      {/* ── Header móvil ─────────────────────────── */}
+      <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 h-14 flex items-center justify-between lg:hidden sticky top-0 z-40 shadow-sm">
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm" style={{ background: "var(--brand-gradient)" }}>
+            <span className="text-white font-black text-xs leading-none" style={{ fontFamily: "Outfit, sans-serif" }}>C</span>
+          </div>
+          <span className="brand-name text-base text-gray-900">
+            Chamba<span className="text-orange-500">Pe</span>
+          </span>
         </Link>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <NotificationBell count={unreadCount} href="/notificaciones" />
           <UserButton />
         </div>
       </header>
 
       <div className="lg:flex">
-        {/* Sidebar desktop */}
-        <aside className="hidden lg:flex flex-col w-56 min-h-screen bg-white border-r border-gray-100 p-4 gap-1 sticky top-0">
-          <Link href="/dashboard" className="font-bold text-orange-500 text-xl mb-6 px-2">
-            ChambaPe 🔧
-          </Link>
-
-          {NAV_ITEMS.map(({ href, icon: Icon, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-colors"
-            >
-              <Icon className="w-4 h-4" />
-              {label}
-            </Link>
-          ))}
-
-          <div className="mt-auto pt-4 border-t border-gray-100 space-y-2">
-            <NotificationBell count={unreadCount} href="/notificaciones" />
-            <UserButton showName />
-          </div>
+        {/* ── Sidebar desktop ────────────────────── */}
+        <aside className="hidden lg:flex flex-col w-64 min-h-screen bg-white border-r border-gray-100 sticky top-0">
+          <ClientSidebarContent unreadCount={unreadCount} />
         </aside>
 
-        <main className="flex-1 min-h-screen">{children}</main>
+        {/* ── Contenido principal ─────────────────── */}
+        <main className="flex-1 min-h-screen pb-20 lg:pb-0">
+          {children}
+        </main>
       </div>
 
-      {/* Nav inferior móvil */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex z-10">
+      {/* ── Nav inferior móvil ─────────────────────── */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-gray-100 flex z-40 shadow-[0_-1px_12px_rgba(0,0,0,0.06)]">
         {NAV_ITEMS.map(({ href, icon: Icon, label }) => (
           <Link
             key={href}
             href={href}
-            className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-gray-400 hover:text-orange-500 transition-colors"
+            className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 text-gray-400 hover:text-orange-500 transition-colors"
           >
             <Icon className="w-5 h-5" />
-            <span className="text-[10px]">{label}</span>
+            <span className="text-[10px] font-medium">{label}</span>
           </Link>
         ))}
+        <Link
+          href="/notificaciones"
+          className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 text-gray-400 hover:text-orange-500 transition-colors relative"
+        >
+          <Bell className="w-5 h-5" />
+          {unreadCount > 0 && (
+            <span className="absolute top-2 right-[calc(50%-14px)] w-4 h-4 bg-orange-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+          <span className="text-[10px] font-medium">Alertas</span>
+        </Link>
       </nav>
-
-      <div className="h-16 lg:hidden" />
     </div>
   )
 }

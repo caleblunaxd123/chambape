@@ -189,31 +189,36 @@ export function SolicitudForm({ defaultCategoria }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
       {/* Header con progreso */}
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-6 pt-5 pb-4">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="text-white font-bold">Nueva solicitud</h1>
-          <span className="text-orange-100 text-sm">{step}/{PASOS.length}</span>
-        </div>
-        <div className="w-full bg-orange-400/40 rounded-full h-1.5">
-          <div
-            className="bg-white rounded-full h-1.5 transition-all duration-500"
-            style={{ width: `${(step / PASOS.length) * 100}%` }}
-          />
-        </div>
-        <div className="flex justify-between mt-3">
-          {PASOS.map((p) => (
-            <span
-              key={p.numero}
-              className={cn(
-                "text-[10px]",
-                p.numero <= step ? "text-white font-medium" : "text-orange-200"
-              )}
-            >
-              {p.label}
+      <div className="bg-[#1e1b4b] relative overflow-hidden px-6 pt-8 pb-6">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-orange-500 rounded-full blur-[60px] opacity-20 pointer-events-none" />
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-5">
+            <h1 className="text-white font-black text-2xl tracking-wide" style={{ fontFamily: "Outfit, sans-serif" }}>Nueva solicitud</h1>
+            <span className="text-indigo-200 font-bold text-sm bg-indigo-900/50 px-3 py-1 rounded-full">
+              Paso {step} de {PASOS.length}
             </span>
-          ))}
+          </div>
+          <div className="w-full bg-indigo-950 rounded-full h-2 mb-4 overflow-hidden shadow-inner">
+            <div
+              className="bg-gradient-to-r from-orange-500 to-amber-400 rounded-full h-2 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(249,115,22,0.5)]"
+              style={{ width: `${(step / PASOS.length) * 100}%` }}
+            />
+          </div>
+          <div className="flex justify-between px-1">
+            {PASOS.map((p) => (
+              <span
+                key={p.numero}
+                className={cn(
+                  "text-[10px] font-bold uppercase tracking-wider transition-colors duration-300",
+                  p.numero === step ? "text-amber-400" : p.numero < step ? "text-indigo-200" : "text-indigo-800"
+                )}
+              >
+                {p.label}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 

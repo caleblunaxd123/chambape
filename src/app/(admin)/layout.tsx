@@ -1,17 +1,17 @@
 import { requireAdmin } from "@/lib/auth"
 import Link from "next/link"
-import { LayoutDashboard, Users, ClipboardList, Star, Tag, CreditCard, LogOut, Menu } from "lucide-react"
+import { LayoutDashboard, Users, ClipboardList, Star, Tag, CreditCard, Menu } from "lucide-react"
+import { AdminSignOutButton } from "@/components/admin/AdminSignOutButton"
 
 const NAV = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/profesionales", label: "Profesionales", icon: Users },
-  { href: "/admin/solicitudes", label: "Solicitudes", icon: ClipboardList },
-  { href: "/admin/resenas", label: "Reseñas", icon: Star },
-  { href: "/admin/categorias", label: "Categorías", icon: Tag },
-  { href: "/admin/transacciones", label: "Transacciones", icon: CreditCard },
+  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, desc: "Métricas generales" },
+  { href: "/admin/profesionales", label: "Profesionales", icon: Users, desc: "Verificar y gestionar" },
+  { href: "/admin/solicitudes", label: "Solicitudes", icon: ClipboardList, desc: "Todas las solicitudes" },
+  { href: "/admin/resenas", label: "Reseñas", icon: Star, desc: "Moderar reseñas" },
+  { href: "/admin/categorias", label: "Categorías", icon: Tag, desc: "Gestionar servicios" },
+  { href: "/admin/transacciones", label: "Transacciones", icon: CreditCard, desc: "Historial de pagos" },
 ]
 
-// Nav items visibles en mobile bottom nav (los más importantes)
 const NAV_MOBILE = [
   { href: "/admin/dashboard", label: "Inicio", icon: LayoutDashboard },
   { href: "/admin/profesionales", label: "Pros", icon: Users },
@@ -24,66 +24,81 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   await requireAdmin()
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* ── Header móvil ─────────────────────────────── */}
-      <header className="lg:hidden bg-gray-900 text-white px-4 h-14 flex items-center justify-between sticky top-0 z-40">
-        <div className="flex items-center gap-2">
-          <span className="text-orange-400 font-bold text-lg">ChambaPe</span>
-          <span className="text-xs bg-orange-500 text-white px-1.5 py-0.5 rounded font-medium">Admin</span>
+    <div className="min-h-screen bg-[#0a0f1e]">
+      {/* ── Header móvil ─────────────────────────── */}
+      <header className="lg:hidden bg-[#0d1224] border-b border-white/5 px-4 h-14 flex items-center justify-between sticky top-0 z-40 backdrop-blur-md">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm" style={{ background: "var(--brand-gradient)" }}>
+            <span className="text-white font-black text-xs leading-none" style={{ fontFamily: "Outfit, sans-serif" }}>C</span>
+          </div>
+          <span className="brand-name text-base text-white">
+            Chamba<span className="text-orange-400">Pe</span>
+          </span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-orange-400 bg-orange-400/10 border border-orange-400/20 px-2 py-0.5 rounded-full">
+            Admin
+          </span>
         </div>
-        <Link href="/" className="text-gray-400 hover:text-white transition-colors">
-          <LogOut className="w-5 h-5" />
-        </Link>
+        <AdminSignOutButton compact />
       </header>
 
       <div className="lg:flex">
-        {/* ── Sidebar desktop ───────────────────────── */}
-        <aside className="hidden lg:flex flex-col w-56 bg-gray-900 text-white fixed inset-y-0 left-0 z-50">
-          <div className="px-5 py-5 border-b border-gray-800">
-            <span className="text-orange-400 font-bold text-lg">ChambaPe</span>
-            <span className="ml-2 text-xs bg-orange-500 text-white px-1.5 py-0.5 rounded font-medium">Admin</span>
+        {/* ── Sidebar desktop ────────────────────── */}
+        <aside className="hidden lg:flex flex-col w-64 bg-[#0d1224] fixed inset-y-0 left-0 z-50 border-r border-white/5">
+          {/* Logo */}
+          <div className="px-5 py-5 border-b border-white/5">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style={{ background: "var(--brand-gradient)" }}>
+                <span className="text-white font-black text-base leading-none" style={{ fontFamily: "Outfit, sans-serif" }}>C</span>
+              </div>
+              <div>
+                <p className="brand-name text-[1.15rem] text-white leading-none">
+                  Chamba<span className="text-orange-400">Pe</span>
+                </p>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400/80">
+                  Admin
+                </span>
+              </div>
+            </div>
           </div>
 
-          <nav className="flex-1 py-4 space-y-0.5 px-2">
-            {NAV.map(({ href, label, icon: Icon }) => (
+          {/* Nav */}
+          <nav className="flex-1 py-4 space-y-0.5 px-3 overflow-y-auto">
+            {NAV.map(({ href, label, icon: Icon, desc }) => (
               <Link
                 key={href}
                 href={href}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                className="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-150"
               >
-                <Icon className="w-4 h-4" />
-                {label}
+                <div className="w-8 h-8 rounded-lg bg-white/5 group-hover:bg-orange-500/15 flex items-center justify-center transition-colors shrink-0">
+                  <Icon className="w-4 h-4 group-hover:text-orange-400 transition-colors" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors leading-none">{label}</p>
+                  <p className="text-[11px] text-gray-600 group-hover:text-gray-400 transition-colors mt-0.5 truncate">{desc}</p>
+                </div>
               </Link>
             ))}
           </nav>
 
-          <div className="px-2 py-4 border-t border-gray-800">
-            <Link
-              href="/"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-white transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Salir del panel
-            </Link>
-          </div>
+          <AdminSignOutButton />
         </aside>
 
-        {/* ── Contenido principal ───────────────────── */}
-        <main className="flex-1 min-h-screen lg:ml-56 pb-20 lg:pb-0">
+        {/* ── Contenido principal ─────────────────── */}
+        <main className="flex-1 min-h-screen lg:ml-64 bg-[#f8f7f5] rounded-tl-2xl lg:rounded-tl-[2rem] pb-20 lg:pb-0">
           {children}
         </main>
       </div>
 
-      {/* ── Nav inferior móvil ────────────────────────── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 flex z-40">
+      {/* ── Nav inferior móvil ─────────────────────── */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-[#0d1224]/95 backdrop-blur-md border-t border-white/5 flex z-40">
         {NAV_MOBILE.map(({ href, icon: Icon, label }) => (
           <Link
             key={href}
             href={href}
-            className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-gray-400 hover:text-orange-400 transition-colors"
+            className="flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 text-gray-500 hover:text-orange-400 transition-colors"
           >
             <Icon className="w-5 h-5" />
-            <span className="text-[10px]">{label}</span>
+            <span className="text-[10px] font-medium">{label}</span>
           </Link>
         ))}
       </nav>

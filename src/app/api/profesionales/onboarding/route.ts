@@ -203,11 +203,36 @@ export async function POST(req: Request) {
           })
         }
 
-        // Marcar onboarding como completado — pasa a PENDING_VERIFICATION
+        // Marcar onboarding como completado
         await db.professionalProfile.update({
           where: { id: profileId },
           data: { onboardingStep: 6 },
         })
+
+        // 🎁 Regalar 25 créditos de bienvenida (solo la primera vez)
+        const yaRecibioBonus = await db.creditTransaction.findFirst({
+          where: { professionalId: profileId, type: "BONUS" },
+        })
+
+        if (!yaRecibioBonus) {
+          const BONUS_CREDITS = 25
+          await db.$transaction([
+            db.professionalProfile.update({
+              where: { id: profileId },
+              data: { credits: { increment: BONUS_CREDITS } },
+            }),
+            db.creditTransaction.create({
+              data: {
+                professionalId: profileId,
+                type: "BONUS",
+                credits: BONUS_CREDITS,
+                balance: (user.professionalProfile.credits ?? 0) + BONUS_CREDITS,
+                description: "🎁 Bienvenido a ChambaPe — 25 créditos de regalo para comenzar",
+              },
+            }),
+          ])
+        }
+
         break
       }
     }

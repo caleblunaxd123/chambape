@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Inter, Outfit } from "next/font/google"
 import { ClerkProvider } from "@clerk/nextjs"
 import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
@@ -7,6 +7,13 @@ import "./globals.css"
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
+})
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
 })
 
 export const metadata: Metadata = {
@@ -44,7 +51,7 @@ export default function RootLayout({
       signUpFallbackRedirectUrl="/registrarse/tipo"
     >
       <html lang="es" suppressHydrationWarning>
-        <body className={`${inter.variable} font-sans antialiased bg-background`}>
+        <body className={`${inter.variable} ${outfit.variable} font-sans antialiased bg-background`}>
           {children}
           <Toaster richColors position="top-right" />
         </body>

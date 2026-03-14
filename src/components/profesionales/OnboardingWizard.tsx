@@ -131,50 +131,58 @@ export function OnboardingWizard({ currentStep: initialStep, categoryMap, initia
   ][step - 1]
 
   return (
-    <div className="bg-white rounded-2xl shadow-md overflow-hidden w-full">
+    <div className="bg-white rounded-3xl shadow-sm overflow-hidden w-full border border-gray-100">
       {/* Header del wizard */}
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-6 pt-6 pb-4">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-white font-bold text-lg">Registro profesional</h1>
-          <span className="text-orange-100 text-sm">
-            {step} / {PASOS.length}
-          </span>
-        </div>
+      <div className="bg-[#1e1b4b] relative overflow-hidden px-6 pt-8 pb-6">
+        <div className="absolute -top-16 -right-16 w-48 h-48 bg-orange-500 rounded-full blur-[70px] opacity-20 pointer-events-none" />
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-white font-black text-xl tracking-wide" style={{ fontFamily: "Outfit, sans-serif" }}>Registro profesional</h1>
+            <span className="text-indigo-200 font-bold text-xs bg-indigo-900/50 px-3 py-1.5 rounded-full">
+              Paso {step} de {PASOS.length}
+            </span>
+          </div>
 
-        {/* Barra de progreso */}
-        <div className="w-full bg-orange-400/40 rounded-full h-1.5 mb-4">
-          <div
-            className="bg-white rounded-full h-1.5 transition-all duration-500"
-            style={{ width: `${(step / PASOS.length) * 100}%` }}
-          />
-        </div>
+          {/* Barra de progreso */}
+          <div className="w-full bg-indigo-950 rounded-full h-2 mb-6 overflow-hidden shadow-inner">
+            <div
+              className="bg-gradient-to-r from-orange-500 to-amber-400 rounded-full h-2 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(249,115,22,0.5)]"
+              style={{ width: `${(step / PASOS.length) * 100}%` }}
+            />
+          </div>
 
-        {/* Indicadores de pasos */}
-        <div className="flex items-center justify-between">
-          {PASOS.map((p) => (
-            <div key={p.numero} className="flex flex-col items-center gap-1">
-              <div
-                className={cn(
-                  "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
-                  p.numero < step
-                    ? "bg-white text-orange-600"
-                    : p.numero === step
-                    ? "bg-white text-orange-600 ring-2 ring-white ring-offset-2 ring-offset-orange-500"
-                    : "bg-orange-400/40 text-orange-100"
-                )}
-              >
-                {p.numero < step ? "✓" : p.numero}
-              </div>
-              <span
-                className={cn(
-                  "text-[9px] hidden sm:block",
-                  p.numero <= step ? "text-white" : "text-orange-200"
-                )}
-              >
-                {p.label}
-              </span>
-            </div>
-          ))}
+          {/* Indicadores de pasos */}
+          <div className="flex justify-between">
+            {PASOS.map((p) => {
+              const isActive = p.numero === step
+              const isPast = p.numero < step
+              return (
+                <div key={p.numero} className="flex flex-col items-center gap-2">
+                  <div
+                    className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center text-xs font-black transition-all duration-300 shadow-sm",
+                      isPast
+                        ? "bg-emerald-500 text-white"
+                        : isActive
+                        ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)] scale-110"
+                        : "bg-indigo-900/50 text-indigo-400 border border-indigo-800"
+                    )}
+                    style={{ fontFamily: "Outfit, sans-serif" }}
+                  >
+                    {isPast ? "✓" : p.numero}
+                  </div>
+                  <span
+                    className={cn(
+                      "text-[9px] font-bold uppercase tracking-wider hidden sm:block transition-colors duration-300",
+                      isActive ? "text-amber-400" : isPast ? "text-indigo-200" : "text-indigo-800"
+                    )}
+                  >
+                    {p.label}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
 
