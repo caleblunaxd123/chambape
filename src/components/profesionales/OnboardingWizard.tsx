@@ -41,6 +41,7 @@ export function OnboardingWizard({ currentStep: initialStep, categoryMap, initia
   const [step, setStep] = useState(initialStep)
   const [loading, setLoading] = useState(false)
   const [completado, setCompletado] = useState(false)
+  const [wizardData, setWizardData] = useState<InitialData>(initialData)
 
   async function saveStep(stepNumber: number, data: object) {
     setLoading(true)
@@ -70,6 +71,12 @@ export function OnboardingWizard({ currentStep: initialStep, categoryMap, initia
   async function handleNext(stepNumber: number, data: object) {
     const ok = await saveStep(stepNumber, data)
     if (!ok) return
+
+    // Actualizar estado local con los nuevos datos
+    setWizardData((prev) => ({
+      ...prev,
+      [`step${stepNumber}`]: data
+    }))
 
     if (stepNumber < 6) {
       setStep(stepNumber + 1)
@@ -217,7 +224,8 @@ export function OnboardingWizard({ currentStep: initialStep, categoryMap, initia
         )}
         {step === 4 && (
           <Step4Verificacion
-            defaultValues={initialData.step4}
+            dniEsperado={wizardData.step1?.dni}
+            defaultValues={wizardData.step4}
             onNext={(data) => handleNext(4, data)}
             loading={loading}
           />

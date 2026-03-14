@@ -42,9 +42,15 @@ export async function POST(req: Request) {
 
   const folder = CLOUDINARY_FOLDERS[parsed.data.folder]
   const timestamp = Math.round(Date.now() / 1000)
+  const params: any = { timestamp, folder }
+  
+  // Si es el frente del DNI, solicitamos OCR de Google
+  if (parsed.data.folder === "dniFrente") {
+    params.ocr = "adv_ocr"
+  }
 
   const signature = cloudinary.utils.api_sign_request(
-    { timestamp, folder },
+    params,
     apiSecret
   )
 
@@ -54,5 +60,6 @@ export async function POST(req: Request) {
     folder,
     cloudName,
     apiKey,
+    ocr: params.ocr,
   })
 }

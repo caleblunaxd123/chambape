@@ -13,17 +13,48 @@ interface DocumentState {
 }
 
 interface Props {
+  dniEsperado?: string
   defaultValues?: Partial<DocumentState>
   onNext: (data: DocumentState) => Promise<void>
   loading: boolean
 }
 
-export function Step4Verificacion({ defaultValues, onNext, loading }: Props) {
+export function Step4Verificacion({ dniEsperado, defaultValues, onNext, loading }: Props) {
   const [docs, setDocs] = useState<Partial<DocumentState>>(defaultValues ?? {})
+  const [verificando, setVerificando] = useState(false)
+  const [errorValidacion, setErrorValidacion] = useState<string | null>(null)
+
+  function handleOCR(result: any) {
+    if (!dniEsperado) return
+
+    // Estructura de Cloudinary con Google OCR
+    const annotations = result?.info?.ocr?.adv_ocr?.data?.[0]?.textAnnotations
+    const fullText = annotations?.[0]?.description ?? ""
+
+    if (!fullText) {
+      console.warn("No se detectó texto en el DNI")
+      return
+    }
+
+    // Buscamos un bloque de 8 números que coincida con el dniEsperado
+    // El DNI en Perú tiene 8 dígitos.
+    const dniEncontrado = fullText.includes(dniEsperado)
+
+    if (!dniEncontrado) {
+      setErrorValidacion(`El DNI en la foto no parece coincidir con el número ${dniEsperado} que ingresaste.`)
+    } else {
+      setErrorValidacion(null)
+      toast.success("DNI validado visualmente con éxito")
+    }
+  }
 
   function handleSubmit() {
     if (!docs.dniFrontUrl || !docs.dniBackUrl || !docs.selfieDniUrl) {
       toast.error("Debes subir los 3 documentos requeridos")
+      return
+    }
+    if (errorValidacion) {
+      toast.error("No puedes continuar: " + errorValidacion)
       return
     }
     onNext(docs as DocumentState)
@@ -50,9 +81,20 @@ export function Step4Verificacion({ defaultValues, onNext, loading }: Props) {
         hint="Asegúrate de que el número de DNI se vea claramente"
         aspectRatio="landscape"
         value={docs.dniFrontUrl}
+        onResult={handleOCR}
         onChange={(url) => setDocs((prev) => ({ ...prev, dniFrontUrl: url }))}
-        onRemove={() => setDocs((prev) => ({ ...prev, dniFrontUrl: undefined }))}
+        onRemove={() => {
+          setDocs((prev) => ({ ...prev, dniFrontUrl: undefined }))
+          setErrorValidacion(null)
+        }}
       />
+
+      {errorValidacion && (
+        <div className="bg-red-50 text-red-600 p-3 rounded-xl text-xs flex gap-2 animate-in fade-in slide-in-from-top-1">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <p>{errorValidacion}</p>
+        </div>
+      )}
 
       {/* DNI Reverso */}
       <ImageUpload
@@ -88,7 +130,7 @@ export function Step4Verificacion({ defaultValues, onNext, loading }: Props) {
       <Button
         type="button"
         onClick={handleSubmit}
-        disabled={loading || !allUploaded}
+        disabled={loading || !allUploaded || !!errorValidacion}
         className="w-full bg-orange-500 hover:bg-orange-600 text-white h-11"
       >
         {loading ? "Guardando..." : "Continuar"}

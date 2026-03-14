@@ -25,6 +25,7 @@ interface ImageUploadProps {
   aspectRatio?: "square" | "portrait" | "landscape"
   maxSizeMB?: number
   className?: string
+  onResult?: (result: any) => void // Para pasar datos extra (como OCR)
 }
 
 export function ImageUpload({
@@ -37,6 +38,7 @@ export function ImageUpload({
   aspectRatio = "square",
   maxSizeMB = 5,
   className,
+  onResult,
 }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
@@ -77,7 +79,7 @@ export function ImageUpload({
         throw new Error(msg || "No se pudo obtener la firma de upload")
       }
 
-      const { signature, timestamp, folder: folderPath, cloudName, apiKey } = await sigRes.json()
+      const { signature, timestamp, folder: folderPath, cloudName, apiKey, ocr } = await sigRes.json()
 
       // 2. Subir directamente a Cloudinary
       const formData = new FormData()
@@ -86,6 +88,7 @@ export function ImageUpload({
       formData.append("timestamp", String(timestamp))
       formData.append("folder", folderPath)
       formData.append("api_key", apiKey)
+      if (ocr) formData.append("ocr", ocr)
 
       const uploadRes = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
@@ -99,6 +102,7 @@ export function ImageUpload({
 
       setPreview(secureUrl)
       onChange(secureUrl)
+      if (onResult) onResult(result)
       toast.success("Imagen subida correctamente")
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Error al subir la imagen. Intenta de nuevo.")
