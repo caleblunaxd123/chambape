@@ -30,8 +30,8 @@ export async function POST(req: Request) {
 
   console.log("[CULQI_WEBHOOK] Evento recibido:", payload.type, payload.data?.object?.id)
 
-  // ─── Solo procesar cargos exitosos ──────────────────────────────
-  if (payload.type !== "charge.creation.success") {
+  // Solo procesar cargos exitosos (Culqi usa ambos nombres según versión)
+  if (payload.type !== "charge.creation.success" && payload.type !== "charge.creation.succeeded") {
     return NextResponse.json({ ok: true, ignored: true })
   }
 
