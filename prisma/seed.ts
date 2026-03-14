@@ -85,7 +85,7 @@ async function main() {
       creditsPerMonth: 20,
       pricePen: 19,
       features: ["20 créditos al mes", "Sin comisiones", "Soporte básico"],
-      mpPlanId: null, // Deberás crear el plan en MP y poner el ID aquí en prod
+      mpPlanId: "51c5da418ce24a9bb2cd4fcf9b8b05cb",
     },
     {
       id: "plan-pro",
@@ -93,7 +93,7 @@ async function main() {
       creditsPerMonth: 50,
       pricePen: 39,
       features: ["50 créditos al mes", "Insignia Profesional Pro", "Soporte prioritario 24/7"],
-      mpPlanId: null,
+      mpPlanId: "89e079cfaa0942228cd4f4a6886a3255",
     },
   ]
 
@@ -105,6 +105,7 @@ async function main() {
         creditsPerMonth: plan.creditsPerMonth,
         pricePen: plan.pricePen,
         features: plan.features,
+        mpPlanId: plan.mpPlanId,
       },
       create: {
         id: plan.id,
@@ -112,6 +113,7 @@ async function main() {
         creditsPerMonth: plan.creditsPerMonth,
         pricePen: plan.pricePen,
         features: plan.features,
+        mpPlanId: plan.mpPlanId,
         active: true,
       },
     })

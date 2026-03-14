@@ -99,12 +99,35 @@ export async function POST(req: Request) {
       const preApprovalApi = new PreApproval(client)
       const subInfo = await preApprovalApi.get({ id })
 
-      const extRef = subInfo.external_reference
-      if (!extRef || !extRef.includes("_SUBSCRIPTION_")) {
-         return NextResponse.json({ ok: true, ignored: true, reason: "not_sub_chambape_tx" })
+      const payerEmail = subInfo.payer_email
+      const mpPlanId = (subInfo as any).preapproval_plan_id
+
+      if (!payerEmail || !mpPlanId) {
+        return NextResponse.json({ ok: true, ignored: true, reason: "missing_email_or_plan_id" })
       }
 
-      const [professionalId, planId] = extRef.split("_")
+      // 1. Buscar al Usuario por email
+      const user = await db.user.findUnique({
+        where: { email: payerEmail },
+        include: { professionalProfile: true }
+      })
+
+      if (!user?.professionalProfile) {
+        console.error(`[MP Webhook] Suscripción recibida para ${payerEmail} pero no se encontró cuenta Profesional en ChambaPe.`)
+        return NextResponse.json({ ok: true, ignored: true, reason: "user_not_found" })
+      }
+
+      const professionalId = user.professionalProfile.id
+
+      // 2. Buscar el Plan en nuestra DB por mpPlanId
+      const plan = await (db as any).subscriptionPlan.findFirst({
+        where: { mpPlanId }
+      })
+
+      if (!plan) {
+         console.error(`[MP Webhook] Suscripción recibida con mpPlanId ${mpPlanId} pero no existe en la DB local.`)
+         return NextResponse.json({ ok: true, ignored: true, reason: "plan_not_found" })
+      }
 
       const statusMap: Record<string, "ACTIVE" | "CANCELLED" | "PAST_DUE"> = {
         "authorized": "ACTIVE",
@@ -115,9 +138,10 @@ export async function POST(req: Request) {
       const statusFinal = statusMap[subInfo.status!] || "CANCELLED"
 
       // Upsert: Crear o actualizar suscripción
-      await db.professionalSubscription.upsert({
+      await (db as any).professionalSubscription.upsert({
         where: { professionalId },
         update: {
+          planId: plan.id,
           mpSubscriptionId: id,
           status: statusFinal,
           nextBillingDate: subInfo.next_payment_date ? new Date(subInfo.next_payment_date) : null,
@@ -125,12 +149,17 @@ export async function POST(req: Request) {
         },
         create: {
           professionalId,
-          planId,
+          planId: plan.id,
           mpSubscriptionId: id,
           status: statusFinal,
           nextBillingDate: subInfo.next_payment_date ? new Date(subInfo.next_payment_date) : null
         }
       })
+
+      // NOTA: Si quisiéramos inyectar los créditos automáticamente cada mes, 
+      // lo ideal sería escuchar el evento `payment` asociado a esta suscripción
+      // (MercadoPago manda `payment` cada que cobra la cuota mensual), o hacerlo
+      // en un cron job leyendo `professionalSubscription`. Por ahora solo guardamos el estado.
 
       return NextResponse.json({ ok: true })
     }

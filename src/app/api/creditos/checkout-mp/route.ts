@@ -76,7 +76,7 @@ export async function POST(req: Request) {
     // ─── TIPO 2: SUSCRIPCIÓN MENSUAL ───────────────────────
     if (type === "SUBSCRIPTION") {
       // packageId actually corresponds to the SubscriptionPlan.id in the DB
-      const plan = await db.subscriptionPlan.findUnique({
+      const plan = await (db as any).subscriptionPlan.findUnique({
         where: { id: packageId },
       })
 
@@ -88,20 +88,11 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "El plan no está configurado en MercadoPago" }, { status: 500 })
       }
 
-      // Crear API PreApproval de MP (Suscripción)
-      const preApproval = new PreApproval(client)
+      // Retornar el link estático del plan pre-aprobado en MP.
+      // Así MP aloja el formulario donde el cliente pondrá su tarjeta.
+      const initPoint = `https://www.mercadopago.com.pe/subscriptions/checkout?preapproval_plan_id=${plan.mpPlanId}`
 
-      const response = await preApproval.create({
-        body: {
-          preapproval_plan_id: plan.mpPlanId,
-          payer_email: user.email,
-          back_url: `${APP_URL}/profesional/creditos?status=success_sub`,
-          external_reference: `${professionalAuth.id}_${plan.id}_SUBSCRIPTION_${Date.now()}`,
-          reason: `Suscripción Mensual - ${plan.name} - ChambaPe`,
-        },
-      })
-
-      return NextResponse.json({ initPoint: response.init_point })
+      return NextResponse.json({ initPoint })
     }
 
     return NextResponse.json({ error: "Tipo de pago no soportado" }, { status: 400 })
