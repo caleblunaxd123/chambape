@@ -223,72 +223,78 @@ export default function CreditosPage() {
       {/* Paquetes */}
       <div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-4 max-w-5xl mx-auto pt-4 pb-8 px-4 sm:px-0">
-          {(activeTab === "SUBS" ? PLANES_MENSUALES : PAC_RECARGAS).map((pkg) => (
-            <div
-              key={pkg.id}
-              className={cn(
-                "relative bg-white border-2 rounded-3xl p-6 sm:p-8 flex flex-col gap-6 transition-all duration-300",
-                pkg.color
-              )}
-            >
-              {pkg.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-black uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg border border-orange-400">
-                  Mejor valor
-                </div>
-              )}
+          {(activeTab === "SUBS" ? PLANES_MENSUALES : PAC_RECARGAS).map((pkg) => {
+            const isCurrentPlan = profile?.subscription?.planId === pkg.id;
 
-              <div className="flex items-center justify-between">
-                <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center", pkg.bg)}>
-                  {pkg.icon as React.ReactNode}
-                </div>
-                {pkg.popular && <Star className="w-6 h-6 text-orange-400 fill-orange-400 shrink-0" />}
-              </div>
-
-              <div>
-                <p className="font-bold text-gray-400 uppercase tracking-widest text-xs mb-1">{pkg.name}</p>
-                <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-black text-gray-900" style={{ fontFamily: "Outfit, sans-serif" }}>{pkg.priceLabel}</p>
-                  <span className="text-sm font-bold text-gray-400">/ {"period" in pkg ? (pkg as any).period : "PEN"}</span>
-                </div>
-                <div className="mt-3 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 inline-flex items-center justify-center">
-                  <p className="text-sm font-black text-gray-900">+{pkg.credits} créditos</p>
-                </div>
-              </div>
-
-              <div className="flex-1">
-                <ul className="space-y-3">
-                  {pkg.features.map((f: string) => (
-                    <li key={f} className="flex items-center gap-2.5 text-sm font-medium text-gray-600">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <button
-                onClick={() => handleBuy(pkg.id, activeTab === "SUBS" ? "SUBSCRIPTION" : "ONE_TIME")}
-                disabled={(purchasing !== null) || (activeTab === "SUBS" && hasActiveSub)}
+            return (
+              <div
+                key={pkg.id}
                 className={cn(
-                  "w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm transition-all text-white mt-4 disabled:opacity-50 disabled:cursor-not-allowed",
-                  pkg.btn
+                  "relative bg-white border-2 rounded-3xl p-6 sm:p-8 flex flex-col gap-6 transition-all duration-300",
+                  isCurrentPlan ? "border-emerald-400 shadow-[0_4px_24px_rgba(16,185,129,0.1)]" : pkg.color
                 )}
               >
-                {purchasing === pkg.id ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Procesando...
-                  </>
-                ) : activeTab === "SUBS" && hasActiveSub ? (
-                  "Suscripción Activa"
-                ) : (
-                  <>
-                    Elegir {pkg.name} <ArrowRight className="w-4 h-4 ml-1" />
-                  </>
+                {pkg.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-black uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg border border-orange-400">
+                    Mejor valor
+                  </div>
                 )}
-              </button>
-            </div>
-          ))}
+
+                <div className="flex items-center justify-between">
+                  <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center", pkg.bg)}>
+                    {pkg.icon as React.ReactNode}
+                  </div>
+                  {pkg.popular && <Star className="w-6 h-6 text-orange-400 fill-orange-400 shrink-0" />}
+                </div>
+
+                <div>
+                  <p className="font-bold text-gray-400 uppercase tracking-widest text-xs mb-1">{pkg.name}</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-4xl font-black text-gray-900" style={{ fontFamily: "Outfit, sans-serif" }}>{pkg.priceLabel}</p>
+                    <span className="text-sm font-bold text-gray-400">/ {"period" in pkg ? (pkg as any).period : "PEN"}</span>
+                  </div>
+                  <div className="mt-3 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 inline-flex items-center justify-center">
+                    <p className="text-sm font-black text-gray-900">+{pkg.credits} créditos</p>
+                  </div>
+                </div>
+
+                <div className="flex-1">
+                  <ul className="space-y-3">
+                    {pkg.features.map((f: string) => (
+                      <li key={f} className="flex items-center gap-2.5 text-sm font-medium text-gray-600">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <button
+                  onClick={() => handleBuy(pkg.id, activeTab === "SUBS" ? "SUBSCRIPTION" : "ONE_TIME")}
+                  disabled={(purchasing !== null) || (activeTab === "SUBS" && hasActiveSub)}
+                  className={cn(
+                    "w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm transition-all text-white mt-4 disabled:opacity-50 disabled:cursor-not-allowed",
+                    isCurrentPlan ? "bg-emerald-600 hover:bg-emerald-700" : pkg.btn
+                  )}
+                >
+                  {purchasing === pkg.id ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Procesando...
+                    </>
+                  ) : isCurrentPlan ? (
+                    "Suscripción Activa"
+                  ) : activeTab === "SUBS" && hasActiveSub ? (
+                    "No disponible"
+                  ) : (
+                    <>
+                      Elegir {pkg.name} <ArrowRight className="w-4 h-4 ml-1" />
+                    </>
+                  )}
+                </button>
+              </div>
+            )
+          })}
         </div>
       </div>
 
