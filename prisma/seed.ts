@@ -76,6 +76,48 @@ async function main() {
   }
   console.log(`✅ ${PAQUETES_CREDITOS.length} paquetes creados`)
 
+  // ─── 2.5 Planes de Suscripción ─────────────────────────────────────
+  console.log("💎 Creando planes de suscripción...")
+  const planesSuscripcion = [
+    {
+      id: "plan-basico",
+      name: "Básico",
+      creditsPerMonth: 20,
+      pricePen: 19,
+      features: ["20 créditos al mes", "Sin comisiones", "Soporte básico"],
+      mpPlanId: null, // Deberás crear el plan en MP y poner el ID aquí en prod
+    },
+    {
+      id: "plan-pro",
+      name: "Pro",
+      creditsPerMonth: 50,
+      pricePen: 39,
+      features: ["50 créditos al mes", "Insignia Profesional Pro", "Soporte prioritario 24/7"],
+      mpPlanId: null,
+    },
+  ]
+
+  for (const plan of planesSuscripcion) {
+    await prisma.subscriptionPlan.upsert({
+      where: { id: plan.id },
+      update: {
+        name: plan.name,
+        creditsPerMonth: plan.creditsPerMonth,
+        pricePen: plan.pricePen,
+        features: plan.features,
+      },
+      create: {
+        id: plan.id,
+        name: plan.name,
+        creditsPerMonth: plan.creditsPerMonth,
+        pricePen: plan.pricePen,
+        features: plan.features,
+        active: true,
+      },
+    })
+  }
+  console.log(`✅ ${planesSuscripcion.length} planes creados`)
+
   // ─── 3. Insignias ─────────────────────────────────────────────────
   console.log("🏅 Creando insignias...")
   const badges = [

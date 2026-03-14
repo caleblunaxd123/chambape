@@ -9,21 +9,31 @@ export async function GET() {
 
   const user = await db.user.findUnique({
     where: { clerkId: userId },
-    include: { professionalProfile: true },
+    include: { 
+      // @ts-ignore prisma cache
+      professionalProfile: {
+        include: { subscription: true }
+      } 
+    },
   })
 
-  if (!user?.professionalProfile) {
+  const userAny = user as any
+
+  if (!userAny?.professionalProfile) {
     return NextResponse.json({ error: "Perfil no encontrado" }, { status: 404 })
   }
 
   const transactions = await db.creditTransaction.findMany({
-    where: { professionalId: user.professionalProfile.id },
+    where: { professionalId: userAny.professionalProfile.id },
     orderBy: { createdAt: "desc" },
     take: 20,
   })
 
+  const profProfile = userAny.professionalProfile as any
+
   return NextResponse.json({
-    credits: user.professionalProfile.credits,
+    credits: profProfile.credits,
     transactions,
+    subscription: profProfile.subscription,
   })
 }

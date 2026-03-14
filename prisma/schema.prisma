@@ -27,6 +27,12 @@ enum ProfessionalStatus {
   REJECTED
 }
 
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAST_DUE
+}
+
 enum RequestStatus {
   OPEN
   IN_PROGRESS
@@ -47,6 +53,7 @@ enum TransactionType {
   SPEND
   REFUND
   BONUS
+  SUBSCRIPTION_PAYMENT
 }
 
 enum NotificationType {
@@ -140,6 +147,7 @@ model ProfessionalProfile {
   portfolioImages    PortfolioImage[]
   badges             ProfessionalBadge[]
   favoritedBy        Favorite[]
+  subscription       ProfessionalSubscription?
 
   @@map("professional_profiles")
 }
@@ -309,6 +317,41 @@ model CreditPackage {
   updatedAt DateTime @updatedAt
 
   @@map("credit_packages")
+}
+
+model SubscriptionPlan {
+  id              String   @id @default(cuid())
+  mpPlanId        String?  @unique // ID del plan preapproval en MercadoPago
+  name            String
+  creditsPerMonth Int
+  pricePen        Int
+  active          Boolean  @default(true)
+  features        String[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  subscriptions   ProfessionalSubscription[]
+
+  @@map("subscription_plans")
+}
+
+model ProfessionalSubscription {
+  id               String   @id @default(cuid())
+  professionalId   String   @unique
+  professional     ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  
+  planId           String
+  plan             SubscriptionPlan @relation(fields: [planId], references: [id])
+  
+  mpSubscriptionId String?  @unique // preapproval_id de MercadoPago
+  status           SubscriptionStatus @default(ACTIVE)
+  nextBillingDate  DateTime?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("professional_subscriptions")
 }
 
 model CreditTransaction {
