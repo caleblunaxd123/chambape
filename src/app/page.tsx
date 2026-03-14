@@ -274,7 +274,7 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <div className="text-center mt-8">
+          <div className="text-center mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/solicitudes/nueva"
               className="inline-flex items-center gap-2 text-orange-500 hover:text-orange-600 font-semibold text-sm transition-all hover:gap-3"
@@ -282,6 +282,60 @@ export default function LandingPage() {
               Ver todos los {CATEGORIAS.length} servicios
               <ArrowRight className="w-4 h-4" />
             </Link>
+            <span className="text-gray-300 hidden sm:block">|</span>
+            <Link
+              href="/profesionales"
+              className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-semibold text-sm transition-all hover:gap-3"
+            >
+              Explorar profesionales verificados
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          BUSCAR PROFESIONALES DIRECTAMENTE
+      ════════════════════════════════════════ */}
+      <section className="py-14 md:py-20 bg-gradient-to-br from-[#1e1b4b] to-[#2d2a6e] relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center gap-10">
+          <div className="flex-1 text-center md:text-left">
+            <span className="inline-block bg-orange-500/20 text-orange-300 text-xs font-bold px-3 py-1 rounded-full mb-4 border border-orange-500/30">
+              ¿Ya sabes quién quieres?
+            </span>
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-4 leading-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
+              Busca y contacta<br />
+              <span className="text-orange-400">profesionales directamente</span>
+            </h2>
+            <p className="text-indigo-200 text-base mb-6 max-w-md">
+              Explora perfiles, lee reseñas reales, compara especialidades y elige el profesional que más te convenza — sin intermediarios.
+            </p>
+            <Link
+              href="/profesionales"
+              className="inline-flex items-center gap-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold px-7 py-4 rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+            >
+              Ver todos los profesionales
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          {/* Mini cards decorativas */}
+          <div className="flex-1 hidden md:flex flex-col gap-3 items-end">
+            {[
+              { name: "Carlos M.", cat: "Gasfitero", rating: "5.0", jobs: 87, emoji: "🥇", grad: "from-blue-400 to-blue-600" },
+              { name: "Ana R.", cat: "Pintora", rating: "4.9", jobs: 52, emoji: "🥈", grad: "from-rose-400 to-pink-500" },
+              { name: "Juan V.", cat: "Electricista", rating: "5.0", jobs: 123, emoji: "💎", grad: "from-violet-400 to-indigo-500" },
+            ].map((p) => (
+              <div key={p.name} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-4 py-3 flex items-center gap-3 w-64">
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${p.grad} flex items-center justify-center text-white font-bold text-sm shrink-0`}>
+                  {p.name.split(" ").map(n => n[0]).join("")}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-bold truncate">{p.name} <span className="text-white/60 font-normal text-xs">· {p.cat}</span></p>
+                  <p className="text-white/70 text-xs">⭐ {p.rating} · {p.jobs} trabajos {p.emoji}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

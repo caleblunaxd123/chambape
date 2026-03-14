@@ -7,6 +7,7 @@ import { Menu, X, Wrench } from "lucide-react"
 const NAV_LINKS = [
   { href: "/#como-funciona", label: "Cómo funciona" },
   { href: "/#categorias", label: "Servicios" },
+  { href: "/profesionales", label: "Profesionales" },
 ]
 
 export function LandingHeader() {

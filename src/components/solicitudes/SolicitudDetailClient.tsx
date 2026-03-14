@@ -20,7 +20,7 @@ interface Aplicacion {
     rating?: number
     totalReviews?: number
     jobsCompleted?: number
-    user: { name: string; email: string }
+    user: { name: string; email: string; phone?: string | null }
     portfolioImages: Array<{ url: string; caption: string | null }>
   }
 }

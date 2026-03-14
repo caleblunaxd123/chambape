@@ -4,7 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { toast } from "sonner"
-import { Star, MessageCircle, CheckCircle2, Award, ExternalLink, PhoneCall } from "lucide-react"
+import { Star, MessageCircle, CheckCircle2, Award, ExternalLink, Mail } from "lucide-react"
 import { formatSoles, formatFechaRelativa, getInitials, getWhatsAppUrl } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 import { BadgeNivel } from "@/components/ui/BadgeNivel"
@@ -123,7 +123,7 @@ export function PropuestaCard({
               href={`mailto:${prof.user.email}`}
               className="inline-flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
             >
-              <PhoneCall className="w-3.5 h-3.5" />
+              <Mail className="w-3.5 h-3.5" />
               Correo
             </a>
           </div>
