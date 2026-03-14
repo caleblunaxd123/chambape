@@ -7,12 +7,25 @@ import crypto from "crypto"
 export async function POST(req: Request) {
   try {
     // 1. Validar la firma del Webhook (Seguridad)
-    // Extraer parámetros de la URL genéricos de MercadoPago
+    // Extraer parámetros de la URL genéricos de MercadoPago (IPN)
     const url = new URL(req.url)
-    const topic = url.searchParams.get("topic") || url.searchParams.get("type")
-    const id = url.searchParams.get("id") || url.searchParams.get("data.id")
+    
+    // Intentar leer el body por si es un Webhook (JSON)
+    const body = await req.json().catch(() => ({}))
+
+    const topic = url.searchParams.get("topic") || 
+                  url.searchParams.get("type") || 
+                  body.type || 
+                  (body.action?.startsWith("payment") ? "payment" : null) ||
+                  (body.action?.startsWith("subscription") ? "subscription_preapproval" : null)
+
+    const id = url.searchParams.get("id") || 
+               url.searchParams.get("data.id") || 
+               body.data?.id || 
+               body.id
 
     if (!topic || !id) {
+      console.log("[MP Webhook] Missing topic or id", { topic, id, body })
       return NextResponse.json({ error: "Missing topic or id" }, { status: 400 })
     }
 
