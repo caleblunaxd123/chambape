@@ -38,7 +38,8 @@ export function ImageUpload({
   maxSizeMB = 5,
   className,
 }: ImageUploadProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
   const [preview, setPreview] = useState<string | null>(value ?? null)
 
@@ -131,9 +132,8 @@ export function ImageUpload({
       <div
         className={cn("relative w-full rounded-xl overflow-hidden border-2", aspectClass,
           loading && "opacity-70 pointer-events-none",
-          preview ? "border-gray-200" : "border-dashed border-gray-300 hover:border-orange-400 cursor-pointer transition-colors"
+          preview ? "border-gray-200" : "border-dashed border-gray-300 hover:border-orange-400 bg-gray-50/50 transition-colors"
         )}
-        onClick={() => !preview && inputRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
       >
@@ -152,10 +152,10 @@ export function ImageUpload({
                 type="button"
                 size="sm"
                 variant="secondary"
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={(e) => { e.stopPropagation(); inputRef.current?.click() }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click() }}
               >
-                <Camera className="w-4 h-4 mr-1" /> Cambiar
+                <Upload className="w-4 h-4 mr-1" /> Cambiar
               </Button>
               {onRemove && (
                 <Button
@@ -171,16 +171,29 @@ export function ImageUpload({
             </div>
           </>
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-400 p-4">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-gray-500 p-4">
             {loading ? (
               <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
             ) : (
-              <>
-                <Upload className="w-8 h-8" />
-                <span className="text-xs text-center">
-                  Toca para subir o arrastra aquí
-                </span>
-              </>
+              <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
+                <Button 
+                  type="button" 
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="flex-1 bg-white text-gray-800 border-2 border-gray-200 hover:border-orange-400 hover:bg-orange-50 shadow-sm"
+                >
+                  <Camera className="w-4 h-4 mr-2 text-orange-500" />
+                  Tomar foto
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex-1 border-2"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Galería
+                </Button>
+              </div>
             )}
           </div>
         )}
@@ -189,10 +202,17 @@ export function ImageUpload({
       {hint && <p className="text-xs text-gray-400">{hint}</p>}
 
       <input
-        ref={inputRef}
+        ref={fileInputRef}
         type="file"
         accept="image/*"
-        capture={folder === "selfieDni" ? "user" : undefined}
+        className="hidden"
+        onChange={handleInputChange}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture={folder === "selfieDni" ? "user" : "environment"}
         className="hidden"
         onChange={handleInputChange}
       />
