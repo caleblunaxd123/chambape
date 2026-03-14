@@ -190,6 +190,41 @@ export async function POST(req: Request) {
       }
 
       case 4: {
+        // 🔍 OCR: Validar que la foto del DNI coincide con el número ingresado
+        const RENIEC_KEY = process.env.RENIEC_API_KEY
+        const profile = await db.professionalProfile.findUnique({ where: { id: profileId } })
+
+        if (RENIEC_KEY && data.dniFrontUrl && profile?.dni) {
+          try {
+            const ocrRes = await fetch("https://api.apis.net.pe/v2/reniec/ocr", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${RENIEC_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ url: data.dniFrontUrl }),
+              signal: AbortSignal.timeout(10000),
+            })
+
+            if (ocrRes.ok) {
+              const ocrData = await ocrRes.json()
+              const dniEnFoto = ocrData?.codigo ?? ocrData?.numero ?? ocrData?.dni ?? ""
+
+              if (dniEnFoto && dniEnFoto !== profile.dni) {
+                return NextResponse.json(
+                  {
+                    error: `El DNI en la foto (${dniEnFoto}) no coincide con el ingresado (${profile.dni}). Sube la foto correcta de tu DNI.`,
+                    dniEnFoto,
+                  },
+                  { status: 400 }
+                )
+              }
+            }
+          } catch {
+            console.warn("[RENIEC_OCR] No disponible, se omite validación de foto")
+          }
+        }
+
         await db.professionalProfile.update({
           where: { id: profileId },
           data: {
