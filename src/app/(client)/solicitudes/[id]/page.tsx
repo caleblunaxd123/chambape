@@ -47,7 +47,7 @@ export default async function SolicitudDetailPage({ params }: Props) {
         include: {
           professional: {
             include: {
-              user: { select: { name: true, email: true } },
+              user: { select: { name: true, email: true, phone: true } },
               portfolioImages: { take: 3 },
             },
           },

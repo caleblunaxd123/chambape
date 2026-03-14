@@ -10,6 +10,7 @@ const schema = z.object({
   avatarUrl: z.string().url().optional().or(z.literal("")),
   districts: z.array(z.string().min(1)).min(1, "Selecciona al menos un distrito").max(20).optional(),
   categoryIds: z.array(z.string().min(1)).min(1, "Selecciona al menos una especialidad").max(10).optional(),
+  phone: z.string().regex(/^\d{9}$/, "Teléfono debe tener 9 dígitos").optional().or(z.literal("")),
 })
 
 export async function PATCH(req: Request) {
@@ -21,9 +22,17 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Datos inválidos" }, { status: 400 })
   }
 
-  const { bio, avatarUrl, districts, categoryIds } = parsed.data
+  const { bio, avatarUrl, districts, categoryIds, phone } = parsed.data
 
   await db.$transaction(async (tx) => {
+    // Actualizar teléfono en User si se envió
+    if (phone !== undefined) {
+      await tx.user.update({
+        where: { id: profile.userId },
+        data: { phone: phone || null },
+      })
+    }
+
     // Actualizar datos del perfil
     await tx.professionalProfile.update({
       where: { id: profile.id },

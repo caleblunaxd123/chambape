@@ -54,6 +54,7 @@ export default async function EditarPerfilPage() {
         initialAvatarUrl={perfilCompleto.avatarUrl ?? ""}
         initialDistricts={perfilCompleto.districts}
         initialCategoryIds={perfilCompleto.categories.map((c) => c.categoryId)}
+        initialPhone={user.phone ?? ""}
         categorias={todasLasCategorias}
       />
 

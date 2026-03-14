@@ -97,6 +97,15 @@ export function truncate(text: string, maxLength: number): string {
   return text.slice(0, maxLength).trimEnd() + "..."
 }
 
+// Genera URL de WhatsApp con mensaje pre-llenado
+// phone: número peruano (9 dígitos), se agrega prefijo 51 automáticamente
+export function getWhatsAppUrl(phone: string, message?: string): string {
+  const clean = phone.replace(/\D/g, "")
+  const full = clean.startsWith("51") ? clean : `51${clean}`
+  const encoded = message ? `?text=${encodeURIComponent(message)}` : ""
+  return `https://wa.me/${full}${encoded}`
+}
+
 // ─── Sistema de insignias por nivel ─────────────────────────────────────────
 export interface BadgeNivel {
   nivel: "nuevo" | "bronce" | "plata" | "oro" | "elite"

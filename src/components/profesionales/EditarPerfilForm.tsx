@@ -14,6 +14,7 @@ interface Props {
   initialAvatarUrl: string
   initialDistricts: string[]
   initialCategoryIds: string[]
+  initialPhone: string
   categorias: Array<{ id: string; name: string; icon: string }>
 }
 
@@ -22,6 +23,7 @@ export function EditarPerfilForm({
   initialAvatarUrl,
   initialDistricts,
   initialCategoryIds,
+  initialPhone,
   categorias,
 }: Props) {
   const router = useRouter()
@@ -29,6 +31,7 @@ export function EditarPerfilForm({
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl)
   const [districts, setDistricts] = useState<string[]>(initialDistricts)
   const [categoryIds, setCategoryIds] = useState<string[]>(initialCategoryIds)
+  const [phone, setPhone] = useState(initialPhone)
   const [loading, setLoading] = useState(false)
 
   function toggleDistrito(slug: string) {
@@ -59,7 +62,7 @@ export function EditarPerfilForm({
       const res = await fetch("/api/profesionales/perfil", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bio, avatarUrl, districts, categoryIds }),
+        body: JSON.stringify({ bio, avatarUrl, districts, categoryIds, phone }),
       })
       const json = await res.json()
       if (!res.ok) {
@@ -104,6 +107,22 @@ export function EditarPerfilForm({
           className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-300 resize-none"
         />
         <p className="text-xs text-gray-400 mt-1 text-right">{bio.length}/600</p>
+      </div>
+
+      {/* Teléfono / WhatsApp */}
+      <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
+        <h2 className="font-semibold text-gray-900 mb-1">Teléfono / WhatsApp</h2>
+        <p className="text-xs text-gray-400 mb-3">Se mostrará a clientes que acepten tu propuesta para que puedan contactarte por WhatsApp.</p>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium select-none">+51</span>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 9))}
+            placeholder="987 654 321"
+            className="w-full pl-12 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-300"
+          />
+        </div>
       </div>
 
       {/* Especialidades */}

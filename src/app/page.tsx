@@ -62,19 +62,22 @@ const TESTIMONIOS = [
   },
 ]
 
-const CATEGORIAS_DESTACADAS = [
-  "gasfiteria",
-  "electricidad",
-  "pintura",
-  "limpieza-hogar",
-  "carpinteria",
-  "cerrajeria",
-  "fumigacion",
-  "mudanzas",
+const CATEGORIAS_DESTACADAS: { slug: string; color: string; bg: string; iconBg: string }[] = [
+  { slug: "gasfiteria",    color: "text-blue-700",   bg: "bg-blue-50 hover:bg-blue-100 border-blue-100",     iconBg: "bg-blue-100" },
+  { slug: "electricidad",  color: "text-yellow-700", bg: "bg-yellow-50 hover:bg-yellow-100 border-yellow-100", iconBg: "bg-yellow-100" },
+  { slug: "pintura",       color: "text-rose-700",   bg: "bg-rose-50 hover:bg-rose-100 border-rose-100",      iconBg: "bg-rose-100" },
+  { slug: "limpieza-hogar",color: "text-teal-700",   bg: "bg-teal-50 hover:bg-teal-100 border-teal-100",      iconBg: "bg-teal-100" },
+  { slug: "carpinteria",   color: "text-amber-700",  bg: "bg-amber-50 hover:bg-amber-100 border-amber-100",   iconBg: "bg-amber-100" },
+  { slug: "cerrajeria",    color: "text-slate-700",  bg: "bg-slate-50 hover:bg-slate-100 border-slate-100",   iconBg: "bg-slate-200" },
+  { slug: "fumigacion",    color: "text-green-700",  bg: "bg-green-50 hover:bg-green-100 border-green-100",   iconBg: "bg-green-100" },
+  { slug: "mudanzas",      color: "text-orange-700", bg: "bg-orange-50 hover:bg-orange-100 border-orange-100",iconBg: "bg-orange-100" },
 ]
 
 export default function LandingPage() {
-  const catDestacadas = CATEGORIAS.filter((c) => CATEGORIAS_DESTACADAS.includes(c.slug))
+  const catDestacadas = CATEGORIAS_DESTACADAS.map((meta) => ({
+    ...meta,
+    ...(CATEGORIAS.find((c) => c.slug === meta.slug) ?? { slug: meta.slug, name: meta.slug, icon: "🔧", description: "" }),
+  }))
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
@@ -259,19 +262,14 @@ export default function LandingPage() {
               <Link
                 key={cat.slug}
                 href={`/solicitudes/nueva?categoria=${cat.slug}`}
-                className="group bg-white border border-gray-100 hover:border-orange-200 hover:bg-gradient-to-br hover:from-orange-50 hover:to-amber-50 rounded-2xl p-4 sm:p-5 flex flex-col items-center text-center gap-3 transition-all duration-200 hover:shadow-[0_4px_16px_rgba(249,115,22,0.12)] hover:-translate-y-0.5"
+                className={`group border rounded-2xl p-4 sm:p-5 flex flex-col items-center text-center gap-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${cat.bg}`}
               >
-                <div className="w-14 h-14 rounded-2xl bg-gray-50 group-hover:bg-white flex items-center justify-center text-3xl shadow-sm group-hover:shadow transition-all duration-200">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm ${cat.iconBg}`}>
                   {cat.icon}
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-gray-800 group-hover:text-orange-600 transition-colors leading-tight">
-                    {cat.name}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1 leading-snug line-clamp-2 hidden sm:block">
-                    {cat.description}
-                  </p>
-                </div>
+                <p className={`text-sm font-bold leading-tight ${cat.color}`}>
+                  {cat.name}
+                </p>
               </Link>
             ))}
           </div>
