@@ -47,7 +47,11 @@ export default async function ProfesionalLayout({ children }: { children: React.
       <div className="lg:flex">
         {/* ── Sidebar desktop ────────────────────── */}
         <aside className="hidden lg:flex flex-col w-64 min-h-screen bg-white border-r border-gray-100 sticky top-0">
-          <ProfSidebarContent unreadCount={unreadCount} credits={profile.credits} />
+          <ProfSidebarContent 
+            unreadCount={unreadCount} 
+            credits={profile.credits} 
+            planName={(profile as any).subscription?.plan?.name}
+          />
         </aside>
 
         {/* ── Contenido principal ─────────────────── */}

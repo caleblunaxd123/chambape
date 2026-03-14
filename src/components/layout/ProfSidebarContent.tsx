@@ -43,9 +43,10 @@ const NAV_ITEMS = [
 interface ProfSidebarContentProps {
   unreadCount: number
   credits: number
+  planName?: string
 }
 
-export function ProfSidebarContent({ unreadCount, credits }: ProfSidebarContentProps) {
+export function ProfSidebarContent({ unreadCount, credits, planName }: ProfSidebarContentProps) {
   const pathname = usePathname()
 
   return (
@@ -60,12 +61,17 @@ export function ProfSidebarContent({ unreadCount, credits }: ProfSidebarContentP
             Chamba<span className="text-orange-500">Pe</span>
           </span>
         </Link>
-        <div className="flex items-center gap-1.5 mt-1.5 pl-[2.375rem]">
+        <div className="flex flex-wrap items-center gap-1.5 mt-1.5 pl-[2.375rem]">
           <span className="text-[11px] text-gray-400 font-medium">Panel profesional</span>
           <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-100">
             <Coins className="w-2.5 h-2.5" />
             {credits}
           </span>
+          {planName && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-orange-500 text-white shadow-sm shadow-orange-200">
+              Plan {planName}
+            </span>
+          )}
         </div>
       </div>
 

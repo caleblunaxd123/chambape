@@ -90,6 +90,11 @@ export async function requireProfessional() {
 
   const profile = await db.professionalProfile.findUnique({
     where: { userId: user.id },
+    include: { 
+      subscription: {
+        include: { plan: true }
+      }
+    }
   })
 
   if (!profile) redirect("/registrarse/profesional")

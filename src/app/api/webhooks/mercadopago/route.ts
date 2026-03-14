@@ -156,10 +156,43 @@ export async function POST(req: Request) {
         }
       })
 
-      // NOTA: Si quisiéramos inyectar los créditos automáticamente cada mes, 
-      // lo ideal sería escuchar el evento `payment` asociado a esta suscripción
-      // (MercadoPago manda `payment` cada que cobra la cuota mensual), o hacerlo
-      // en un cron job leyendo `professionalSubscription`. Por ahora solo guardamos el estado.
+      if (statusFinal === "ACTIVE") {
+        // Evitar duplicados para esta fecha de cobro o esta activación
+        const existingTx = await (db as any).creditTransaction.findFirst({
+          where: {
+            professionalId,
+            type: "SUBSCRIPTION_PAYMENT" as any,
+            metadata: { path: ["mpSubscriptionId"], equals: id }
+          },
+          orderBy: { createdAt: "desc" }
+        })
+
+        // Si es una nueva activación (no hay transacciones previas para este ID)
+        // o si ha pasado más de 25 días desde el último abono de este plan (renovación)
+        const shouldAward = !existingTx || (Date.now() - existingTx.createdAt.getTime() > 25 * 24 * 60 * 60 * 1000)
+
+        if (shouldAward) {
+           const profile = user.professionalProfile
+           await (db as any).$transaction([
+             (db as any).professionalProfile.update({
+               where: { id: professionalId },
+               data: { credits: { increment: (plan as any).creditsPerMonth } }
+             }),
+             (db as any).creditTransaction.create({
+               data: {
+                 professionalId,
+                 type: "SUBSCRIPTION_PAYMENT" as any,
+                 credits: (plan as any).creditsPerMonth,
+                 amountPen: (plan as any).pricePen,
+                 balance: (profile as any).credits + (plan as any).creditsPerMonth,
+                 description: `Mensualidad Plan ${(plan as any).name}`,
+                 metadata: { mpSubscriptionId: id, mpStatus: subInfo.status }
+               }
+             })
+           ])
+           console.log(`[MP Webhook] Créditos (${(plan as any).creditsPerMonth}) otorgados a ${payerEmail} por suscripción ${id}`)
+        }
+      }
 
       return NextResponse.json({ ok: true })
     }
