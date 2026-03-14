@@ -96,3 +96,77 @@ export function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text
   return text.slice(0, maxLength).trimEnd() + "..."
 }
+
+// ─── Sistema de insignias por nivel ─────────────────────────────────────────
+export interface BadgeNivel {
+  nivel: "nuevo" | "bronce" | "plata" | "oro" | "elite"
+  emoji: string
+  label: string
+  description: string
+  // Colores Tailwind
+  bg: string
+  text: string
+  border: string
+  ring: string
+}
+
+export function getBadge(totalJobs: number, avgRating: number): BadgeNivel {
+  if (totalJobs >= 100 && avgRating >= 4.8) {
+    return {
+      nivel: "elite",
+      emoji: "💎",
+      label: "Élite",
+      description: "Top 1% de ChambaPe · +100 trabajos · 4.8★",
+      bg: "bg-gradient-to-r from-cyan-50 to-blue-50",
+      text: "text-cyan-700",
+      border: "border-cyan-200",
+      ring: "ring-cyan-300",
+    }
+  }
+  if (totalJobs >= 50 && avgRating >= 4.5) {
+    return {
+      nivel: "oro",
+      emoji: "🥇",
+      label: "Oro",
+      description: "Profesional destacado · +50 trabajos · 4.5★",
+      bg: "bg-gradient-to-r from-yellow-50 to-amber-50",
+      text: "text-amber-700",
+      border: "border-amber-200",
+      ring: "ring-amber-300",
+    }
+  }
+  if (totalJobs >= 20 && avgRating >= 4.0) {
+    return {
+      nivel: "plata",
+      emoji: "🥈",
+      label: "Plata",
+      description: "Muy confiable · +20 trabajos · 4.0★",
+      bg: "bg-gradient-to-r from-slate-50 to-gray-100",
+      text: "text-slate-600",
+      border: "border-slate-200",
+      ring: "ring-slate-300",
+    }
+  }
+  if (totalJobs >= 5) {
+    return {
+      nivel: "bronce",
+      emoji: "🥉",
+      label: "Bronce",
+      description: "En camino · +5 trabajos completados",
+      bg: "bg-gradient-to-r from-orange-50 to-amber-50",
+      text: "text-orange-700",
+      border: "border-orange-200",
+      ring: "ring-orange-200",
+    }
+  }
+  return {
+    nivel: "nuevo",
+    emoji: "🌱",
+    label: "Nuevo",
+    description: "Profesional recién unido a ChambaPe",
+    bg: "bg-green-50",
+    text: "text-green-700",
+    border: "border-green-200",
+    ring: "ring-green-200",
+  }
+}

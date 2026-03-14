@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { Star, MessageCircle, CheckCircle2, Award, ExternalLink, PhoneCall } from "lucide-react"
 import { formatSoles, formatFechaRelativa, getInitials } from "@/lib/utils"
 import { cn } from "@/lib/utils"
+import { BadgeNivel } from "@/components/ui/BadgeNivel"
 
 interface PropuestaCardProps {
   aplicacion: {
@@ -144,7 +145,7 @@ export function PropuestaCard({
                     <ExternalLink className="w-3 h-3" />
                   </Link>
                 </div>
-                <div className="flex items-center gap-2 mt-0.5">
+                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                   <div className="flex items-center gap-0.5">
                     {[1,2,3,4,5].map((i) => (
                       <Star
@@ -164,6 +165,11 @@ export function PropuestaCard({
                     <Award className="w-3 h-3" />
                     {prof.jobsCompleted ?? 0} trabajos
                   </span>
+                  <BadgeNivel
+                    totalJobs={prof.jobsCompleted ?? 0}
+                    avgRating={prof.rating ?? 0}
+                    size="sm"
+                  />
                 </div>
               </div>
               <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0", status.cls)}>

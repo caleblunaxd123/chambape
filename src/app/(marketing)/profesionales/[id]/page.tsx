@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { getInitials } from "@/lib/utils"
 import { auth } from "@clerk/nextjs/server"
 import { FavoriteButton } from "@/components/ui/FavoriteButton"
+import { BadgeNivel } from "@/components/ui/BadgeNivel"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -112,6 +113,16 @@ export default async function PerfilPublicoPage({ params }: Props) {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Badge de nivel */}
+              <div className="mt-3">
+                <BadgeNivel
+                  totalJobs={profile.totalJobs}
+                  avgRating={profile.avgRating}
+                  size="lg"
+                  showDescription
+                />
               </div>
 
               {/* Rating y stats */}

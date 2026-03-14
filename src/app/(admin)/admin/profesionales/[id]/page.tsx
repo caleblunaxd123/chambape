@@ -18,6 +18,7 @@ import { formatFechaCompleta, PROFESSIONAL_STATUS_LABELS } from "@/lib/utils"
 import { AdminVerificacionActions } from "@/components/admin/AdminVerificacionActions"
 import { AdminCreditosActions } from "@/components/admin/AdminCreditosActions"
 import { AdminEstadoActions } from "@/components/admin/AdminEstadoActions"
+import { BadgeNivel } from "@/components/ui/BadgeNivel"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -97,6 +98,16 @@ export default async function AdminProfesionalDetailPage({ params }: Props) {
             {profesional.status === "REJECTED" && <XCircle className="w-4 h-4" />}
             {PROFESSIONAL_STATUS_LABELS[profesional.status]}
           </span>
+        </div>
+
+        {/* Badge de nivel */}
+        <div className="mt-4">
+          <BadgeNivel
+            totalJobs={profesional.totalJobs}
+            avgRating={profesional.avgRating}
+            size="md"
+            showDescription
+          />
         </div>
 
         {/* Stats */}
