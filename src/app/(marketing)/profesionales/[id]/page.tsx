@@ -2,8 +2,8 @@ import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { db } from "@/lib/db"
-import { Star, MapPin, ShieldCheck, Briefcase, Calendar, MessageCircle } from "lucide-react"
-import { formatFechaCompleta } from "@/lib/utils"
+import { Star, MapPin, ShieldCheck, Briefcase, Calendar, MessageCircle, Zap } from "lucide-react"
+import { formatFechaCompleta, getBadge } from "@/lib/utils"
 import { ReviewCard } from "@/components/resenas/ReviewCard"
 import { cn } from "@/lib/utils"
 import { getInitials } from "@/lib/utils"
@@ -28,11 +28,19 @@ export async function generateMetadata({ params }: Props) {
   }
 }
 
+// Gradientes de hero según nivel de badge
+const HERO_GRADIENTS: Record<string, string> = {
+  elite:   "from-violet-600 via-purple-600 to-indigo-700",
+  oro:     "from-yellow-500 via-amber-500 to-orange-500",
+  plata:   "from-slate-500 via-slate-400 to-gray-500",
+  bronce:  "from-amber-700 via-amber-600 to-yellow-600",
+  nuevo:   "from-orange-500 via-orange-400 to-amber-400",
+}
+
 export default async function PerfilPublicoPage({ params }: Props) {
   const { id } = await params
   const { userId: clerkId } = await auth()
 
-  // Verificar si el usuario autenticado ya tiene este profesional en favoritos
   let isFavorite = false
   let currentUserId: string | null = null
   if (clerkId) {
@@ -56,6 +64,7 @@ export default async function PerfilPublicoPage({ params }: Props) {
       categories: { include: { category: true } },
       portfolioImages: { orderBy: { order: "asc" } },
       badges: { include: { badge: true } },
+      subscription: { include: { plan: { select: { name: true } } } },
       reviewsReceived: {
         where: { hidden: false },
         include: { client: { select: { name: true, avatarUrl: true } } },
@@ -71,130 +80,177 @@ export default async function PerfilPublicoPage({ params }: Props) {
   }
 
   const isVerified = profile.status === "ACTIVE" || profile.status === "VERIFIED"
-  const hasDocuments = !!(profile.dniFrontUrl && profile.dniBackUrl)
+  const badge = getBadge(profile.totalJobs, profile.avgRating)
+  const heroGradient = HERO_GRADIENTS[badge.nivel] ?? HERO_GRADIENTS.nuevo
+  const hasPro = profile.subscription?.status === "ACTIVE"
+  const firstName = profile.user.name.split(" ")[0]
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Back nav */}
       <div className="bg-white border-b border-gray-100">
-        <div className="max-w-3xl mx-auto px-4 py-4">
-          <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
+        <div className="max-w-3xl mx-auto px-4 py-3">
+          <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1">
             ← Volver al inicio
           </Link>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-6 space-y-5">
-        {/* Card de perfil principal */}
-        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-          <div className="flex items-start gap-4">
-            {/* Avatar */}
-            <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-orange-100 flex-shrink-0">
-              {profile.avatarUrl ? (
-                <Image src={profile.avatarUrl} alt={profile.user.name} fill className="object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-orange-600 font-bold text-2xl">
-                  {getInitials(profile.user.name)}
-                </div>
+      <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
+
+        {/* ── HERO CARD ─────────────────────────────── */}
+        <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm">
+          {/* Gradient banner */}
+          <div className={cn("h-28 sm:h-36 bg-gradient-to-br relative", heroGradient)}>
+            {/* Subtle pattern overlay */}
+            <div
+              className="absolute inset-0 opacity-10"
+              style={{
+                backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)",
+                backgroundSize: "20px 20px",
+              }}
+            />
+            {/* Top-right chips */}
+            <div className="absolute top-3 right-3 flex items-center gap-2">
+              {hasPro && (
+                <span className="inline-flex items-center gap-1 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-black px-2.5 py-1 rounded-full">
+                  <Zap className="w-3 h-3 fill-current" />
+                  PRO
+                </span>
+              )}
+              {isVerified && (
+                <span className="inline-flex items-center gap-1 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                  <ShieldCheck className="w-3 h-3" />
+                  Verificado
+                </span>
               )}
             </div>
+          </div>
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">{profile.user.name}</h1>
-                  {isVerified && (
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <ShieldCheck className="w-4 h-4 text-blue-500" />
-                      <span className="text-xs text-blue-600 font-medium">
-                        Identidad verificada
-                        {profile.verifiedAt && ` · ${formatFechaCompleta(new Date(profile.verifiedAt))}`}
-                      </span>
+          <div className="px-5 pb-5">
+            {/* Avatar + name row — overlaps banner */}
+            <div className="flex items-end justify-between -mt-10 sm:-mt-12 mb-4">
+              <div className="relative">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-orange-100 border-4 border-white shadow-lg flex-shrink-0">
+                  {profile.avatarUrl ? (
+                    <Image src={profile.avatarUrl} alt={profile.user.name} fill className="object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-orange-600 font-bold text-2xl sm:text-3xl">
+                      {getInitials(profile.user.name)}
                     </div>
                   )}
                 </div>
+                {/* Badge emoji floating on avatar */}
+                <span className="absolute -bottom-1 -right-1 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-md text-base border border-gray-100">
+                  {badge.emoji}
+                </span>
               </div>
 
-              {/* Badge de nivel */}
-              <div className="mt-3">
-                <BadgeNivel
-                  totalJobs={profile.totalJobs}
-                  avgRating={profile.avgRating}
-                  size="lg"
-                  showDescription
-                />
-              </div>
-
-              {/* Rating y stats */}
-              <div className="flex flex-wrap items-center gap-3 mt-3">
-                {profile.avgRating > 0 ? (
-                  <div className="flex items-center gap-1">
-                    {[1,2,3,4,5].map((s) => (
-                      <Star
-                        key={s}
-                        className={cn(
-                          "w-4 h-4",
-                          s <= Math.round(profile.avgRating)
-                            ? "fill-orange-400 text-orange-400"
-                            : "fill-gray-100 text-gray-100"
-                        )}
-                      />
-                    ))}
-                    <span className="text-sm font-semibold text-gray-900 ml-1">
-                      {profile.avgRating.toFixed(1)}
-                    </span>
-                    <span className="text-sm text-gray-400">
-                      ({profile._count.reviewsReceived} reseñas)
-                    </span>
-                  </div>
-                ) : (
-                  <span className="text-sm text-gray-400">Sin reseñas aún</span>
+              {/* Fav + CTA */}
+              <div className="flex items-center gap-2 pb-1">
+                {currentUserId && (
+                  <FavoriteButton professionalId={id} isFavorite={isFavorite} iconOnly />
                 )}
-
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <Briefcase className="w-3.5 h-3.5 text-gray-400" />
-                  {profile.totalJobs} trabajos completados
-                </div>
-
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                  Desde {formatFechaCompleta(new Date(profile.user.createdAt))}
-                </div>
+                <Link
+                  href="/solicitudes/nueva"
+                  className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition-colors shadow-sm"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Solicitar servicio
+                </Link>
               </div>
             </div>
-          </div>
 
-          {/* Bio */}
-          {profile.bio && (
-            <div className="mt-4 pt-4 border-t border-gray-50">
-              <p className="text-sm text-gray-600 leading-relaxed">{profile.bio}</p>
+            {/* Name + subtitle */}
+            <div className="mb-4">
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <h1 className="text-2xl font-black text-gray-900" style={{ fontFamily: "Outfit, sans-serif" }}>
+                  {profile.user.name}
+                </h1>
+                {hasPro && (
+                  <span className="inline-flex items-center gap-1 bg-gradient-to-r from-violet-500 to-indigo-500 text-white text-[11px] font-black px-2 py-0.5 rounded-full">
+                    <Zap className="w-2.5 h-2.5 fill-current" />
+                    {profile.subscription!.plan.name}
+                  </span>
+                )}
+              </div>
+              {profile.categories.length > 0 && (
+                <p className="text-sm text-gray-500 font-medium">
+                  {profile.categories.slice(0, 2).map(c => c.category.name).join(" · ")}
+                  {profile.categories.length > 2 && ` · +${profile.categories.length - 2} más`}
+                </p>
+              )}
             </div>
-          )}
 
-          {/* CTA */}
-          <div className="mt-4 flex gap-2">
-            {currentUserId && (
-              <FavoriteButton professionalId={id} isFavorite={isFavorite} iconOnly />
+            {/* Badge nivel */}
+            <div className="mb-4">
+              <BadgeNivel totalJobs={profile.totalJobs} avgRating={profile.avgRating} size="lg" showDescription />
+            </div>
+
+            {/* Stats grid */}
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="bg-gray-50 rounded-2xl p-3 text-center border border-gray-100">
+                <div className="flex items-center justify-center gap-0.5 mb-0.5">
+                  {profile.avgRating > 0 ? (
+                    <>
+                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                      <span className="text-xl font-black text-gray-900" style={{ fontFamily: "Outfit, sans-serif" }}>
+                        {profile.avgRating.toFixed(1)}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-lg font-black text-gray-300">—</span>
+                  )}
+                </div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                  {profile._count.reviewsReceived} reseñas
+                </p>
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-3 text-center border border-gray-100">
+                <div className="flex items-center justify-center gap-1 mb-0.5">
+                  <Briefcase className="w-4 h-4 text-orange-400" />
+                  <span className="text-xl font-black text-gray-900" style={{ fontFamily: "Outfit, sans-serif" }}>
+                    {profile.totalJobs}
+                  </span>
+                </div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Trabajos</p>
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-3 text-center border border-gray-100">
+                <div className="flex items-center justify-center gap-1 mb-0.5">
+                  <Calendar className="w-4 h-4 text-blue-400" />
+                  <span className="text-xl font-black text-gray-900" style={{ fontFamily: "Outfit, sans-serif" }}>
+                    {new Date().getFullYear() - new Date(profile.user.createdAt).getFullYear() > 0
+                      ? `${new Date().getFullYear() - new Date(profile.user.createdAt).getFullYear()}a`
+                      : "<1a"}
+                  </span>
+                </div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">En ChambaPe</p>
+              </div>
+            </div>
+
+            {/* Bio */}
+            {profile.bio && (
+              <p className="text-sm text-gray-600 leading-relaxed bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3">
+                {profile.bio}
+              </p>
             )}
-            <Link
-              href="/solicitudes/nueva"
-              className="flex items-center justify-center gap-2 flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl transition-colors"
-            >
-              <MessageCircle className="w-4 h-4" />
-              Solicitar este servicio
-            </Link>
           </div>
         </div>
 
-        {/* Especialidades */}
+        {/* ── ESPECIALIDADES ────────────────────────── */}
         {profile.categories.length > 0 && (
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-            <h2 className="font-semibold text-gray-900 mb-3">Especialidades</h2>
+            <h2 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span className="w-1 h-5 bg-orange-500 rounded-full block" />
+              Especialidades
+            </h2>
             <div className="flex flex-wrap gap-2">
               {profile.categories.map((c) => (
                 <span
                   key={c.categoryId}
-                  className="flex items-center gap-1.5 bg-orange-50 text-orange-700 px-3 py-1.5 rounded-xl text-sm font-medium"
+                  className="flex items-center gap-1.5 bg-orange-50 border border-orange-100 text-orange-700 px-3 py-1.5 rounded-xl text-sm font-semibold"
                 >
                   <span>{c.category.icon}</span>
                   {c.category.name}
@@ -204,16 +260,17 @@ export default async function PerfilPublicoPage({ params }: Props) {
           </div>
         )}
 
-        {/* Zonas de cobertura */}
+        {/* ── ZONAS ─────────────────────────────────── */}
         {profile.districts.length > 0 && (
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-            <h2 className="font-semibold text-gray-900 mb-3 flex items-center gap-1.5">
+            <h2 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span className="w-1 h-5 bg-blue-500 rounded-full block" />
               <MapPin className="w-4 h-4 text-gray-400" />
-              Zonas de atención en Lima
+              Zonas de atención
             </h2>
             <div className="flex flex-wrap gap-1.5">
               {profile.districts.map((d) => (
-                <span key={d} className="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-lg text-xs font-medium">
+                <span key={d} className="bg-blue-50 border border-blue-100 text-blue-700 px-2.5 py-1 rounded-lg text-xs font-semibold">
                   {d}
                 </span>
               ))}
@@ -221,16 +278,19 @@ export default async function PerfilPublicoPage({ params }: Props) {
           </div>
         )}
 
-        {/* Insignias */}
+        {/* ── LOGROS / INSIGNIAS ────────────────────── */}
         {profile.badges.length > 0 && (
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-            <h2 className="font-semibold text-gray-900 mb-3">Logros</h2>
+            <h2 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span className="w-1 h-5 bg-yellow-400 rounded-full block" />
+              Logros
+            </h2>
             <div className="flex flex-wrap gap-3">
               {profile.badges.map((b) => (
                 <div key={b.badgeId} className="flex items-center gap-2 bg-yellow-50 border border-yellow-100 rounded-xl px-3 py-2">
                   <span className="text-xl">{b.badge.icon}</span>
                   <div>
-                    <p className="text-xs font-semibold text-yellow-800">{b.badge.name}</p>
+                    <p className="text-xs font-bold text-yellow-800">{b.badge.name}</p>
                     <p className="text-xs text-yellow-600">{b.badge.description}</p>
                   </div>
                 </div>
@@ -239,10 +299,13 @@ export default async function PerfilPublicoPage({ params }: Props) {
           </div>
         )}
 
-        {/* Portfolio */}
+        {/* ── PORTFOLIO ─────────────────────────────── */}
         {profile.portfolioImages.length > 0 && (
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-            <h2 className="font-semibold text-gray-900 mb-3">Trabajos anteriores</h2>
+            <h2 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <span className="w-1 h-5 bg-emerald-500 rounded-full block" />
+              Trabajos anteriores
+            </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {profile.portfolioImages.map((img) => (
                 <div key={img.id} className="group relative aspect-square rounded-xl overflow-hidden bg-gray-100">
@@ -258,23 +321,24 @@ export default async function PerfilPublicoPage({ params }: Props) {
           </div>
         )}
 
-        {/* Reseñas */}
+        {/* ── RESEÑAS ───────────────────────────────── */}
         <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-          <h2 className="font-semibold text-gray-900 mb-4">
+          <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span className="w-1 h-5 bg-amber-400 rounded-full block" />
             Reseñas de clientes
             {profile._count.reviewsReceived > 0 && (
-              <span className="ml-2 text-sm font-normal text-gray-400">
+              <span className="ml-1 text-sm font-normal text-gray-400">
                 ({profile._count.reviewsReceived})
               </span>
             )}
           </h2>
 
           {profile.reviewsReceived.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="text-center py-8 bg-gray-50 rounded-2xl">
               <Star className="w-8 h-8 text-gray-200 mx-auto mb-2" />
               <p className="text-sm text-gray-400">Aún no tiene reseñas</p>
               <p className="text-xs text-gray-400 mt-0.5">
-                Sé el primero en contratar a {profile.user.name.split(" ")[0]}
+                Sé el primero en contratar a {firstName}
               </p>
             </div>
           ) : (
@@ -292,19 +356,21 @@ export default async function PerfilPublicoPage({ params }: Props) {
           )}
         </div>
 
-        {/* CTA final */}
-        <div className="bg-orange-500 rounded-2xl p-5 text-center text-white">
-          <h3 className="font-bold text-lg mb-1">¿Necesitas este servicio?</h3>
-          <p className="text-sm text-orange-100 mb-4">
-            Publica tu solicitud gratis y recibe propuestas de profesionales verificados
+        {/* ── CTA FINAL ─────────────────────────────── */}
+        <div className={cn("rounded-3xl p-6 text-center text-white bg-gradient-to-br", heroGradient)}>
+          <div className="text-3xl mb-2">{badge.emoji}</div>
+          <h3 className="font-black text-lg mb-1">¿Necesitas a {firstName}?</h3>
+          <p className="text-sm text-white/80 mb-4">
+            Publica tu solicitud gratis y recibe su propuesta directamente
           </p>
           <Link
             href="/solicitudes/nueva"
-            className="inline-flex items-center gap-2 bg-white text-orange-600 font-semibold px-6 py-2.5 rounded-xl hover:bg-orange-50 transition-colors"
+            className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-6 py-2.5 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
           >
             Publicar solicitud
           </Link>
         </div>
+
       </div>
     </div>
   )
