@@ -50,6 +50,14 @@ const schema = z.object({
   ),
   preferredTime: z.string().max(100).optional(),
 }).refine(
+  (data) => {
+    if (data.budgetMin !== undefined && data.budgetMax !== undefined) {
+      return data.budgetMax >= data.budgetMin
+    }
+    return true
+  },
+  { message: "El presupuesto máximo debe ser mayor o igual al mínimo", path: ["budgetMax"] }
+).refine(
   (d) => !d.budgetMin || !d.budgetMax || d.budgetMax >= d.budgetMin,
   { message: "El presupuesto máximo debe ser mayor o igual al mínimo", path: ["budgetMax"] }
 )

@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { RealtimeNotifications } from "@/components/notifications/RealtimeNotifications"
 import { PusherBeamsClient } from "@/components/notifications/PusherBeamsClient"
 import { SWRegistration } from "@/components/shared/SWRegistration"
+import { InstallPWA } from "@/components/shared/InstallPWA"
 import "./globals.css"
 
 const inter = Inter({
@@ -72,6 +73,7 @@ export default function RootLayout({
           <RealtimeNotifications />
           <PusherBeamsClient />
           <SWRegistration />
+          <InstallPWA />
           <Toaster richColors position="top-right" />
         </body>
       </html>

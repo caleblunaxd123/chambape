@@ -71,9 +71,10 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
           }
         },
         orderBy: [
-          { subscription: { status: "asc" } }, // 'ACTIVE' viene antes que nulo/otros en asc? No, Prisma maneja nulls.
-          { avgRating: "desc" }, 
-          { totalJobs: "desc" }
+          // PostgreSQL NULLS LAST en ASC → "ACTIVE" < NULL → suscriptores PRO aparecen primero ✓
+          { subscription: { status: "asc" } },
+          { avgRating: "desc" },
+          { totalJobs: "desc" },
         ],
         skip: (page - 1) * PAGE_SIZE,
         take: PAGE_SIZE,

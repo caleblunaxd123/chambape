@@ -31,11 +31,19 @@ export function RealtimeNotifications() {
         } : undefined,
       })
 
-      // Opcional: Sonido sutil
+      // Sonido sutil usando Web Audio API (no requiere archivo externo)
       try {
-        const audio = new Audio("/sounds/notification.mp3")
-        audio.play().catch(() => {}) // Ignorar si el navegador bloquea autoplay
-      } catch (e) {}
+        const ctx = new AudioContext()
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.frequency.value = 880
+        gain.gain.setValueAtTime(0.1, ctx.currentTime)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3)
+        osc.start(ctx.currentTime)
+        osc.stop(ctx.currentTime + 0.3)
+      } catch {}
     })
 
     return () => {

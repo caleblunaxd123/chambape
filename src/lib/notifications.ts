@@ -38,17 +38,19 @@ export async function createNotification(params: CreateNotificationParams) {
     console.error("[PUSHER_CHANNELS_ERROR]", error)
   }
 
-  // 2. Trigger native push notification via Pusher Beams
+  // 2. Push notification nativa via Pusher Beams (llega al celular aunque la app este cerrada)
   if (beamsServer) {
     try {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ""
       await beamsServer.publishToInterests([`user-${params.userId}`], {
         web: {
           notification: {
             title: params.title,
             body: params.message,
-            deep_link: `${process.env.NEXT_PUBLIC_APP_URL}${params.link || ""}`,
-            icon: `${process.env.NEXT_PUBLIC_APP_URL}/icons/icon-192x192.png`,
+            icon: `${appUrl}/icons/icon-192x192.png`,
           },
+          // data.url: Pusher Beams abre esta URL al hacer tap en la notificacion
+          data: { url: `${appUrl}${params.link ?? "/"}` },
         },
       })
     } catch (error) {
@@ -56,7 +58,7 @@ export async function createNotification(params: CreateNotificationParams) {
     }
   }
 
-  return notification
+    return notification
 }
 
 // ─── Helpers por tipo de evento ──────────────────────────────────
