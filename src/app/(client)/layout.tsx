@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { requireAuth } from "@/lib/auth"
 import { UserButton } from "@clerk/nextjs"
-import { LayoutDashboard, PlusCircle, ClipboardList, Heart, Bell } from "lucide-react"
+import { LayoutDashboard, PlusCircle, ClipboardList, Heart, Bell, Users } from "lucide-react"
 import { redirect } from "next/navigation"
 import { db } from "@/lib/db"
 import { NotificationBell } from "@/components/ui/NotificationBell"
@@ -9,8 +9,9 @@ import { ClientSidebarContent } from "@/components/layout/ClientSidebarContent"
 
 const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Inicio" },
-  { href: "/solicitudes/nueva", icon: PlusCircle, label: "Nueva solicitud" },
-  { href: "/solicitudes", icon: ClipboardList, label: "Mis solicitudes" },
+  { href: "/solicitudes/nueva", icon: PlusCircle, label: "Solicitar" },
+  { href: "/profesionales", icon: Users, label: "Profesionales" },
+  { href: "/solicitudes", icon: ClipboardList, label: "Mis pedidos" },
   { href: "/favoritos", icon: Heart, label: "Favoritos" },
 ]
 

@@ -2,7 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { PlusCircle, ArrowRight, Clock, CheckCircle2, Users, Sparkles } from "lucide-react"
+import { PlusCircle, ArrowRight, Users, Sparkles, Search } from "lucide-react"
 import { URGENCIA_LABELS, REQUEST_STATUS_LABELS, formatFechaRelativa } from "@/lib/utils"
 import { CATEGORIAS_MAP } from "@/constants/categorias"
 
@@ -121,6 +121,24 @@ export default async function DashboardClientePage() {
             </div>
           </div>
         )}
+
+        {/* ── Buscar profesional ─────────────────────── */}
+        <Link
+          href="/profesionales"
+          className="flex items-center gap-4 bg-white border border-gray-100 rounded-2xl p-4 hover:border-orange-200 hover:shadow-sm transition-all group"
+        >
+          <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
+            <Search className="w-5 h-5 text-blue-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-gray-900 text-sm">Buscar profesional directamente</p>
+            <p className="text-xs text-gray-400 mt-0.5">Explora el directorio, ve sus reseñas y contáctalos</p>
+          </div>
+          <div className="flex items-center gap-1 text-orange-500 shrink-0">
+            <Users className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </div>
+        </Link>
 
         {/* ── Servicios rápidos ──────────────────────── */}
         <div>
