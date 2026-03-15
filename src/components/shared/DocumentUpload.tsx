@@ -24,14 +24,17 @@ export function DocumentUpload({ folder, onUploaded, accept = "application/pdf,i
   async function handleFile(file: File) {
     setLoading(true)
     try {
+      // Extraer extensión del archivo para incluirla en el public_id (documentos)
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "pdf"
+
       const sigRes = await fetch("/api/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ folder }),
+        body: JSON.stringify({ folder, ext }),
       })
       if (!sigRes.ok) throw new Error(await sigRes.text())
 
-      const { signature, timestamp, folder: folderPath, cloudName, apiKey, resourceType, maxFileSize } = await sigRes.json()
+      const { signature, timestamp, publicId, folder: folderPath, cloudName, apiKey, resourceType, maxFileSize } = await sigRes.json()
 
       // Límite del servidor (maxFileSize en bytes), con fallback al prop
       const effectiveMaxBytes = maxFileSize ?? (maxMBProp ? maxMBProp * 1024 * 1024 : 10 * 1024 * 1024)
@@ -46,11 +49,16 @@ export function DocumentUpload({ folder, onUploaded, accept = "application/pdf,i
       formData.append("file", file)
       formData.append("signature", signature)
       formData.append("timestamp", String(timestamp))
-      formData.append("folder", folderPath)
       formData.append("api_key", apiKey)
+      // public_id (con extensión) si viene del servidor, sino folder
+      if (publicId) {
+        formData.append("public_id", publicId)
+      } else if (folderPath) {
+        formData.append("folder", folderPath)
+      }
 
       const uploadRes = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType ?? "auto"}/upload`,
+        `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType ?? "image"}/upload`,
         { method: "POST", body: formData }
       )
       if (!uploadRes.ok) throw new Error("Error al subir el archivo")

@@ -16,6 +16,8 @@ const schema = z.object({
     "documentos",
     "certificados",
   ]),
+  // Extensión del archivo (sin punto), solo para carpetas de documentos
+  ext: z.string().regex(/^[a-zA-Z0-9]{1,10}$/).optional(),
 })
 
 export async function POST(req: Request) {
@@ -60,7 +62,20 @@ export async function POST(req: Request) {
 
   // Nota: max_file_size NO va en la firma — solo es válido en upload presets (unsigned).
   // Para signed uploads se valida solo del lado cliente antes de subir.
-  const params: Record<string, string | number> = { timestamp, folder }
+  const isDocument = ["documentos", "certificados"].includes(parsed.data.folder)
+
+  const params: Record<string, string | number> = { timestamp }
+
+  // Documentos/certificados: resource_type "raw" para no hacer procesamiento ni moderación.
+  // Incluimos el public_id con extensión para que la URL sea accesible directamente.
+  // Ej: chambape/documentos/abc123.pdf → /raw/upload/v.../chambape/documentos/abc123.pdf
+  if (isDocument && parsed.data.ext) {
+    const randomId = Math.random().toString(36).slice(2) + Date.now().toString(36)
+    const ext = parsed.data.ext.toLowerCase().replace(/[^a-z0-9]/g, "")
+    params.public_id = `${folder}/${randomId}.${ext}`
+  } else {
+    params.folder = folder
+  }
 
   // Si es el frente del DNI, solicitamos OCR de Google
   if (parsed.data.folder === "dniFrente") {
@@ -72,19 +87,16 @@ export async function POST(req: Request) {
     apiSecret
   )
 
-  // documentos y certificados usan "auto" para que Cloudinary preserve la extensión
-  // en la URL (.pdf, .jpg, etc.) aunque el recurso quede como image type.
-  // El PDF original se descarga via fl_attachment en el cliente.
-  const isDocument = ["documentos", "certificados"].includes(parsed.data.folder)
-
   return NextResponse.json({
     signature,
     timestamp,
-    folder,
+    // public_id ya incluye la carpeta si es documento; sino enviamos folder
+    publicId: params.public_id,
+    folder: params.folder ?? undefined,
     cloudName,
     apiKey,
     maxFileSize,
     ocr: params.ocr,
-    resourceType: isDocument ? "auto" : "image",
+    resourceType: isDocument ? "raw" : "image",
   })
 }
