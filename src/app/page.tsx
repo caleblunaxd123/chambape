@@ -86,17 +86,17 @@ export default function LandingPage() {
       {/* ════════════════════════════════════════
           HERO
       ════════════════════════════════════════ */}
-      <section className="relative pt-24 pb-20 md:pt-36 md:pb-32 overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#fff7ed] via-white to-[#fef9f0]" />
-        {/* Decorative blobs */}
-        <div className="pointer-events-none absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full opacity-20 blur-3xl" style={{ background: "radial-gradient(circle, #fb923c, #fbbf24)" }} />
-        <div className="pointer-events-none absolute bottom-0 -left-24 w-80 h-80 rounded-full opacity-15 blur-3xl" style={{ background: "radial-gradient(circle, #f97316, #f59e0b)" }} />
+      <section className="relative pt-24 pb-20 md:pt-36 md:pb-32 overflow-hidden bg-[#fafafa]">
+        {/* Background blobs */}
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-orange-400/20 rounded-full blur-[100px] mix-blend-multiply pointer-events-none animate-pulse-glow" />
+        <div className="absolute -top-32 left-0 w-[600px] h-[600px] bg-purple-400/15 rounded-full blur-[100px] mix-blend-multiply pointer-events-none" />
+        <div className="absolute bottom-0 right-1/3 w-[500px] h-[500px] bg-amber-300/20 rounded-full blur-[120px] mix-blend-multiply pointer-events-none" />
+
         {/* Grid pattern */}
         <div
-          className="absolute inset-0 opacity-[0.025]"
+          className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: "radial-gradient(circle, #f97316 1px, transparent 1px)",
+            backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)",
             backgroundSize: "32px 32px",
           }}
         />
@@ -105,27 +105,29 @@ export default function LandingPage() {
           {/* Left: copy */}
           <div className="flex-1 max-w-xl animate-fade-up">
             {/* Live badge */}
-            <div className="inline-flex items-center gap-2 bg-white border border-orange-100 text-orange-600 text-xs font-bold px-3 py-1.5 rounded-full mb-6 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-              Más de 500 profesionales activos en Lima
+            <div className="inline-flex items-center gap-2 glass-panel text-orange-600 text-xs font-bold px-4 py-2 rounded-full mb-6 relative">
+              <span className="absolute inset-0 rounded-full animate-pulse-glow" />
+              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse relative z-10" />
+              <span className="relative z-10">Más de 500 profesionales activos en Lima</span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-black text-gray-900 leading-[1.05] mb-5 tracking-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
+            <h1 className="text-4xl md:text-5xl lg:text-[4rem] font-black text-slate-900 leading-[1.05] mb-5 tracking-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
               El técnico que{" "}
               <span className="relative inline-block text-orange-500">
                 necesitas
                 <svg
-                  className="absolute -bottom-1 left-0 w-full"
+                  className="absolute -bottom-2 left-0 w-full"
                   viewBox="0 0 200 8"
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
                   <path
                     d="M0 6 Q50 1 100 5 Q150 9 200 3"
-                    stroke="#fed7aa"
-                    strokeWidth="3"
+                    stroke="currentColor"
+                    strokeWidth="4"
                     fill="none"
                     strokeLinecap="round"
+                    className="opacity-40"
                   />
                 </svg>
               </span>
@@ -133,35 +135,36 @@ export default function LandingPage() {
               cuando lo necesitas
             </h1>
 
-            <p className="text-lg text-gray-500 leading-relaxed mb-8 max-w-md">
+            <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-md">
               Gasfiteros, electricistas, pintores y más. Profesionales verificados
               en Lima listos para ayudarte.{" "}
-              <span className="font-semibold text-gray-700">Presupuestos gratis en minutos.</span>
+              <span className="font-bold text-slate-800">Presupuestos gratis en minutos.</span>
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href="/solicitudes/nueva"
-                className="inline-flex items-center justify-center gap-2.5 text-white font-bold px-7 py-4 rounded-2xl transition-all text-base shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+                className="inline-flex items-center justify-center gap-2.5 text-white font-bold px-8 py-4 rounded-2xl transition-all text-base shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-1 relative overflow-hidden group"
                 style={{ background: "var(--brand-gradient)" }}
               >
-                <Wrench className="w-5 h-5" />
-                Necesito un servicio
-                <ArrowRight className="w-4 h-4" />
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                <Wrench className="w-5 h-5 relative z-10" />
+                <span className="relative z-10">Necesito un servicio</span>
+                <ArrowRight className="w-4 h-4 relative z-10" />
               </Link>
               <Link
                 href="/registrarse"
-                className="inline-flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-orange-300 hover:bg-orange-50 text-gray-700 hover:text-orange-600 font-bold px-7 py-4 rounded-2xl transition-all text-base"
+                className="glass-panel text-slate-700 hover:text-orange-600 font-bold px-8 py-4 rounded-2xl transition-all text-base hover:-translate-y-1 flex items-center justify-center gap-2 border border-slate-200"
               >
                 Soy profesional →
               </Link>
             </div>
 
             {/* Trust chips */}
-            <div className="flex flex-wrap gap-4 mt-7">
+            <div className="flex flex-wrap gap-4 mt-8">
               {["Gratis para clientes", "Sin tarjeta de crédito", "Profesionales verificados"].map((t) => (
-                <span key={t} className="flex items-center gap-1.5 text-sm text-gray-400">
+                <span key={t} className="flex items-center gap-2 text-sm text-slate-500 font-medium">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   {t}
                 </span>
@@ -170,72 +173,71 @@ export default function LandingPage() {
           </div>
 
           {/* Right: floating UI cards */}
-          <div className="hidden md:flex flex-col gap-3 flex-1 items-end relative animate-fade-up delay-200">
+          <div className="hidden md:flex flex-col gap-4 flex-1 items-end relative h-[500px]">
+            {/* Background glowing orb for cards */}
+            <div className="absolute top-1/2 right-10 -translate-y-1/2 w-64 h-64 bg-orange-400/30 rounded-full blur-[80px] z-0 pointer-events-none animate-pulse-glow" />
+
             {/* Notification badge */}
-            <div className="absolute -top-2 right-8 z-10 flex items-center gap-1.5 bg-white border border-orange-100 text-orange-600 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+            <div className="absolute top-10 right-4 z-30 flex items-center gap-2 glass-panel text-orange-600 text-xs font-bold px-4 py-2 rounded-full animate-float delay-100">
+              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
               3 propuestas nuevas 🎉
             </div>
 
             {/* Card 1 — Proposal */}
-            <div className="w-[300px] bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-gray-100 p-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>
+            <div className="w-[320px] glass-panel p-5 relative z-20 animate-float translate-y-16 -translate-x-12">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold shadow-lg shrink-0" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>
                   CM
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-gray-900">Carlos M. — Gasfitero</p>
-                  <p className="text-xs text-gray-400">Disponible hoy · Miraflores</p>
-                  <div className="flex items-center gap-0.5 mt-0.5">
-                    {[1,2,3,4,5].map((i) => (
-                      <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                    ))}
-                    <span className="text-xs text-gray-400 ml-1">5.0 (34 reseñas)</span>
+                  <p className="text-sm font-bold text-slate-900">Carlos M. — Gasfitero</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Disponible hoy · Miraflores</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <div className="flex gap-0.5">
+                      {[1,2,3,4,5].map((i) => (
+                        <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <span className="text-[10px] text-slate-500 font-medium">5.0 (34)</span>
                   </div>
                 </div>
               </div>
-              <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
-                <p className="text-xs text-orange-700 leading-relaxed">
+              <div className="bg-orange-50/80 rounded-xl p-3 border border-orange-100/50 backdrop-blur-sm">
+                <p className="text-xs text-orange-800 leading-relaxed font-medium">
                   💬 &ldquo;Puedo atenderte hoy por la tarde. Presupuesto estimado: <strong>S/.80</strong> incluye materiales.&rdquo;
                 </p>
               </div>
-              <div className="flex gap-2 mt-3">
-                <button className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2 rounded-lg transition-colors">
+              <div className="flex gap-2 mt-4">
+                <button className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 transition-all hover:-translate-y-0.5">
                   ✓ Elegir
                 </button>
-                <button className="flex-1 border border-gray-200 text-gray-500 text-xs font-medium py-2 rounded-lg hover:bg-gray-50 transition-colors">
-                  Ver más
+                <button className="flex-1 bg-white/50 border border-slate-200 hover:bg-white text-slate-600 text-xs font-bold py-2.5 rounded-xl transition-all hover:bg-slate-50">
+                  Ver perfil
                 </button>
               </div>
             </div>
 
             {/* Card 2 — Another pro */}
-            <div className="w-[260px] bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.07)] border border-gray-100 p-4">
+            <div className="absolute top-64 right-16 w-[280px] glass-panel p-4 z-10 animate-float delay-300">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0" style={{ background: "linear-gradient(135deg, #f59e0b, #f97316)" }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-md shrink-0" style={{ background: "linear-gradient(135deg, #f59e0b, #f97316)" }}>
                   JR
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-gray-900">Juan R. — Electricista</p>
-                  <p className="text-xs text-gray-400">Disponible mañana · San Isidro</p>
-                  <div className="flex items-center gap-0.5 mt-0.5">
-                    {[1,2,3,4,5].map((i) => (
-                      <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                    ))}
-                    <span className="text-xs text-gray-400 ml-1">4.9 (87)</span>
-                  </div>
+                  <p className="text-sm font-bold text-slate-900">Juan R. — Electricista</p>
+                  <p className="text-xs text-slate-500 mt-0.5">A 2km de tu ubicación</p>
                 </div>
               </div>
             </div>
 
             {/* Card 3 — Completed */}
-            <div className="w-[250px] bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-sm">
-              <div className="w-9 h-9 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm shrink-0">
+            <div className="absolute top-20 right-64 w-[220px] glass-panel bg-emerald-50/90 border-emerald-200/50 px-4 py-3 flex items-center gap-3 z-0 animate-float delay-200">
+              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm shrink-0 shadow-md shadow-emerald-500/20">
                 ✓
               </div>
-              <div>
-                <p className="text-xs font-bold text-emerald-800">Trabajo completado</p>
-                <p className="text-xs text-emerald-600">María C. dejó 5 ★ a Carlos</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-emerald-800 truncate">Trabajo exitoso</p>
+                <p className="text-[10px] text-emerald-600 truncate mt-0.5">María C. dejó 5 ★</p>
               </div>
             </div>
           </div>
@@ -247,27 +249,28 @@ export default function LandingPage() {
       ════════════════════════════════════════ */}
       <section className="py-16 md:py-24 bg-white" id="categorias">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <span className="section-label mb-3">Servicios disponibles</span>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3" style={{ fontFamily: "Outfit, sans-serif" }}>
+          <div className="text-center mb-16">
+            <span className="section-label mb-4">Servicios disponibles</span>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
               ¿Qué servicio necesitas?
             </h2>
-            <p className="text-gray-500 text-base max-w-lg mx-auto">
+            <p className="text-slate-500 text-lg max-w-lg mx-auto">
               Encuentra el profesional ideal para cualquier trabajo en tu hogar
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {catDestacadas.map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/solicitudes/nueva?categoria=${cat.slug}`}
-                className={`group border rounded-2xl p-4 sm:p-5 flex flex-col items-center text-center gap-3 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${cat.bg}`}
+                className={`group border border-slate-100 rounded-[2rem] p-5 sm:p-7 flex flex-col items-center text-center gap-4 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-orange-500/10 bg-white hover:border-orange-200 relative overflow-hidden`}
               >
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm ${cat.iconBg}`}>
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className={`w-16 h-16 rounded-[1.2rem] flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform duration-300 relative z-10 ${cat.iconBg}`}>
                   {cat.icon}
                 </div>
-                <p className={`text-sm font-bold leading-tight ${cat.color}`}>
+                <p className={`text-[15px] font-bold leading-tight relative z-10 ${cat.color}`}>
                   {cat.name}
                 </p>
               </Link>
@@ -297,42 +300,47 @@ export default function LandingPage() {
       {/* ════════════════════════════════════════
           BUSCAR PROFESIONALES DIRECTAMENTE
       ════════════════════════════════════════ */}
-      <section className="py-14 md:py-20 bg-gradient-to-br from-[#1e1b4b] to-[#2d2a6e] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+      <section className="py-16 md:py-24 relative overflow-hidden bg-[#0f172a]">
+        {/* Animated Orbs */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[100px] animate-pulse-glow pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-orange-500/20 rounded-full blur-[100px] animate-pulse-glow pointer-events-none delay-300" />
+        
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+        
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center gap-10">
-          <div className="flex-1 text-center md:text-left">
-            <span className="inline-block bg-orange-500/20 text-orange-300 text-xs font-bold px-3 py-1 rounded-full mb-4 border border-orange-500/30">
+          <div className="flex-1 text-center md:text-left animate-fade-up">
+            <span className="inline-block glass-panel-dark text-orange-400 text-xs font-bold px-4 py-1.5 rounded-full mb-5">
               ¿Ya sabes quién quieres?
             </span>
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4 leading-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-5 leading-tight tracking-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
               Busca y contacta<br />
               <span className="text-orange-400">profesionales directamente</span>
             </h2>
-            <p className="text-indigo-200 text-base mb-6 max-w-md">
+            <p className="text-slate-300 text-lg mb-8 max-w-md mx-auto md:mx-0 leading-relaxed">
               Explora perfiles, lee reseñas reales, compara especialidades y elige el profesional que más te convenza — sin intermediarios.
             </p>
             <Link
               href="/profesionales"
-              className="inline-flex items-center gap-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold px-7 py-4 rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 rounded-2xl transition-all shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_30px_rgba(249,115,22,0.5)] hover:-translate-y-1"
             >
               Ver todos los profesionales
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
           {/* Mini cards decorativas */}
-          <div className="flex-1 hidden md:flex flex-col gap-3 items-end">
+          <div className="flex-1 hidden md:flex flex-col gap-4 items-end relative h-[300px]">
             {[
-              { name: "Carlos M.", cat: "Gasfitero", rating: "5.0", jobs: 87, emoji: "🥇", grad: "from-blue-400 to-blue-600" },
-              { name: "Ana R.", cat: "Pintora", rating: "4.9", jobs: 52, emoji: "🥈", grad: "from-rose-400 to-pink-500" },
-              { name: "Juan V.", cat: "Electricista", rating: "5.0", jobs: 123, emoji: "💎", grad: "from-violet-400 to-indigo-500" },
-            ].map((p) => (
-              <div key={p.name} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-4 py-3 flex items-center gap-3 w-64">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${p.grad} flex items-center justify-center text-white font-bold text-sm shrink-0`}>
+              { name: "Carlos M.", cat: "Gasfitero", rating: "5.0", jobs: 87, emoji: "🥇", grad: "from-blue-400 to-blue-600", delay: "" },
+              { name: "Ana R.", cat: "Pintora", rating: "4.9", jobs: 52, emoji: "🥈", grad: "from-rose-400 to-pink-500", delay: "delay-100" },
+              { name: "Juan V.", cat: "Electricista", rating: "5.0", jobs: 123, emoji: "💎", grad: "from-violet-400 to-indigo-500", delay: "delay-200" },
+            ].map((p, i) => (
+              <div key={p.name} className={`glass-panel-dark w-72 rounded-2xl px-5 py-4 flex items-center gap-4 animate-slide-in ${p.delay}`} style={{ transform: `translateX(${-i * 15}px)` }}>
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${p.grad} flex items-center justify-center text-white font-bold text-base shadow-lg shrink-0`}>
                   {p.name.split(" ").map(n => n[0]).join("")}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-bold truncate">{p.name} <span className="text-white/60 font-normal text-xs">· {p.cat}</span></p>
-                  <p className="text-white/70 text-xs">⭐ {p.rating} · {p.jobs} trabajos {p.emoji}</p>
+                  <p className="text-white text-[15px] font-bold truncate">{p.name}</p>
+                  <p className="text-slate-400 text-xs mt-0.5">{p.cat} · ⭐ {p.rating} · {p.jobs} jobs {p.emoji}</p>
                 </div>
               </div>
             ))}
@@ -362,35 +370,33 @@ export default function LandingPage() {
       <section className="py-16 md:py-20 relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: "var(--brand-gradient)" }} />
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
-
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
+        
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10">
             {STATS.map((s, i) => {
               const Icon = s.icon
               return (
-                <div key={i} className="text-center">
-                  <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mx-auto mb-3">
-                    <Icon className="w-5 h-5 text-white" />
+                <div key={i} className="text-center glass-panel bg-white/10 border-white/20 p-6 rounded-3xl animate-fade-up delay-100 hover:bg-white/20 transition-colors">
+                  <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-md">
+                    <Icon className="w-6 h-6 text-white" />
                   </div>
-                  <p className="stat-number text-4xl md:text-5xl text-white mb-1">{s.value}</p>
-                  <p className="text-sm text-orange-100 leading-snug">{s.label}</p>
+                  <p className="stat-number text-4xl md:text-5xl text-white mb-2">{s.value}</p>
+                  <p className="text-sm text-orange-50 leading-snug font-medium">{s.label}</p>
                 </div>
               )
             })}
           </div>
         </div>
-      </section>
-
-      {/* ════════════════════════════════════════
+      </section>       {/* ════════════════════════════════════════
           BENEFICIOS
       ════════════════════════════════════════ */}
-      <section className="py-16 md:py-24 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <span className="section-label mb-3">¿Por qué ChambaPe?</span>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3" style={{ fontFamily: "Outfit, sans-serif" }}>
-              La forma más fácil de encontrar
-              <br className="hidden sm:block" /> profesionales de confianza
+      <section className="py-16 md:py-24 bg-[#fafafa] relative overflow-hidden">
+        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-orange-400/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+          <div className="text-center mb-16">
+            <span className="section-label mb-3">¿Por qué elegirnos?</span>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
+              Ventajas de usar ChambaPe
             </h2>
           </div>
 
@@ -398,78 +404,70 @@ export default function LandingPage() {
             {BENEFITS.map((b, i) => (
               <div
                 key={i}
-                className="group relative bg-white border border-gray-100 hover:border-orange-100 rounded-2xl p-6 transition-all duration-200 hover:shadow-[0_8px_32px_rgba(249,115,22,0.1)] overflow-hidden"
+                className="group relative glass-panel bg-white/80 hover:bg-white border-white/50 hover:border-orange-200 rounded-3xl p-8 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/10 hover:-translate-y-2 overflow-hidden"
               >
-                {/* Top accent bar */}
-                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${b.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-
-                <div className={`w-14 h-14 ${b.bg} rounded-2xl flex items-center justify-center text-2xl shadow-sm mb-5 group-hover:scale-105 transition-transform duration-200`}>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br opacity-5 group-hover:opacity-10 transition-opacity rounded-bl-full" />
+                <div className={`w-14 h-14 ${b.bg} rounded-2xl flex items-center justify-center text-2xl shadow-sm mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 relative z-10`}>
                   {b.icon}
                 </div>
-                <h3 className="font-bold text-gray-900 text-lg mb-2" style={{ fontFamily: "Outfit, sans-serif" }}>{b.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{b.desc}</p>
+                <h3 className="text-xl font-bold text-slate-900 mb-3 relative z-10">{b.title}</h3>
+                <p className="text-slate-500 text-[15px] leading-relaxed relative z-10">{b.desc}</p>
               </div>
             ))}
           </div>
         </div>
-      </section>
-
-      {/* ════════════════════════════════════════
+      </section>        {/* ════════════════════════════════════════
           TESTIMONIOS
       ════════════════════════════════════════ */}
-      <section className="py-16 md:py-24 bg-[#f8f7f5]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
+      <section className="py-16 md:py-24 bg-white relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-50/50 rounded-full blur-[100px] pointer-events-none" />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+          <div className="text-center mb-16">
             <span className="section-label mb-3">Testimonios reales</span>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3" style={{ fontFamily: "Outfit, sans-serif" }}>
+            <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
               Lo que dicen nuestros usuarios
             </h2>
-            <p className="text-gray-500 text-base">Miles de limeños ya encontraron su profesional en ChambaPe</p>
+            <p className="text-slate-500 text-lg">Miles de limeños ya encontraron su profesional en ChambaPe</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {TESTIMONIOS.map((t, i) => (
               <div
                 key={i}
-                className="bg-white rounded-2xl border border-gray-100 p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-200 hover:-translate-y-1 flex flex-col"
+                className="glass-panel hover:bg-white rounded-3xl border border-slate-100 p-8 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300 hover:-translate-y-2 flex flex-col group relative"
               >
-                {/* Quote mark */}
-                <div className="text-5xl text-orange-100 font-black leading-none mb-2" style={{ fontFamily: "Georgia, serif" }}>&ldquo;</div>
-                {/* Stars */}
-                <div className="flex gap-0.5 mb-3">
-                  {[1,2,3,4,5].map((s) => (
-                    <Star key={s} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <div className="flex gap-1 mb-6">
+                  {[1,2,3,4,5].map((star) => (
+                    <Star key={star} className="w-5 h-5 fill-amber-400 text-amber-400 group-hover:scale-110 transition-transform duration-300" style={{ transitionDelay: `${star * 50}ms` }} />
                   ))}
                 </div>
-                <p className="text-sm text-gray-600 leading-relaxed flex-1 mb-5">
-                  {t.texto}
+                <p className="text-slate-700 text-[15px] leading-relaxed italic mb-8 flex-1">
+                  "{t.texto}"
                 </p>
-                <div className="flex items-center gap-3 pt-4 border-t border-gray-50">
-                  <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-white font-bold text-sm shrink-0`}>
+                <div className="flex items-center gap-4 border-t border-slate-100 pt-6">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shadow-md bg-gradient-to-br ${t.color}`}>
                     {t.iniciales}
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-900">{t.nombre}</p>
-                    <p className="text-xs text-gray-400">{t.distrito} · {t.servicio}</p>
+                    <p className="font-bold text-slate-900">{t.nombre}</p>
+                    <p className="text-xs text-slate-500">{t.distrito} · {t.servicio}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </section>
-
-      {/* ════════════════════════════════════════
+      </section>        {/* ════════════════════════════════════════
           CTA DUAL — Cliente + Profesional
       ════════════════════════════════════════ */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className="py-16 md:py-24 bg-[#fafafa]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* CTA Cliente */}
-            <div className="relative overflow-hidden rounded-3xl p-8 text-white" style={{ background: "var(--brand-gradient)" }}>
-              <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white opacity-5" />
-              <div className="absolute bottom-0 left-12 w-24 h-24 rounded-full bg-white opacity-5" />
-              <div className="relative">
+            <div className="relative overflow-hidden rounded-[2.5rem] p-10 text-white shadow-2xl shadow-orange-500/20 group hover:-translate-y-1 transition-transform duration-300" style={{ background: "var(--brand-gradient)" }}>
+              <div className="absolute -top-10 -right-10 w-64 h-64 rounded-full bg-white opacity-10 group-hover:scale-110 transition-transform duration-500" />
+              <div className="absolute bottom-0 left-12 w-32 h-32 rounded-full bg-white opacity-10 group-hover:scale-150 transition-transform duration-700" />
+              <div className="relative z-10">
                 <div className="text-4xl mb-4">🏠</div>
                 <h3 className="text-2xl font-black mb-2" style={{ fontFamily: "Outfit, sans-serif" }}>¿Necesitas un servicio?</h3>
                 <p className="text-orange-100 text-sm leading-relaxed mb-6">
@@ -477,14 +475,14 @@ export default function LandingPage() {
                 </p>
                 <Link
                   href="/solicitudes/nueva"
-                  className="inline-flex items-center gap-2 bg-white text-orange-600 font-bold px-6 py-3 rounded-xl text-sm transition-all hover:shadow-lg hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 bg-white text-orange-600 font-bold px-6 py-3 rounded-xl text-sm transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                 >
                   Publicar solicitud gratis
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <div className="flex flex-wrap gap-3 mt-5">
                   {["Sin registro obligatorio", "100% gratuito", "Resultado en minutos"].map((f) => (
-                    <span key={f} className="flex items-center gap-1 text-xs text-orange-100">
+                    <span key={f} className="flex items-center gap-1 text-xs text-orange-100 font-medium">
                       <CheckCircle2 className="w-3 h-3 text-white" />
                       {f}
                     </span>
@@ -494,18 +492,18 @@ export default function LandingPage() {
             </div>
 
             {/* CTA Profesional */}
-            <div className="relative overflow-hidden rounded-3xl p-8 bg-[#0f172a] text-white">
-              <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-orange-500 opacity-5" />
-              <div className="absolute bottom-0 left-12 w-24 h-24 rounded-full bg-orange-500 opacity-5" />
-              <div className="relative">
+            <div className="relative overflow-hidden rounded-[2.5rem] p-10 bg-[#0f172a] text-white shadow-2xl group hover:-translate-y-1 transition-transform duration-300">
+              <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-orange-500 opacity-10 blur-xl group-hover:opacity-20 transition-opacity duration-500" />
+              <div className="absolute bottom-0 left-12 w-24 h-24 rounded-full bg-orange-500 opacity-10 blur-xl group-hover:opacity-20 transition-opacity duration-700" />
+              <div className="relative z-10">
                 <div className="text-4xl mb-4">🔧</div>
                 <h3 className="text-2xl font-black mb-2" style={{ fontFamily: "Outfit, sans-serif" }}>¿Tienes un oficio?</h3>
-                <p className="text-gray-400 text-sm leading-relaxed mb-6">
+                <p className="text-slate-400 text-sm leading-relaxed mb-6">
                   Llega a miles de limeños que buscan exactamente lo que ofreces. Regístrate gratis, verifica tu perfil y empieza hoy.
                 </p>
                 <Link
                   href="/registrarse"
-                  className="inline-flex items-center gap-2 font-bold px-6 py-3 rounded-xl text-sm transition-all hover:shadow-lg hover:-translate-y-0.5 text-white"
+                  className="inline-flex items-center gap-2 font-bold px-6 py-3 rounded-xl text-sm transition-all shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/30 hover:-translate-y-0.5 text-white"
                   style={{ background: "var(--brand-gradient)" }}
                 >
                   Registrarme como profesional
@@ -513,7 +511,7 @@ export default function LandingPage() {
                 </Link>
                 <div className="flex flex-wrap gap-3 mt-5">
                   {["Registro gratuito", "Tú pones el precio", "Alertas en tu zona"].map((f) => (
-                    <span key={f} className="flex items-center gap-1 text-xs text-gray-500">
+                    <span key={f} className="flex items-center gap-1 text-xs text-slate-500 font-medium">
                       <CheckCircle2 className="w-3 h-3 text-orange-500" />
                       {f}
                     </span>

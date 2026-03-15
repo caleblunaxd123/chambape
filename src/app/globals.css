@@ -261,6 +261,14 @@
   .step-dot-upcoming {
     @apply bg-gray-200;
   }
+
+  /* Glassmorphism */
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.05)];
+  }
+  .glass-panel-dark {
+    @apply bg-[#0f172a]/70 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)];
+  }
 }
 
 /* ─────────────────────────────────────────
@@ -291,10 +299,24 @@
   to   { background-position: 400px 0; }
 }
 
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(249, 115, 22, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+}
+
 .animate-fade-up  { animation: fade-up 0.4s ease both; }
 .animate-fade-in  { animation: fade-in 0.3s ease both; }
 .animate-slide-in { animation: slide-in-left 0.4s ease both; }
 .animate-scale-in { animation: scale-in 0.25s ease both; }
+.animate-float    { animation: float 6s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 2.5s infinite; }
 
 /* Delays */
 .delay-100 { animation-delay: 100ms; }

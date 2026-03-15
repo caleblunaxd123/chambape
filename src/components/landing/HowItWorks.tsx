@@ -45,22 +45,25 @@ export function HowItWorks() {
       {STEPS_CLIENT.map((step, i) => {
         const Icon = step.icon
         return (
-          <div key={i} className={`relative flex flex-col bg-white rounded-2xl border ${step.border} p-6 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_24px_rgba(0,0,0,0.08)] transition-all duration-200 hover:-translate-y-1`}>
+          <div key={i} className={`relative flex flex-col glass-panel hover:bg-white rounded-[2rem] p-7 transition-all duration-300 hover:-translate-y-2 group overflow-hidden border border-slate-100 hover:border-orange-200`}>
+            {/* Hover overlay gradient */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${step.color} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-300 pointer-events-none`} />
+
             {/* Connector line on desktop */}
             {i < STEPS_CLIENT.length - 1 && (
-              <div className="hidden lg:block absolute top-[2.75rem] left-full w-full h-px border-t-2 border-dashed border-gray-200 z-0" style={{ width: "calc(100% - 3rem)", left: "calc(100% - 1.5rem)" }} />
+              <div className="hidden lg:block absolute top-12 left-full w-full h-px border-t-2 border-dashed border-slate-200 z-0 opacity-50 group-hover:border-orange-300 transition-colors" style={{ width: "calc(100% - 2rem)", left: "calc(100% - 1rem)" }} />
             )}
 
-            {/* Number badge */}
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-sm shrink-0`}>
-                <Icon className="w-5 h-5 text-white" />
+            {/* Number badge & Icon */}
+            <div className="flex items-center justify-between mb-6 relative z-10">
+              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                <Icon className="w-6 h-6 text-white" />
               </div>
-              <span className="stat-number text-4xl text-gray-100 leading-none">{step.number}</span>
+              <span className="stat-number text-5xl text-slate-100 group-hover:text-orange-100 transition-colors duration-300 leading-none">{step.number}</span>
             </div>
 
-            <h3 className="font-bold text-gray-900 text-base mb-2 leading-snug">{step.title}</h3>
-            <p className="text-sm text-gray-500 leading-relaxed">{step.desc}</p>
+            <h3 className="font-bold text-slate-900 text-lg mb-3 leading-snug relative z-10">{step.title}</h3>
+            <p className="text-[15px] text-slate-500 leading-relaxed relative z-10">{step.desc}</p>
           </div>
         )
       })}
