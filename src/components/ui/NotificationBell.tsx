@@ -103,15 +103,20 @@ export function NotificationBell({ count: _initialCount, href }: Props) {
     return () => document.removeEventListener("keydown", handleKey)
   }, [open])
 
-  // Cerrar al hacer scroll o resize
+  // Cerrar al hacer resize o scroll FUERA del dropdown (no cerrarse al deslizar dentro)
   useEffect(() => {
     if (!open) return
-    function close() { setOpen(false) }
-    window.addEventListener("resize", close, { passive: true })
-    window.addEventListener("scroll", close, { passive: true, capture: true })
+    function handleResize() { setOpen(false) }
+    function handleScroll(e: Event) {
+      // Si el scroll ocurre dentro del propio dropdown, no cerrar
+      if (dropdownRef.current?.contains(e.target as Node)) return
+      setOpen(false)
+    }
+    window.addEventListener("resize", handleResize, { passive: true })
+    window.addEventListener("scroll", handleScroll, { passive: true, capture: true })
     return () => {
-      window.removeEventListener("resize", close)
-      window.removeEventListener("scroll", close, true)
+      window.removeEventListener("resize", handleResize)
+      window.removeEventListener("scroll", handleScroll, true)
     }
   }, [open])
 

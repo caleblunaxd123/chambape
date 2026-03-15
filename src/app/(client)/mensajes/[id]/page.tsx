@@ -51,6 +51,19 @@ export default async function ChatPage({ params }: Props) {
     data: { readAt: new Date() },
   })
 
+  // Verificar si el trabajo más reciente entre estos dos fue completado
+  const latestApp = await db.serviceApplication.findFirst({
+    where: {
+      status: "ACCEPTED",
+      professional: { userId: conv.professionalUserId },
+      request: { clientId: conv.clientId },
+    },
+    orderBy: { createdAt: "desc" },
+    select: { request: { select: { status: true, updatedAt: true } } },
+  })
+  const isCompleted = latestApp?.request.status === "COMPLETED"
+  const completedAt = isCompleted ? latestApp?.request.updatedAt : null
+
   const initialMessages = conv.messages.map((m) => ({
     id: m.id,
     content: m.content,
@@ -73,6 +86,8 @@ export default async function ChatPage({ params }: Props) {
       otherUser={otherUser}
       initialMessages={initialMessages}
       backHref="/mensajes"
+      isCompleted={isCompleted}
+      completedAt={completedAt}
     />
   )
 }

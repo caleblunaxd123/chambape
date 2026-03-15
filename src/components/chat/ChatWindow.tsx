@@ -216,10 +216,14 @@ interface Props {
   conversationId: string; currentUserId: string
   otherUser: { id: string; name: string; avatarUrl: string | null }
   initialMessages: ChatMessage[]; backHref: string
+  /** Si el trabajo fue marcado como completado, el chat queda en solo lectura */
+  isCompleted?: boolean
+  /** Fecha en que se completó para mostrar en el banner */
+  completedAt?: Date | null
 }
 
 // ── Componente principal ──────────────────────────────────────
-export function ChatWindow({ conversationId, currentUserId, otherUser, initialMessages, backHref }: Props) {
+export function ChatWindow({ conversationId, currentUserId, otherUser, initialMessages, backHref, isCompleted, completedAt }: Props) {
   const router = useRouter()
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [text, setText] = useState("")
@@ -602,63 +606,80 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
         </div>
       )}
 
-      {/* Input bar */}
-      <div className="bg-white border-t border-gray-100 px-3 py-2.5">
-        <div className="flex items-end gap-2 max-w-3xl mx-auto w-full">
-          <button
-            type="button"
-            onClick={() => { setShowAttach((v) => !v); setShowStickers(false) }}
-            className={cn(
-              "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
-              showAttach ? "bg-orange-100 text-orange-500" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-            )}
-          >
-            <Paperclip className="w-4 h-4" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => { setShowStickers((v) => !v); setShowAttach(false) }}
-            className={cn(
-              "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
-              showStickers ? "bg-orange-100 text-orange-500" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-            )}
-          >
-            <Smile className="w-4 h-4" />
-          </button>
-
-          {!isRecording && (
-            <VoiceRecorder
-              onRecordingComplete={(url, dur) => {
-                sendAudio(url, dur)
-              }}
-              onCancel={() => setIsRecording(false)}
-              disabled={sending}
-            />
-          )}
-
-          <textarea
-            ref={textareaRef}
-            value={text}
-            onChange={handleTextChange}
-            onKeyDown={onKey}
-            placeholder="Escribe un mensaje..."
-            rows={1}
-            maxLength={2000}
-            className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-300 resize-none min-h-[40px] max-h-32 overflow-y-auto"
-            style={{ lineHeight: "1.4" }}
-          />
-
-          <button
-            type="button"
-            onClick={() => sendMessage()}
-            disabled={sending || (!text.trim() && !pendingFile)}
-            className="w-9 h-9 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-colors shadow-sm"
-          >
-            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          </button>
+      {/* Input bar / Banner de chat completado */}
+      {isCompleted ? (
+        <div className="bg-white border-t border-gray-100 px-4 py-4">
+          <div className="max-w-3xl mx-auto w-full">
+            <div className="flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 border border-gray-200 rounded-2xl text-center">
+              <span className="text-xl">🔒</span>
+              <div>
+                <p className="text-sm font-bold text-gray-700">Chat finalizado</p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  El trabajo fue marcado como completado.
+                  {completedAt ? ` · ${new Date(completedAt).toLocaleDateString("es-PE", { day: "numeric", month: "long" })}` : ""} Los mensajes quedan como historial.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-white border-t border-gray-100 px-3 py-2.5">
+          <div className="flex items-end gap-2 max-w-3xl mx-auto w-full">
+            <button
+              type="button"
+              onClick={() => { setShowAttach((v) => !v); setShowStickers(false) }}
+              className={cn(
+                "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
+                showAttach ? "bg-orange-100 text-orange-500" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+              )}
+            >
+              <Paperclip className="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { setShowStickers((v) => !v); setShowAttach(false) }}
+              className={cn(
+                "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
+                showStickers ? "bg-orange-100 text-orange-500" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+              )}
+            >
+              <Smile className="w-4 h-4" />
+            </button>
+
+            {!isRecording && (
+              <VoiceRecorder
+                onRecordingComplete={(url, dur) => {
+                  sendAudio(url, dur)
+                }}
+                onCancel={() => setIsRecording(false)}
+                disabled={sending}
+              />
+            )}
+
+            <textarea
+              ref={textareaRef}
+              value={text}
+              onChange={handleTextChange}
+              onKeyDown={onKey}
+              placeholder="Escribe un mensaje..."
+              rows={1}
+              maxLength={2000}
+              className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-300 resize-none min-h-[40px] max-h-32 overflow-y-auto"
+              style={{ lineHeight: "1.4" }}
+            />
+
+            <button
+              type="button"
+              onClick={() => sendMessage()}
+              disabled={sending || (!text.trim() && !pendingFile)}
+              className="w-9 h-9 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-colors shadow-sm"
+            >
+              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

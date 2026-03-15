@@ -5,6 +5,7 @@ import { Users, Loader2, Star, CheckCircle2 } from "lucide-react"
 import { PropuestaCard } from "./PropuestaCard"
 import { ReviewForm } from "@/components/resenas/ReviewForm"
 import { useState } from "react"
+import { toast } from "sonner"
 
 interface Aplicacion {
   id: string
@@ -63,15 +64,21 @@ export function SolicitudDetailClient({
   }
 
   async function handleCompletar() {
-    if (!confirm("¿Confirmas que el trabajo fue completado satisfactoriamente?")) return
+    if (!confirm("¿Confirmas que el trabajo fue completado satisfactoriamente? El chat quedará en modo historial.")) return
     setCompleting(true)
     try {
-      const res = await fetch(`/api/solicitudes/${solicitudId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "completar" }),
+      const res = await fetch(`/api/solicitudes/${solicitudId}/completar`, {
+        method: "POST",
       })
-      if (res.ok) router.refresh()
+      if (res.ok) {
+        toast.success("¡Trabajo completado! Ya puedes dejar tu reseña.")
+        router.refresh()
+      } else {
+        const json = await res.json().catch(() => ({}))
+        toast.error(json.error ?? "No se pudo completar el trabajo")
+      }
+    } catch {
+      toast.error("Error de conexión")
     } finally {
       setCompleting(false)
     }

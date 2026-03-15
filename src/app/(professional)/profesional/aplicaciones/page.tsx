@@ -19,6 +19,7 @@ import {
   UserCheck,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ProfChatButton } from "@/components/solicitudes/ProfChatButton"
 
 interface AplicacionItem {
   id: string
@@ -36,7 +37,7 @@ interface AplicacionItem {
     status: string
     targetProfessionalId: string | null
     category: { name: string }
-    client: { name: string; email: string; phone: string | null }
+    client: { id: string; name: string; email: string; phone: string | null }
   }
 }
 
@@ -114,7 +115,7 @@ export default async function MisAplicacionesPage({ searchParams }: Props) {
         request: {
           include: {
             category: true,
-            client: { select: { name: true, email: true, phone: true } },
+            client: { select: { id: true, name: true, email: true, phone: true } },
           },
         },
       },
@@ -126,6 +127,25 @@ export default async function MisAplicacionesPage({ searchParams }: Props) {
   ])
 
   const totalPages = Math.ceil(total / pageSize)
+
+  // Buscar conversaciones existentes para aplicaciones ACCEPTED
+  const acceptedClientIds = aplicaciones
+    .filter((a) => a.status === "ACCEPTED")
+    .map((a) => a.request.client.id)
+
+  const convMap: Record<string, string> = {}
+  if (acceptedClientIds.length > 0) {
+    const convs = await db.conversation.findMany({
+      where: {
+        professionalUserId: user.id,
+        clientId: { in: acceptedClientIds },
+      },
+      select: { id: true, clientId: true },
+    })
+    for (const c of convs) {
+      convMap[c.clientId] = c.id
+    }
+  }
 
   // Stats rápidas
   const stats = await db.serviceApplication.groupBy({
@@ -288,9 +308,9 @@ export default async function MisAplicacionesPage({ searchParams }: Props) {
                     {/* Accepted: show client contact info */}
                     {isAccepted && (
                       <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-4">
-                        <p className="text-sm font-black text-emerald-800 mb-2">🎉 ¡El cliente te ha elegido!</p>
-                        <p className="text-xs text-emerald-600 mb-3">Contáctale directamente para coordinar el trabajo.</p>
-                        <div className="flex flex-col sm:flex-row gap-2">
+                        <p className="text-sm font-black text-emerald-800 mb-1">🎉 ¡El cliente te ha elegido!</p>
+                        <p className="text-xs text-emerald-600 mb-3">Coordina el trabajo directamente con el cliente.</p>
+                        <div className="flex flex-wrap gap-2">
                           {a.request.client.phone && (
                             <a
                               href={getWhatsAppUrl(a.request.client.phone, `Hola ${a.request.client.name}, soy el profesional asignado para tu solicitud "${a.request.title}" en ChambaPe. ¿Cuándo podemos coordinar?`)}
@@ -309,6 +329,11 @@ export default async function MisAplicacionesPage({ searchParams }: Props) {
                             <Mail className="w-4 h-4" />
                             Correo
                           </a>
+                          {/* Chat interno — siempre disponible */}
+                          <ProfChatButton
+                            conversationId={convMap[a.request.client.id]}
+                            clientId={a.request.client.id}
+                          />
                         </div>
                       </div>
                     )}
