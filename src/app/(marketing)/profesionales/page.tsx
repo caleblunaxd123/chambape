@@ -5,7 +5,6 @@ import { Users, SlidersHorizontal } from "lucide-react"
 import { CATEGORIAS } from "@/constants/categorias"
 import { DISTRITOS } from "@/constants/distritos"
 import { ProfessionalCard } from "@/components/profesionales/ProfessionalCard"
-import { LandingHeader } from "@/components/landing/LandingHeader"
 import { DistrictFilter } from "@/components/profesionales/DistrictFilter"
 import { SearchBar } from "@/components/profesionales/SearchBar"
 
@@ -125,10 +124,9 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <LandingHeader />
 
       {/* Hero */}
-      <div className="bg-gradient-to-br from-[#1a1740] via-[#1e1b4b] to-[#2d2a6e] pt-24 pb-10 px-4">
+      <div className="bg-gradient-to-br from-[#1a1740] via-[#1e1b4b] to-[#2d2a6e] py-10 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
             <div>
