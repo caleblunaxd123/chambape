@@ -109,7 +109,7 @@ export async function POST(req: Request) {
     // Notificar SOLO al profesional destino para que aplique
     createNotification({
       userId: targetPro.userId,
-      type: "NEW_APPLICATION",
+      type: "NEW_REQUEST",
       title: "Nueva solicitud directa 📩",
       message: `${user.name} te ha enviado una solicitud de trabajo exclusiva: "${data.title}". ¡Aplica ahora!`,
       link: `/profesional/oportunidades`,

@@ -12,8 +12,6 @@ import {
   notifyAplicacionAceptada,
   createNotification,
 } from "@/lib/notifications"
-import { pusherServer } from "@/lib/pusher"
-
 const schema = z.object({
   applicationId: z.string().min(1),
 })
@@ -126,7 +124,7 @@ export async function POST(
   // Notificaciones en background
   notifyAplicacionAceptada(
     aplicacion.professional.userId,
-    solicitud.title,
+    user.name,  // nombre del cliente que acepta, no el título de la solicitud
     id
   ).catch((err) => console.error("[NOTIFY_ACEPTADA]", err))
 

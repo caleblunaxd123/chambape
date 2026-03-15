@@ -49,7 +49,10 @@ const schema = z.object({
     z.number().min(0).optional()
   ),
   preferredTime: z.string().max(100).optional(),
-})
+}).refine(
+  (d) => !d.budgetMin || !d.budgetMax || d.budgetMax >= d.budgetMin,
+  { message: "El presupuesto máximo debe ser mayor o igual al mínimo", path: ["budgetMax"] }
+)
 
 // Definición manual para evitar conflictos de inferencia con z.preprocess
 type FormData = {
@@ -141,6 +144,7 @@ export function SolicitudForm({ defaultCategoria, targetProfessionalId }: Props)
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ folder: "solicitudes" }),
       })
+      if (!sigRes.ok) throw new Error(await sigRes.text())
       const { signature, timestamp, folder, cloudName, apiKey } = await sigRes.json()
 
       const fd = new FormData()
@@ -456,7 +460,7 @@ export function SolicitudForm({ defaultCategoria, targetProfessionalId }: Props)
               <Label className="mb-1.5 block">Fotos del problema (opcional, máx. 3)</Label>
               <div className="flex gap-2 flex-wrap">
                 {fotos.map((url, i) => (
-                  <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+                  <div key={url} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
                     <img src={url} alt="" className="w-full h-full object-cover" />
                     <button
                       type="button"

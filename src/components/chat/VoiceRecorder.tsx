@@ -38,13 +38,17 @@ export function VoiceRecorder({ onRecordingComplete, onCancel, disabled }: Props
       }
 
       mediaRecorder.onstop = async () => {
+        // Siempre liberar el micrófono
+        stream.getTracks().forEach(t => t.stop())
+
         const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" })
-        if (audioBlob.size < 100) return // Demasiado corto o vacío
+        if (audioBlob.size < 100) {
+          toast.error("Nota de voz muy corta, intenta de nuevo")
+          onCancel()
+          return
+        }
 
         await uploadAudio(audioBlob)
-        
-        // Detener todos los tracks para liberar el micrófono
-        stream.getTracks().forEach(t => t.stop())
       }
 
       mediaRecorder.start()
@@ -68,8 +72,8 @@ export function VoiceRecorder({ onRecordingComplete, onCancel, disabled }: Props
   }
 
   function cancelRecording() {
-    if (isRecording) {
-      mediaRecorderRef.current!.stop()
+    if (isRecording && mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop()
       setIsRecording(false)
       if (timerRef.current) clearInterval(timerRef.current)
     }

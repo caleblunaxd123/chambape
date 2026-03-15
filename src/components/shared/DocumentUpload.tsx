@@ -5,7 +5,7 @@ import { Upload, X, Loader2, FileText, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
-type DocumentFolder = "documentos" | "certificados"
+type DocumentFolder = "documentos" | "certificados" | "mensajes"
 
 interface Props {
   folder: DocumentFolder

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { toast } from "sonner"
@@ -181,7 +181,7 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
   }, [text])
 
   const [isTyping, setIsTyping] = useState(false)
-  const typingTimeoutRef = useRef<NodeJS.Timeout>(null!)
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastTypingRef = useRef<number>(0)
 
   useEffect(() => {
@@ -322,7 +322,12 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
         </div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-gray-900 text-sm truncate">{otherUser.name}</p>
-          <p className="text-xs text-green-500 font-medium">En línea</p>
+          <p className={cn(
+            "text-xs font-medium transition-colors",
+            isTyping ? "text-orange-500" : "text-gray-400"
+          )}>
+            {isTyping ? "Escribiendo..." : ""}
+          </p>
         </div>
       </div>
 
@@ -452,7 +457,7 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
         <div className="bg-white border-t border-gray-100 px-4 py-3">
           <p className="text-xs font-semibold text-gray-600 mb-2">Adjuntar archivo (PDF, imagen, Word)</p>
           <DocumentUpload
-            folder="documentos"
+            folder="mensajes"
             onUploaded={(url, name) => {
               setPendingFile({ url, name })
               setShowAttach(false)

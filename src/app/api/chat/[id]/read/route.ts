@@ -12,6 +12,16 @@ export async function POST(
 
   const { id } = await params
 
+  // Verificar que el usuario es participante de la conversación
+  const conv = await db.conversation.findFirst({
+    where: {
+      id,
+      OR: [{ clientId: user.id }, { professionalUserId: user.id }],
+    },
+    select: { id: true },
+  })
+  if (!conv) return new NextResponse("No autorizado", { status: 403 })
+
   try {
     const now = new Date()
     const updated = await db.message.updateMany({

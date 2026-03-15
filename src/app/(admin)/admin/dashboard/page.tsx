@@ -21,6 +21,7 @@ export default async function AdminDashboardPage() {
     ingresosTotal,
     profesionalesHoy,
     solicitudesHoy,
+    clientesHoy,
   ] = await Promise.all([
     db.professionalProfile.count(),
     db.professionalProfile.count({ where: { status: "PENDING_VERIFICATION" } }),
@@ -38,6 +39,12 @@ export default async function AdminDashboardPage() {
     }),
     db.serviceRequest.count({
       where: { createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) } },
+    }),
+    db.user.count({
+      where: {
+        role: "CLIENT",
+        createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+      },
     }),
   ])
 
@@ -126,7 +133,7 @@ export default async function AdminDashboardPage() {
             icon={<Users className="w-7 h-7 text-white" />}
             label="Clientes"
             value={totalClientes}
-            sub={`+${solicitudesHoy} registrados`}
+            sub={`+${clientesHoy} hoy`}
             colorClass="from-emerald-500 to-teal-600"
           />
           <StatCard
