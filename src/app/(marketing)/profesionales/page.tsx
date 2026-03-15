@@ -101,8 +101,10 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
   const profesionales = profesionalesRaw as unknown as Array<{
     id: string; avatarUrl: string | null; bio: string | null
     avgRating: number; totalJobs: number; districts: string[]
+    status: string
     user: { name: string }
     categories: Array<{ category: { name: string; icon: string; slug: string } }>
+    subscription?: { status: string } | null
   }>
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
@@ -125,17 +127,33 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
     <div className="min-h-screen bg-gray-50">
       <LandingHeader />
 
-      {/* Hero compacto */}
-      <div className="bg-gradient-to-br from-[#1e1b4b] to-[#2d2a6e] pt-24 pb-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-black text-white mb-2" style={{ fontFamily: "Outfit, sans-serif" }}>
-            {categoriaActual ? `${categoriaActual.icon} ${categoriaActual.name}` : "Profesionales verificados"}
-          </h1>
-          <p className="text-indigo-200 text-base mb-6">
-            {total} profesional{total !== 1 ? "es" : ""} disponible{total !== 1 ? "s" : ""} en Lima
-          </p>
+      {/* Hero */}
+      <div className="bg-gradient-to-br from-[#1a1740] via-[#1e1b4b] to-[#2d2a6e] pt-24 pb-10 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+            <div>
+              <h1
+                className="text-3xl md:text-5xl font-black text-white mb-2 leading-tight"
+                style={{ fontFamily: "Outfit, sans-serif" }}
+              >
+                {categoriaActual
+                  ? <>{categoriaActual.icon} {categoriaActual.name}</>
+                  : "Profesionales verificados"}
+              </h1>
+              <p className="text-indigo-200 text-base">
+                <span className="font-bold text-white">{total}</span>{" "}
+                profesional{total !== 1 ? "es" : ""} disponible{total !== 1 ? "s" : ""} en Lima
+              </p>
+            </div>
+            <Link
+              href="/solicitudes/nueva"
+              className="shrink-0 inline-flex items-center gap-2 bg-white text-orange-600 font-bold px-5 py-2.5 rounded-xl hover:bg-orange-50 transition-colors shadow-lg text-sm"
+            >
+              + Publicar solicitud gratis
+            </Link>
+          </div>
 
-          {/* Búsqueda por nombre — en tiempo real con debounce */}
+          {/* Búsqueda por nombre */}
           <SearchBar
             defaultValue={q}
             currentCategoria={categoria}
@@ -144,18 +162,17 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-5">
+      <div className="max-w-6xl mx-auto px-4 py-6">
 
         {/* Filtros de categoría (scroll horizontal) */}
-        <div className="overflow-x-auto pb-1 -mx-4 px-4">
+        <div className="overflow-x-auto pb-2 -mx-4 px-4 mb-5">
           <div className="flex gap-2 w-max">
-            {/* "Todos" siempre limpia q para no quedar pegado con búsqueda anterior */}
             <Link
               href={buildUrl({ categoria: undefined, page: undefined, q: undefined })}
-              className={`flex-shrink-0 px-3 py-2 rounded-xl border text-xs font-bold transition-all ${
+              className={`flex-shrink-0 px-3.5 py-2 rounded-xl border text-xs font-bold transition-all ${
                 !categoria
-                  ? "bg-gray-900 text-white border-gray-900"
-                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                  ? "bg-gray-900 text-white border-gray-900 shadow-sm"
+                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:bg-gray-50"
               }`}
             >
               Todos
@@ -168,9 +185,8 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
               return (
                 <Link
                   key={cat.slug}
-                  // Al cambiar de categoría se limpia la búsqueda por nombre (q: undefined)
                   href={buildUrl({ categoria: isActive ? undefined : cat.slug, page: undefined, q: undefined })}
-                  className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-all ${colorClass}`}
+                  className={`flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-bold transition-all ${colorClass}`}
                 >
                   <span>{cat.icon}</span>
                   {cat.name}
@@ -180,13 +196,14 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
           </div>
         </div>
 
-        {/* Filtro de distrito + contador */}
-        <div className="flex items-center justify-between gap-3 flex-wrap">
+        {/* Toolbar: contador + distrito */}
+        <div className="flex items-center justify-between gap-3 flex-wrap mb-5">
           <div className="flex items-center gap-2">
             <SlidersHorizontal className="w-4 h-4 text-gray-400" />
-            <span className="text-sm text-gray-500 font-medium">
-              {total} profesionale{total !== 1 ? "s" : ""}
-              {categoriaActual && ` de ${categoriaActual.name}`}
+            <span className="text-sm text-gray-600 font-medium">
+              <span className="font-bold text-gray-900">{total}</span>{" "}
+              profesionale{total !== 1 ? "s" : ""}
+              {categoriaActual && <> de <span className="text-orange-600">{categoriaActual.name}</span></>}
               {distrito && ` en ${DISTRITOS.find((d) => d.slug === distrito)?.name ?? distrito}`}
             </span>
           </div>
@@ -199,11 +216,11 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
 
         {/* Grid de profesionales */}
         {profesionales.length === 0 ? (
-          <div className="text-center py-20">
+          <div className="text-center py-24">
             <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
               <Users className="w-10 h-10 text-gray-300" />
             </div>
-            <h3 className="text-lg font-black text-gray-900 mb-2" style={{ fontFamily: "Outfit, sans-serif" }}>
+            <h3 className="text-xl font-black text-gray-900 mb-2" style={{ fontFamily: "Outfit, sans-serif" }}>
               No encontramos profesionales
             </h3>
             <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
@@ -211,13 +228,13 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
             </p>
             <Link
               href="/solicitudes/nueva"
-              className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 rounded-xl transition-colors"
+              className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 rounded-xl transition-colors shadow-sm"
             >
               Publicar solicitud gratis
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {profesionales.map((pro) => (
               <ProfessionalCard key={pro.id} professional={pro} />
             ))}
@@ -226,22 +243,22 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
 
         {/* Paginación */}
         {totalPages > 1 && (
-          <div className="flex justify-center gap-2 pt-4">
+          <div className="flex justify-center items-center gap-2 pt-8">
             {page > 1 && (
               <Link
                 href={buildUrl({ page: String(page - 1) })}
-                className="px-4 py-2 text-sm font-bold border border-gray-200 rounded-xl text-gray-600 hover:text-orange-500 hover:border-orange-200 hover:bg-orange-50 transition-all"
+                className="px-4 py-2.5 text-sm font-bold border border-gray-200 rounded-xl text-gray-600 hover:text-orange-500 hover:border-orange-200 hover:bg-orange-50 transition-all"
               >
                 ← Anterior
               </Link>
             )}
-            <span className="px-4 py-2 text-sm font-bold text-gray-400">
-              {page} / {totalPages}
+            <span className="px-4 py-2.5 text-sm text-gray-400">
+              Pág <span className="font-bold text-gray-700">{page}</span> de <span className="font-bold text-gray-700">{totalPages}</span>
             </span>
             {page < totalPages && (
               <Link
                 href={buildUrl({ page: String(page + 1) })}
-                className="px-4 py-2 text-sm font-bold border border-gray-200 rounded-xl text-gray-600 hover:text-orange-500 hover:border-orange-200 hover:bg-orange-50 transition-all"
+                className="px-4 py-2.5 text-sm font-bold border border-gray-200 rounded-xl text-gray-600 hover:text-orange-500 hover:border-orange-200 hover:bg-orange-50 transition-all"
               >
                 Siguiente →
               </Link>
@@ -250,17 +267,27 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
         )}
 
         {/* CTA publicar solicitud */}
-        <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-3xl p-6 text-white text-center mt-4">
-          <h3 className="font-black text-xl mb-1">¿No encontraste lo que buscas?</h3>
-          <p className="text-orange-100 text-sm mb-4">
-            Publica tu solicitud gratis y recibe hasta 5 presupuestos de profesionales verificados en tu zona.
-          </p>
-          <Link
-            href="/solicitudes/nueva"
-            className="inline-flex items-center gap-2 bg-white text-orange-600 font-bold px-6 py-2.5 rounded-xl hover:bg-orange-50 transition-colors shadow-sm"
-          >
-            Publicar solicitud gratis →
-          </Link>
+        <div className="mt-10 rounded-3xl overflow-hidden relative" style={{ background: "var(--brand-gradient)" }}>
+          <div className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: "radial-gradient(circle at 10% 50%, white 2px, transparent 2px), radial-gradient(circle at 90% 20%, white 2px, transparent 2px)",
+              backgroundSize: "32px 32px",
+            }}
+          />
+          <div className="relative px-8 py-8 text-white text-center">
+            <h3 className="font-black text-2xl mb-2" style={{ fontFamily: "Outfit, sans-serif" }}>
+              ¿No encontraste lo que buscas?
+            </h3>
+            <p className="text-orange-100 text-sm mb-5 max-w-md mx-auto">
+              Publica tu solicitud gratis y recibe hasta 5 presupuestos de profesionales verificados en tu zona.
+            </p>
+            <Link
+              href="/solicitudes/nueva"
+              className="inline-flex items-center gap-2 bg-white text-orange-600 font-bold px-7 py-3 rounded-xl hover:bg-orange-50 transition-colors shadow-lg"
+            >
+              Publicar solicitud gratis →
+            </Link>
+          </div>
         </div>
 
       </div>

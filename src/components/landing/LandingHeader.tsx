@@ -2,8 +2,15 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Menu, X } from "lucide-react"
+import { Menu, X, LayoutDashboard } from "lucide-react"
 import { Logo } from "@/components/shared/Logo"
+import { useUser, UserButton } from "@clerk/nextjs"
+
+function getPanelHref(role?: string) {
+  if (role === "PROFESSIONAL") return "/profesional/dashboard"
+  if (role === "ADMIN") return "/admin/dashboard"
+  return "/dashboard"
+}
 
 const NAV_LINKS = [
   { href: "/#como-funciona", label: "Cómo funciona" },
@@ -14,6 +21,9 @@ const NAV_LINKS = [
 export function LandingHeader() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const { isSignedIn, isLoaded, user } = useUser()
+  const role = user?.publicMetadata?.role as string | undefined
+  const panelHref = getPanelHref(role)
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20)
@@ -48,42 +58,80 @@ export function LandingHeader() {
           ))}
         </nav>
 
-        {/* Desktop CTAs */}
+        {/* Desktop CTAs — cambia según auth */}
         <div className="hidden md:flex items-center gap-2">
-          <Link
-            href="/iniciar-sesion"
-            className={`text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
-              scrolled ? "text-gray-600 hover:text-gray-900" : "text-gray-700 hover:text-gray-900"
-            }`}
-          >
-            Iniciar sesión
-          </Link>
-          <Link
-            href="/registrarse"
-            className="text-sm font-bold text-white px-5 py-2 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-px active:translate-y-0"
-            style={{ background: "var(--brand-gradient)" }}
-          >
-            Registrarse gratis
-          </Link>
+          {!isLoaded ? (
+            <div className="w-28 h-9 bg-white/20 rounded-xl animate-pulse" />
+          ) : isSignedIn ? (
+            <div className="flex items-center gap-2.5">
+              <Link
+                href={panelHref}
+                className={`flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-xl transition-all ${
+                  scrolled
+                    ? "text-gray-700 hover:text-orange-600 hover:bg-orange-50 border border-gray-200 hover:border-orange-200"
+                    : "text-gray-800 bg-white/80 hover:bg-white hover:text-orange-600 border border-white/30"
+                }`}
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                Mi panel
+              </Link>
+              <UserButton />
+            </div>
+          ) : (
+            <>
+              <Link
+                href="/iniciar-sesion"
+                className={`text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
+                  scrolled ? "text-gray-600 hover:text-gray-900" : "text-gray-700 hover:text-gray-900"
+                }`}
+              >
+                Iniciar sesión
+              </Link>
+              <Link
+                href="/registrarse"
+                className="text-sm font-bold text-white px-5 py-2 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-px active:translate-y-0"
+                style={{ background: "var(--brand-gradient)" }}
+              >
+                Registrarse gratis
+              </Link>
+            </>
+          )}
         </div>
 
-        {/* Mobile: botones visibles + hamburguesa */}
-        <div className="flex items-center gap-1 md:hidden">
-          <Link
-            href="/iniciar-sesion"
-            className={`text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors ${
-              scrolled ? "text-gray-700 hover:bg-gray-100" : "text-gray-700 hover:bg-white/60"
-            }`}
-          >
-            Entrar
-          </Link>
-          <Link
-            href="/registrarse"
-            className="text-xs font-bold text-white px-3 py-1.5 rounded-xl"
-            style={{ background: "var(--brand-gradient)" }}
-          >
-            Gratis
-          </Link>
+        {/* Mobile: según auth */}
+        <div className="flex items-center gap-1.5 md:hidden">
+          {isLoaded && isSignedIn ? (
+            <>
+              <Link
+                href={panelHref}
+                className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-lg transition-colors ${
+                  scrolled ? "text-orange-600 bg-orange-50 border border-orange-100" : "text-orange-600 bg-white/80 border border-white/30"
+                }`}
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                Panel
+              </Link>
+              <UserButton />
+            </>
+          ) : (
+            <>
+              <Link
+                href="/iniciar-sesion"
+                className={`text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+                  scrolled ? "text-gray-700 hover:bg-gray-100" : "text-gray-700 hover:bg-white/60"
+                }`}
+              >
+                Entrar
+              </Link>
+              <Link
+                href="/registrarse"
+                className="text-xs font-bold text-white px-3 py-1.5 rounded-xl"
+                style={{ background: "var(--brand-gradient)" }}
+              >
+                Gratis
+              </Link>
+            </>
+          )}
           <button
             className={`p-2 rounded-lg transition-colors ${scrolled ? "text-gray-700 hover:bg-gray-100" : "text-gray-700 hover:bg-white/60"}`}
             onClick={() => setMenuOpen(!menuOpen)}
@@ -108,21 +156,34 @@ export function LandingHeader() {
             </Link>
           ))}
           <div className="h-px bg-gray-100 my-1" />
-          <Link
-            href="/iniciar-sesion"
-            onClick={() => setMenuOpen(false)}
-            className="text-sm font-semibold text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-50 transition-colors"
-          >
-            Iniciar sesión
-          </Link>
-          <Link
-            href="/registrarse"
-            onClick={() => setMenuOpen(false)}
-            className="text-sm font-bold text-white py-3 px-4 rounded-xl text-center transition-all"
-            style={{ background: "var(--brand-gradient)" }}
-          >
-            Registrarse gratis →
-          </Link>
+          {isSignedIn ? (
+            <Link
+              href={panelHref}
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2 text-sm font-bold text-orange-600 py-3 px-4 rounded-xl hover:bg-orange-50 transition-colors"
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              Ir a mi panel
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/iniciar-sesion"
+                onClick={() => setMenuOpen(false)}
+                className="text-sm font-semibold text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                Iniciar sesión
+              </Link>
+              <Link
+                href="/registrarse"
+                onClick={() => setMenuOpen(false)}
+                className="text-sm font-bold text-white py-3 px-4 rounded-xl text-center transition-all"
+                style={{ background: "var(--brand-gradient)" }}
+              >
+                Registrarse gratis →
+              </Link>
+            </>
+          )}
         </div>
       )}
     </header>
