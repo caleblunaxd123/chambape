@@ -43,9 +43,11 @@ interface DropdownPos {
 interface Props {
   count: number
   href: string
+  /** "light" = ícono blanco para headers oscuros/naranjas (default: "dark") */
+  variant?: "light" | "dark"
 }
 
-export function NotificationBell({ count: _initialCount, href }: Props) {
+export function NotificationBell({ count: _initialCount, href, variant = "dark" }: Props) {
   const { notifCount } = useAppState()
   const router = useRouter()
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -175,15 +177,22 @@ export function NotificationBell({ count: _initialCount, href }: Props) {
         onClick={handleToggle}
         className={cn(
           "relative p-2 rounded-xl transition-all duration-150",
-          open
-            ? "text-orange-500 bg-orange-50"
-            : "text-gray-400 hover:text-orange-500 hover:bg-gray-50"
+          variant === "light"
+            ? open
+              ? "text-white bg-white/20"
+              : "text-white/80 hover:text-white hover:bg-white/15"
+            : open
+              ? "text-orange-500 bg-orange-50"
+              : "text-gray-400 hover:text-orange-500 hover:bg-gray-50"
         )}
         aria-label="Notificaciones"
       >
         <Bell className="w-5 h-5" />
         {unread > 0 && (
-          <span className="absolute top-0.5 right-0.5 min-w-[17px] h-[17px] bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5 leading-none ring-2 ring-white animate-pulse">
+          <span className={cn(
+            "absolute top-0.5 right-0.5 min-w-[17px] h-[17px] bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5 leading-none ring-2 animate-pulse",
+            variant === "light" ? "ring-orange-500" : "ring-white"
+          )}>
             {unread > 99 ? "99+" : unread}
           </span>
         )}

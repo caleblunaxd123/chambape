@@ -30,10 +30,10 @@ export default async function ClientLayout({ children }: { children: React.React
     <AppStateProvider initialNotifs={unreadCount} initialMsgs={unreadMessages}>
       <div className="min-h-screen bg-[#f8f7f5]">
         {/* ── Header móvil ─────────────────────────── */}
-        <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 h-14 flex items-center justify-between lg:hidden sticky top-0 z-40 shadow-sm">
-          <Logo href="/dashboard" size="xs" />
+        <header className="px-4 h-14 flex items-center justify-between lg:hidden sticky top-0 z-40 shadow-md" style={{ background: "var(--brand-gradient)" }}>
+          <Logo href="/dashboard" size="xs" variant="dark" />
           <div className="flex items-center gap-1.5">
-            <NotificationBell count={unreadCount} href="/notificaciones" />
+            <NotificationBell count={unreadCount} href="/notificaciones" variant="light" />
             <UserButton />
           </div>
         </header>

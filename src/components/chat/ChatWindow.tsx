@@ -610,15 +610,23 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
       {isCompleted ? (
         <div className="bg-white border-t border-gray-100 px-4 py-4">
           <div className="max-w-3xl mx-auto w-full">
-            <div className="flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 border border-gray-200 rounded-2xl text-center">
-              <span className="text-xl">🔒</span>
-              <div>
-                <p className="text-sm font-bold text-gray-700">Chat finalizado</p>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  El trabajo fue marcado como completado.
-                  {completedAt ? ` · ${new Date(completedAt).toLocaleDateString("es-PE", { day: "numeric", month: "long" })}` : ""} Los mensajes quedan como historial.
+            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl">
+              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center shrink-0 shadow-sm">
+                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-green-800">¡Trabajo completado exitosamente! 🎉</p>
+                <p className="text-xs text-green-600 mt-0.5">
+                  El cliente confirmó la finalización.
+                  {completedAt
+                    ? ` · ${new Date(completedAt).toLocaleDateString("es-PE", { day: "numeric", month: "long", year: "numeric" })}`
+                    : ""}
+                  {" "}· Los mensajes quedan como historial.
                 </p>
               </div>
+              <span className="text-2xl shrink-0 hidden sm:block">🏆</span>
             </div>
           </div>
         </div>

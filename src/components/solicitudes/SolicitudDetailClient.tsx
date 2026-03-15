@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { Users, Loader2, Star, CheckCircle2 } from "lucide-react"
+import { Users, Loader2, Star, CheckCircle2, AlertCircle, X } from "lucide-react"
 import { PropuestaCard } from "./PropuestaCard"
 import { ReviewForm } from "@/components/resenas/ReviewForm"
 import { useState } from "react"
@@ -45,6 +45,7 @@ export function SolicitudDetailClient({
   const router = useRouter()
   const [cancelling, setCancelling] = useState(false)
   const [completing, setCompleting] = useState(false)
+  const [confirmingComplete, setConfirmingComplete] = useState(false)
 
   const aplicacionAceptada = aplicaciones.find((a) => a.status === "ACCEPTED")
 
@@ -64,14 +65,14 @@ export function SolicitudDetailClient({
   }
 
   async function handleCompletar() {
-    if (!confirm("¿Confirmas que el trabajo fue completado satisfactoriamente? El chat quedará en modo historial.")) return
     setCompleting(true)
+    setConfirmingComplete(false)
     try {
       const res = await fetch(`/api/solicitudes/${solicitudId}/completar`, {
         method: "POST",
       })
       if (res.ok) {
-        toast.success("¡Trabajo completado! Ya puedes dejar tu reseña.")
+        toast.success("¡Trabajo completado! 🎉 Ya puedes dejar tu reseña.")
         router.refresh()
       } else {
         const json = await res.json().catch(() => ({}))
@@ -108,18 +109,53 @@ export function SolicitudDetailClient({
 
       {/* Marcar como completado */}
       {solicitudStatus === "IN_PROGRESS" && aplicacionAceptada && (
-        <button
-          onClick={handleCompletar}
-          disabled={completing}
-          className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white font-semibold px-4 py-3 rounded-xl transition-colors text-sm"
-        >
-          {completing ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
+        confirmingComplete ? (
+          /* ── Confirmación inline ── */
+          <div className="rounded-2xl border-2 border-green-200 bg-green-50 p-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-5 h-5 text-green-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-green-900">¿Confirmar trabajo completado?</p>
+                <p className="text-xs text-green-700 mt-0.5 leading-relaxed">
+                  El chat pasará a modo historial (solo lectura) y podrás dejar tu reseña al profesional.
+                </p>
+              </div>
+              <button
+                onClick={() => setConfirmingComplete(false)}
+                className="text-green-400 hover:text-green-600 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={handleCompletar}
+                disabled={completing}
+                className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 disabled:opacity-60 text-white font-bold px-4 py-2.5 rounded-xl transition-colors text-sm"
+              >
+                {completing ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                Sí, confirmar
+              </button>
+              <button
+                onClick={() => setConfirmingComplete(false)}
+                className="px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors border border-gray-200"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* ── Botón inicial ── */
+          <button
+            onClick={() => setConfirmingComplete(true)}
+            className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-3 rounded-xl transition-colors text-sm shadow-sm hover:shadow-md"
+          >
             <CheckCircle2 className="w-4 h-4" />
-          )}
-          Marcar trabajo como completado
-        </button>
+            Marcar trabajo como completado
+          </button>
+        )
       )}
 
       {/* Header propuestas */}

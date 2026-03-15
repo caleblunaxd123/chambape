@@ -29,14 +29,14 @@ export default async function ProfesionalLayout({ children }: { children: React.
     <AppStateProvider initialNotifs={unreadCount} initialMsgs={unreadMessages}>
       <div className="min-h-screen bg-[#f8f7f5]">
         {/* ── Header móvil ─────────────────────────── */}
-        <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 h-14 flex items-center justify-between lg:hidden sticky top-0 z-40 shadow-sm">
-          <Logo href="/profesional/dashboard" size="xs" />
+        <header className="px-4 h-14 flex items-center justify-between lg:hidden sticky top-0 z-40 shadow-md" style={{ background: "var(--brand-gradient)" }}>
+          <Logo href="/profesional/dashboard" size="xs" variant="dark" />
           <div className="flex items-center gap-1.5">
-            <span className="flex items-center gap-1 text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full">
+            <span className="flex items-center gap-1 text-[11px] font-bold text-white bg-white/20 border border-white/25 px-2 py-0.5 rounded-full">
               <Coins className="w-3 h-3" />
               {profile.credits}
             </span>
-            <NotificationBell count={unreadCount} href="/profesional/notificaciones" />
+            <NotificationBell count={unreadCount} href="/profesional/notificaciones" variant="light" />
             <UserButton />
           </div>
         </header>

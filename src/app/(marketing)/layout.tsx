@@ -14,7 +14,7 @@ import { AppStateProvider } from "@/components/providers/AppStateProvider"
 export default async function MarketingLayout({ children }: { children: React.ReactNode }) {
   const user = await getDbUser()
 
-  // ── Invitado: solo el LandingHeader y los children ──────────────────────────
+  // ── Invitado: LandingHeader naranja + spacer ──────────────────────────────────
   if (!user) {
     return (
       <>
@@ -49,17 +49,20 @@ export default async function MarketingLayout({ children }: { children: React.Re
     return (
       <AppStateProvider initialNotifs={unreadCount} initialMsgs={unreadMessages}>
         <div className="min-h-screen bg-[#f8f7f5]">
-          {/* Header móvil */}
-          <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 h-14 flex items-center justify-between lg:hidden sticky top-0 z-40 shadow-sm">
-            <Logo href="/profesional/dashboard" size="xs" />
+          {/* Header móvil naranja */}
+          <header
+            className="px-4 h-14 flex items-center justify-between lg:hidden sticky top-0 z-40 shadow-md"
+            style={{ background: "var(--brand-gradient)" }}
+          >
+            <Logo href="/profesional/dashboard" size="xs" variant="dark" />
             <div className="flex items-center gap-1.5">
               {profile && (
-                <span className="flex items-center gap-1 text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full">
+                <span className="flex items-center gap-1 text-[11px] font-bold text-white bg-white/20 border border-white/25 px-2 py-0.5 rounded-full">
                   <Coins className="w-3 h-3" />
                   {profile.credits}
                 </span>
               )}
-              <NotificationBell count={unreadCount} href="/profesional/notificaciones" />
+              <NotificationBell count={unreadCount} href="/profesional/notificaciones" variant="light" />
               <UserButton />
             </div>
           </header>
@@ -86,13 +89,16 @@ export default async function MarketingLayout({ children }: { children: React.Re
     )
   }
 
-  // ── Admin: redirigir a panel o mostrar chrome mínima ────────────────────────
+  // ── Admin ────────────────────────────────────────────────────────────────────
   if (user.role === "ADMIN") {
     return (
       <AppStateProvider initialNotifs={unreadCount} initialMsgs={unreadMessages}>
         <div className="min-h-screen bg-[#f8f7f5]">
-          <header className="bg-white border-b border-gray-100 px-4 h-14 flex items-center justify-between sticky top-0 z-40 shadow-sm">
-            <Logo href="/admin/dashboard" size="xs" />
+          <header
+            className="px-4 h-14 flex items-center justify-between sticky top-0 z-40 shadow-md"
+            style={{ background: "var(--brand-gradient)" }}
+          >
+            <Logo href="/admin/dashboard" size="xs" variant="dark" />
             <UserButton />
           </header>
           <main className="flex-1 min-h-screen">{children}</main>
@@ -105,11 +111,14 @@ export default async function MarketingLayout({ children }: { children: React.Re
   return (
     <AppStateProvider initialNotifs={unreadCount} initialMsgs={unreadMessages}>
       <div className="min-h-screen bg-[#f8f7f5]">
-        {/* Header móvil */}
-        <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 h-14 flex items-center justify-between lg:hidden sticky top-0 z-40 shadow-sm">
-          <Logo href="/dashboard" size="xs" />
+        {/* Header móvil naranja */}
+        <header
+          className="px-4 h-14 flex items-center justify-between lg:hidden sticky top-0 z-40 shadow-md"
+          style={{ background: "var(--brand-gradient)" }}
+        >
+          <Logo href="/dashboard" size="xs" variant="dark" />
           <div className="flex items-center gap-1.5">
-            <NotificationBell count={unreadCount} href="/notificaciones" />
+            <NotificationBell count={unreadCount} href="/notificaciones" variant="light" />
             <UserButton />
           </div>
         </header>
