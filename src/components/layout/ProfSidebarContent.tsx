@@ -2,8 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { UserButton } from "@clerk/nextjs"
-import { LayoutDashboard, Search, FileText, Coins, User, MessageCircle } from "lucide-react"
+import { useClerk, useUser, UserButton } from "@clerk/nextjs"
+import { LayoutDashboard, Search, FileText, Coins, User, MessageCircle, LogOut } from "lucide-react"
 import { NotificationBell } from "@/components/ui/NotificationBell"
 import { Logo } from "@/components/shared/Logo"
 
@@ -55,12 +55,18 @@ interface ProfSidebarContentProps {
 
 export function ProfSidebarContent({ unreadCount, credits, planName }: ProfSidebarContentProps) {
   const pathname = usePathname()
+  const { signOut } = useClerk()
+  const { user } = useUser()
 
   return (
     <>
-      {/* Logo */}
-      <div className="px-4 py-5 border-b border-gray-100">
-        <Logo href="/profesional/dashboard" size="sm" />
+      {/* ── Logo + NotificationBell arriba ───── */}
+      <div className="px-4 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between gap-2">
+          <Logo href="/profesional/dashboard" size="sm" />
+          {/* Bell ARRIBA como Facebook/LinkedIn */}
+          <NotificationBell count={unreadCount} href="/profesional/notificaciones" />
+        </div>
         <div className="flex flex-wrap items-center gap-1.5 mt-1.5 pl-[2.375rem]">
           <span className="text-[11px] text-gray-400 font-medium">Panel profesional</span>
           <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-100">
@@ -102,12 +108,26 @@ export function ProfSidebarContent({ unreadCount, credits, planName }: ProfSideb
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="p-3 border-t border-gray-100 space-y-1">
-        <NotificationBell count={unreadCount} href="/profesional/notificaciones" />
-        <div className="px-1 py-1">
-          <UserButton showName />
+      {/* ── Footer: Tarjeta usuario + Cerrar sesión ── */}
+      <div className="p-3 border-t border-gray-100 space-y-2">
+        {/* Tarjeta usuario al estilo Slack/Notion */}
+        <div className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl bg-gray-50 border border-gray-100">
+          <UserButton />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-800 truncate leading-tight">
+              {user?.firstName} {user?.lastName}
+            </p>
+            <p className="text-[11px] text-gray-400 truncate">Profesional</p>
+          </div>
         </div>
+        {/* Botón cerrar sesión — siempre visible y claro */}
+        <button
+          onClick={() => signOut({ redirectUrl: "/iniciar-sesion" })}
+          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-gray-500 hover:text-red-600 hover:bg-red-50 border border-gray-100 hover:border-red-100 transition-all duration-150 group"
+        >
+          <LogOut className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
+          <span className="font-medium">Cerrar sesión</span>
+        </button>
       </div>
     </>
   )
