@@ -101,11 +101,13 @@ export default async function PerfilPublicoPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Back nav */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="max-w-3xl mx-auto px-4 py-3">
-          <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 transition-colors flex items-center gap-1">
-            ← Volver al inicio
+      <div className="bg-white border-b border-gray-100 sticky top-0 z-20">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
+          <Link href="/profesionales" className="text-sm text-gray-400 hover:text-orange-500 transition-colors flex items-center gap-1 font-medium">
+            ← Directorio
           </Link>
+          <span className="text-gray-200">/</span>
+          <span className="text-sm text-gray-600 font-semibold truncate">{profile.user.name.split(" ")[0]}</span>
         </div>
       </div>
 
@@ -141,8 +143,8 @@ export default async function PerfilPublicoPage({ params }: Props) {
           </div>
 
           <div className="px-5 pb-5">
-            {/* Avatar + name row — overlaps banner */}
-            <div className="flex items-end justify-between -mt-10 sm:-mt-12 mb-4">
+            {/* Avatar + name row — overlaps banner; relative+z-10 para pintar sobre el banner */}
+            <div className="relative z-10 flex items-end justify-between -mt-10 sm:-mt-12 mb-4">
               <div className="relative">
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-orange-100 border-4 border-white shadow-lg flex-shrink-0">
                   {profile.avatarUrl ? (

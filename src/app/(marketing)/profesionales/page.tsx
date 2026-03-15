@@ -1,12 +1,13 @@
 import { db } from "@/lib/db"
 import { Prisma } from "@prisma/client"
 import Link from "next/link"
-import { Search, Users, SlidersHorizontal } from "lucide-react"
+import { Users, SlidersHorizontal } from "lucide-react"
 import { CATEGORIAS } from "@/constants/categorias"
 import { DISTRITOS } from "@/constants/distritos"
 import { ProfessionalCard } from "@/components/profesionales/ProfessionalCard"
 import { LandingHeader } from "@/components/landing/LandingHeader"
 import { DistrictFilter } from "@/components/profesionales/DistrictFilter"
+import { SearchBar } from "@/components/profesionales/SearchBar"
 
 export const metadata = {
   title: "Profesionales verificados en Lima — ChambaPe",
@@ -126,26 +127,12 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
             {total} profesional{total !== 1 ? "es" : ""} disponible{total !== 1 ? "s" : ""} en Lima
           </p>
 
-          {/* Búsqueda por nombre */}
-          <form action="/profesionales" method="GET" className="flex gap-2">
-            {categoria && <input type="hidden" name="categoria" value={categoria} />}
-            {distrito && <input type="hidden" name="distrito" value={distrito} />}
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                name="q"
-                defaultValue={q}
-                placeholder="Buscar por nombre..."
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-white/50 text-sm focus:outline-none focus:bg-white/20 focus:border-white/40"
-              />
-            </div>
-            <button
-              type="submit"
-              className="px-5 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-colors text-sm"
-            >
-              Buscar
-            </button>
-          </form>
+          {/* Búsqueda por nombre — en tiempo real con debounce */}
+          <SearchBar
+            defaultValue={q}
+            currentCategoria={categoria}
+            currentDistrito={distrito}
+          />
         </div>
       </div>
 
@@ -154,8 +141,9 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
         {/* Filtros de categoría (scroll horizontal) */}
         <div className="overflow-x-auto pb-1 -mx-4 px-4">
           <div className="flex gap-2 w-max">
+            {/* "Todos" siempre limpia q para no quedar pegado con búsqueda anterior */}
             <Link
-              href={buildUrl({ categoria: undefined, page: undefined })}
+              href={buildUrl({ categoria: undefined, page: undefined, q: undefined })}
               className={`flex-shrink-0 px-3 py-2 rounded-xl border text-xs font-bold transition-all ${
                 !categoria
                   ? "bg-gray-900 text-white border-gray-900"
@@ -172,7 +160,8 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
               return (
                 <Link
                   key={cat.slug}
-                  href={buildUrl({ categoria: isActive ? undefined : cat.slug, page: undefined })}
+                  // Al cambiar de categoría se limpia la búsqueda por nombre (q: undefined)
+                  href={buildUrl({ categoria: isActive ? undefined : cat.slug, page: undefined, q: undefined })}
                   className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-all ${colorClass}`}
                 >
                   <span>{cat.icon}</span>
