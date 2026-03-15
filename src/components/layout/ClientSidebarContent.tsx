@@ -6,6 +6,7 @@ import { useClerk, useUser, UserButton } from "@clerk/nextjs"
 import { LayoutDashboard, PlusCircle, ClipboardList, Heart, Users, MessageCircle, LogOut } from "lucide-react"
 import { NotificationBell } from "@/components/ui/NotificationBell"
 import { Logo } from "@/components/shared/Logo"
+import { useAppState } from "@/components/providers/AppStateProvider"
 
 const NAV_ITEMS = [
   {
@@ -55,6 +56,7 @@ export function ClientSidebarContent({ unreadCount }: ClientSidebarContentProps)
   const pathname = usePathname()
   const { signOut } = useClerk()
   const { user } = useUser()
+  const { msgCount } = useAppState()
 
   return (
     <>
@@ -84,7 +86,14 @@ export function ClientSidebarContent({ unreadCount }: ClientSidebarContentProps)
                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
               }`}
             >
-              <Icon className={`w-4.5 h-4.5 shrink-0 ${highlight && !isActive ? "text-white" : isActive ? "text-orange-500" : "text-gray-400 group-hover:text-gray-600"}`} />
+              <div className="relative shrink-0">
+                <Icon className={`w-4.5 h-4.5 ${highlight && !isActive ? "text-white" : isActive ? "text-orange-500" : "text-gray-400 group-hover:text-gray-600"}`} />
+                {href === "/mensajes" && msgCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[14px] h-[14px] bg-orange-500 text-white text-[8px] font-black rounded-full flex items-center justify-center px-0.5 leading-none">
+                    {msgCount > 9 ? "9+" : msgCount}
+                  </span>
+                )}
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium leading-none truncate">{label}</p>
                 <p className={`text-[11px] mt-0.5 truncate ${highlight && !isActive ? "text-orange-100" : isActive ? "text-orange-400" : "text-gray-400"}`}>{desc}</p>

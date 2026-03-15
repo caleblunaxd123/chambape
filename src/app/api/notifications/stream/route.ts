@@ -1,5 +1,5 @@
-// GET /api/notifications/stream — SSE para notificaciones en tiempo real
-// Polling cada 4 segundos a la DB y emite eventos cuando hay nuevas notificaciones
+// GET /api/notifications/stream — SSE para datos en tiempo real
+// Envía: notifCount (total no leídas), msgCount (mensajes no leídos), newNotif (última notif nueva)
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
 
@@ -21,13 +21,14 @@ export async function GET(req: Request) {
 
   const stream = new ReadableStream({
     start(controller) {
-      // Ping inicial para establecer la conexión
+      // Ping inicial
       controller.enqueue(encoder.encode(": ping\n\n"))
 
       const interval = setInterval(async () => {
         if (closed) return
         try {
-          const count = await db.notification.count({
+          // Verificar si hay nuevas notificaciones desde el último check
+          const newNotifCount = await db.notification.count({
             where: {
               userId: user.id,
               read: false,
@@ -37,11 +38,46 @@ export async function GET(req: Request) {
 
           lastCheck = new Date()
 
-          if (count > 0) {
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ type: "notification", count })}\n\n`)
+          // Siempre consultar totales para mantener el estado actualizado
+          const [totalNotifs, totalMsgs, latestNewNotif] = await Promise.all([
+            db.notification.count({
+              where: { userId: user.id, read: false },
+            }),
+            db.message.count({
+              where: {
+                readAt: null,
+                senderId: { not: user.id },
+                conversation: {
+                  OR: [
+                    { clientId: user.id },
+                    { professionalUserId: user.id },
+                  ],
+                },
+              },
+            }),
+            // Solo buscar la última notif nueva si realmente llegó algo nuevo
+            newNotifCount > 0
+              ? db.notification.findFirst({
+                  where: {
+                    userId: user.id,
+                    read: false,
+                  },
+                  orderBy: { createdAt: "desc" },
+                  select: { type: true, title: true, message: true, link: true },
+                })
+              : null,
+          ])
+
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({
+                type: "update",
+                notifCount: totalNotifs,
+                msgCount: totalMsgs,
+                newNotif: latestNewNotif ?? null,
+              })}\n\n`
             )
-          }
+          )
         } catch {
           clearInterval(interval)
         }
