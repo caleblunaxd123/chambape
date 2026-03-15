@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { X, Coins, AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
+import { X, Coins, AlertCircle, CheckCircle2, Loader2, Wallet, Lightbulb } from "lucide-react"
 import { formatSoles } from "@/lib/utils"
 import Link from "next/link"
 
@@ -27,7 +27,7 @@ export function AplicarModal({
 }: AplicarModalProps) {
   const router = useRouter()
   const [message, setMessage] = useState("")
-  const [price, setPrice] = useState("")
+  const [proposedBudget, setProposedBudget] = useState("")
   const [estimatedDays, setEstimatedDays] = useState("")
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -46,7 +46,7 @@ export function AplicarModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: message.trim(),
-          price: price ? parseFloat(price) : undefined,
+          proposedBudget: proposedBudget ? Math.round(parseFloat(proposedBudget)) : undefined,
           estimatedDays: estimatedDays ? parseInt(estimatedDays) : undefined,
         }),
       })
@@ -178,45 +178,53 @@ export function AplicarModal({
               </div>
             </div>
 
-            {/* Optional fields */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Precio estimado{" "}
-                  <span className="text-gray-400 font-normal">(opcional)</span>
+            {/* Presupuesto propuesto — campo clave, bien visible */}
+            <div className="rounded-xl border-2 border-amber-100 bg-amber-50/50 p-3.5 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-1.5 text-sm font-bold text-gray-800">
+                  <Wallet className="w-4 h-4 text-amber-500" />
+                  Tu precio por este trabajo
                 </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
-                    S/.
-                  </span>
-                  <input
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    placeholder="150"
-                    min="1"
-                    step="0.5"
-                    disabled={!canApply}
-                    className="w-full text-sm border border-gray-200 rounded-xl pl-9 pr-3 py-2.5 focus:outline-none focus:border-orange-300 focus:ring-2 focus:ring-orange-100 transition disabled:opacity-50 disabled:bg-gray-50"
-                  />
-                </div>
+                <span className="text-[11px] text-gray-400 font-normal">opcional</span>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                  Días estimados{" "}
-                  <span className="text-gray-400 font-normal">(opcional)</span>
-                </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-amber-500">
+                  S/.
+                </span>
                 <input
                   type="number"
-                  value={estimatedDays}
-                  onChange={(e) => setEstimatedDays(e.target.value)}
-                  placeholder="2"
+                  value={proposedBudget}
+                  onChange={(e) => setProposedBudget(e.target.value)}
+                  placeholder="0"
                   min="1"
-                  max="365"
+                  step="1"
+                  inputMode="numeric"
                   disabled={!canApply}
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-orange-300 focus:ring-2 focus:ring-orange-100 transition disabled:opacity-50 disabled:bg-gray-50"
+                  className="w-full text-lg font-bold border-2 border-amber-200 rounded-xl pl-10 pr-3 py-2.5 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 bg-white transition disabled:opacity-50 disabled:bg-gray-50"
                 />
               </div>
+              <div className="flex items-start gap-1.5 text-[11px] text-amber-700">
+                <Lightbulb className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                <span>El cliente ve tu precio <strong>antes</strong> de elegirte. Ingresar un precio aumenta tus chances.</span>
+              </div>
+            </div>
+
+            {/* Días estimados */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                Días estimados para completar{" "}
+                <span className="text-gray-400 font-normal">(opcional)</span>
+              </label>
+              <input
+                type="number"
+                value={estimatedDays}
+                onChange={(e) => setEstimatedDays(e.target.value)}
+                placeholder="Ej: 2"
+                min="1"
+                max="365"
+                disabled={!canApply}
+                className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-orange-300 focus:ring-2 focus:ring-orange-100 transition disabled:opacity-50 disabled:bg-gray-50"
+              />
             </div>
 
             {/* Actions */}

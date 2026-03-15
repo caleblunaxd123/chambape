@@ -253,17 +253,22 @@ export function PropuestaCard({
                     <BadgeNivel totalJobs={jobs} avgRating={rating} size="sm" />
                   </div>
                 </div>
-                {/* Badge estado + monto propuesto en la misma fila */}
+                {/* Badge estado + monto propuesto */}
                 <div className="flex flex-col items-end gap-1.5 shrink-0">
                   <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full border", status.cls)}>
                     {status.label}
                   </span>
-                  {aplicacion.proposedBudget && (
+                  {aplicacion.proposedBudget ? (
                     <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 rounded-xl px-2.5 py-1">
                       <Wallet className="w-3 h-3 text-amber-500 shrink-0" />
                       <span className="text-sm font-black text-amber-700 tabular-nums" style={{ fontFamily: "Outfit, sans-serif" }}>
                         {formatSoles(aplicacion.proposedBudget)}
                       </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-1">
+                      <Wallet className="w-3 h-3 text-gray-300 shrink-0" />
+                      <span className="text-xs text-gray-400 tabular-nums">A convenir</span>
                     </div>
                   )}
                 </div>
