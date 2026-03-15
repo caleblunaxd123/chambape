@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Bell, CheckCheck, ExternalLink, X, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -33,8 +33,14 @@ const TYPE_ICONS: Record<string, string> = {
   REQUEST_EXPIRED: "⏰",
 }
 
+interface DropdownPos {
+  top: number
+  left?: number
+  right?: number
+  maxHeight: number
+}
+
 interface Props {
-  /** count inicial del servidor (SSE lo actualiza automáticamente) */
   count: number
   href: string
 }
@@ -42,22 +48,51 @@ interface Props {
 export function NotificationBell({ count: _initialCount, href }: Props) {
   const { notifCount } = useAppState()
   const router = useRouter()
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
   const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState<DropdownPos | null>(null)
   const [notifs, setNotifs] = useState<Notif[]>([])
   const [loading, setLoading] = useState(false)
   const [markingRead, setMarkingRead] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
 
-  // Cerrar dropdown al hacer click fuera
-  useEffect(() => {
-    function handleOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
+  // Calcular posición fixed basada en el botón
+  const calcPosition = useCallback(() => {
+    if (!buttonRef.current) return null
+    const rect = buttonRef.current.getBoundingClientRect()
+    const PANEL_W = 340
+    const MARGIN = 8
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+    const top = rect.bottom + 6
+
+    let left: number | undefined
+    let right: number | undefined
+
+    // ¿Cabe a la derecha del botón?
+    if (rect.left + PANEL_W + MARGIN <= vw) {
+      left = rect.left
     }
-    if (open) document.addEventListener("mousedown", handleOutside)
-    return () => document.removeEventListener("mousedown", handleOutside)
-  }, [open])
+    // ¿Cabe alineado al borde derecho del botón?
+    else if (rect.right - PANEL_W >= MARGIN) {
+      left = rect.right - PANEL_W
+    }
+    // En móvil: fijar con márgenes laterales
+    else {
+      left = MARGIN
+      right = undefined
+    }
+
+    // Si está muy cerca del borde derecho en mobile, forzar right
+    if (vw < 640) {
+      left = MARGIN
+    }
+
+    const maxHeight = Math.max(240, vh - top - 16)
+
+    return { top, left, maxHeight }
+  }, [])
 
   // Cerrar con Escape
   useEffect(() => {
@@ -68,9 +103,38 @@ export function NotificationBell({ count: _initialCount, href }: Props) {
     return () => document.removeEventListener("keydown", handleKey)
   }, [open])
 
+  // Cerrar al hacer scroll o resize
+  useEffect(() => {
+    if (!open) return
+    function close() { setOpen(false) }
+    window.addEventListener("resize", close, { passive: true })
+    window.addEventListener("scroll", close, { passive: true, capture: true })
+    return () => {
+      window.removeEventListener("resize", close)
+      window.removeEventListener("scroll", close, true)
+    }
+  }, [open])
+
+  // Cerrar click fuera
+  useEffect(() => {
+    function handleOutside(e: MouseEvent) {
+      const target = e.target as Node
+      if (
+        dropdownRef.current && !dropdownRef.current.contains(target) &&
+        buttonRef.current && !buttonRef.current.contains(target)
+      ) {
+        setOpen(false)
+      }
+    }
+    if (open) document.addEventListener("mousedown", handleOutside)
+    return () => document.removeEventListener("mousedown", handleOutside)
+  }, [open])
+
   async function handleToggle() {
     if (open) { setOpen(false); return }
 
+    const p = calcPosition()
+    setPos(p)
     setOpen(true)
     setLoading(true)
     try {
@@ -99,9 +163,10 @@ export function NotificationBell({ count: _initialCount, href }: Props) {
   const unread = notifCount
 
   return (
-    <div className="relative" ref={containerRef}>
+    <>
       {/* ── Botón campanita ── */}
       <button
+        ref={buttonRef}
         onClick={handleToggle}
         className={cn(
           "relative p-2 rounded-xl transition-all duration-150",
@@ -119,27 +184,28 @@ export function NotificationBell({ count: _initialCount, href }: Props) {
         )}
       </button>
 
-      {/* ── Dropdown panel ── */}
-      {open && (
+      {/* ── Dropdown portal-like con position:fixed ── */}
+      {open && pos && (
         <>
-          {/* Overlay sutil en mobile */}
+          {/* Backdrop solo en mobile */}
           <div
-            className="fixed inset-0 z-40 lg:hidden"
+            className="fixed inset-0 z-[998] bg-black/20 sm:bg-transparent sm:pointer-events-none"
             onClick={() => setOpen(false)}
           />
 
           <div
-            className={cn(
-              "absolute z-50 bg-white rounded-2xl shadow-2xl border border-gray-100",
-              "w-[calc(100vw-32px)] max-w-sm",
-              // En desktop sidebar (izquierda) → despliega a la derecha
-              // En header mobile (derecha) → despliega a la izquierda
-              "right-0 top-full mt-2",
-            )}
-            style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.12)" }}
+            ref={dropdownRef}
+            className="fixed z-[999] bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col"
+            style={{
+              top: pos.top,
+              left: pos.left,
+              width: "min(340px, calc(100vw - 16px))",
+              maxHeight: Math.min(pos.maxHeight, 520),
+              boxShadow: "0 8px 40px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08)",
+            }}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+            {/* ── Header ── */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-gray-900 text-sm">Notificaciones</h3>
                 {unread > 0 && (
@@ -155,11 +221,10 @@ export function NotificationBell({ count: _initialCount, href }: Props) {
                     disabled={markingRead}
                     className="flex items-center gap-1 text-[11px] font-semibold text-orange-500 hover:text-orange-600 disabled:opacity-50 px-2 py-1 rounded-lg hover:bg-orange-50 transition-colors"
                   >
-                    {markingRead ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <CheckCheck className="w-3 h-3" />
-                    )}
+                    {markingRead
+                      ? <Loader2 className="w-3 h-3 animate-spin" />
+                      : <CheckCheck className="w-3 h-3" />
+                    }
                     Marcar leídas
                   </button>
                 )}
@@ -172,8 +237,8 @@ export function NotificationBell({ count: _initialCount, href }: Props) {
               </div>
             </div>
 
-            {/* Lista de notificaciones */}
-            <div className="max-h-[420px] overflow-y-auto">
+            {/* ── Lista ── */}
+            <div className="flex-1 overflow-y-auto overscroll-contain">
               {loading ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="w-5 h-5 text-orange-400 animate-spin" />
@@ -191,15 +256,15 @@ export function NotificationBell({ count: _initialCount, href }: Props) {
                       key={n.id}
                       onClick={() => handleNotifClick(n)}
                       className={cn(
-                        "w-full flex items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50",
-                        !n.read && "bg-orange-50/60 hover:bg-orange-50"
+                        "w-full flex items-start gap-3 px-4 py-3 text-left transition-colors",
+                        n.read
+                          ? "hover:bg-gray-50"
+                          : "bg-orange-50/60 hover:bg-orange-50"
                       )}
                     >
-                      {/* Emoji icon */}
                       <span className="text-lg leading-none mt-0.5 shrink-0">
                         {TYPE_ICONS[n.type] ?? "🔔"}
                       </span>
-
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-1">
                           <p className={cn(
@@ -225,8 +290,8 @@ export function NotificationBell({ count: _initialCount, href }: Props) {
               )}
             </div>
 
-            {/* Footer — ver todas */}
-            <div className="border-t border-gray-100 px-4 py-2.5">
+            {/* ── Footer ── */}
+            <div className="border-t border-gray-100 px-4 py-2.5 shrink-0">
               <Link
                 href={href}
                 onClick={() => setOpen(false)}
@@ -239,6 +304,6 @@ export function NotificationBell({ count: _initialCount, href }: Props) {
           </div>
         </>
       )}
-    </div>
+    </>
   )
 }
