@@ -166,6 +166,7 @@ model ProfessionalProfile {
   subscription       ProfessionalSubscription?
   workExperiences    WorkExperience[]
   documents          ProfessionalDocument[]
+  directRequests     ServiceRequest[]       @relation("DirectRequests")
 
   @@map("professional_profiles")
 }
@@ -250,6 +251,10 @@ model ServiceRequest {
   status          RequestStatus @default(OPEN)
   maxApplications Int           @default(5)
   viewCount       Int           @default(0)
+
+  // Solicitud directa a un profesional específico (desde su perfil público)
+  targetProfessionalId String?
+  targetProfessional   ProfessionalProfile? @relation("DirectRequests", fields: [targetProfessionalId], references: [id])
 
   expiresAt   DateTime?
   completedAt DateTime?

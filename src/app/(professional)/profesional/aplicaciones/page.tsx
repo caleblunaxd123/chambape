@@ -16,6 +16,7 @@ import {
   MapPin,
   ChevronRight,
   Mail,
+  UserCheck,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -33,6 +34,7 @@ interface AplicacionItem {
     district: string
     urgency: string
     status: string
+    targetProfessionalId: string | null
     category: { name: string }
     client: { name: string; email: string; phone: string | null }
   }
@@ -212,6 +214,7 @@ export default async function MisAplicacionesPage({ searchParams }: Props) {
             {aplicaciones.map((a) => {
               const s = STATUS_MAP[a.status] ?? STATUS_MAP["PENDING"]
               const isAccepted = a.status === "ACCEPTED"
+              const isDirect = a.request.targetProfessionalId === profile.id
               return (
                 <div
                   key={a.id}
@@ -220,16 +223,25 @@ export default async function MisAplicacionesPage({ searchParams }: Props) {
                     s.border
                   )}
                 >
-                  {/* Top accent bar for accepted proposals */}
+                  {/* Top accent bar */}
                   {isAccepted && <div className="h-1 bg-gradient-to-r from-emerald-400 to-emerald-600" />}
+                  {!isAccepted && isDirect && <div className="h-1 bg-gradient-to-r from-orange-400 to-amber-400" />}
 
                   <div className="p-4 sm:p-5">
                     {/* Request info */}
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex-1 min-w-0">
-                        <span className="text-[11px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
-                          {a.request.category.name}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                          <span className="text-[11px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
+                            {a.request.category.name}
+                          </span>
+                          {isDirect && (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-white bg-orange-500 px-2 py-0.5 rounded-full">
+                              <UserCheck className="w-3 h-3" />
+                              Solicitud directa
+                            </span>
+                          )}
+                        </div>
                         <h3 className="font-bold text-gray-900 text-base mt-2 line-clamp-2 leading-tight group-hover:text-orange-600 transition-colors">
                           {a.request.title}
                         </h3>
@@ -241,12 +253,19 @@ export default async function MisAplicacionesPage({ searchParams }: Props) {
                     </div>
 
                     {/* My proposal details */}
-                    <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 mb-4">
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Mí propuesta</p>
-                      <p className="text-sm text-gray-700 italic leading-relaxed line-clamp-3">
-                        &ldquo;{a.message}&rdquo;
-                      </p>
-                    </div>
+                    {isDirect ? (
+                      <div className="bg-orange-50 border border-orange-100 rounded-xl p-3 mb-4 flex items-center gap-2">
+                        <UserCheck className="w-4 h-4 text-orange-500 shrink-0" />
+                        <p className="text-sm text-orange-700 font-medium">El cliente te eligió directamente · <span className="font-bold">0 créditos</span></p>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 mb-4">
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Mí propuesta</p>
+                        <p className="text-sm text-gray-700 italic leading-relaxed line-clamp-3">
+                          &ldquo;{a.message}&rdquo;
+                        </p>
+                      </div>
+                    )}
 
                     <div className="flex items-center gap-4 text-xs flex-wrap mb-4">
                       <span className="flex items-center gap-1.5 text-gray-500 font-medium">

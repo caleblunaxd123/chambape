@@ -65,6 +65,11 @@ export default async function OportunidadesPage({ searchParams }: Props) {
       categoryId: filterCategoryId ?? { in: categoryIds },
       district: { in: profile.districts },
       ...(urgenciaParam ? { urgency: urgenciaParam as never } : {}),
+      // Excluir solicitudes directas destinadas a OTRO profesional
+      OR: [
+        { targetProfessionalId: null },
+        { targetProfessionalId: profile.id },
+      ],
       NOT: {
         applications: {
           some: { professionalId: profile.id },

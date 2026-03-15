@@ -72,7 +72,8 @@ export async function POST(req: Request) {
     apiSecret
   )
 
-  // documentos y certificados usan resource_type "auto" para soportar PDFs
+  // documentos y certificados usan resource_type "raw" para que los PDFs
+  // se sirvan tal cual (no convertidos a imagen) y el browser los muestre correctamente
   const isDocument = ["documentos", "certificados"].includes(parsed.data.folder)
 
   return NextResponse.json({
@@ -83,6 +84,6 @@ export async function POST(req: Request) {
     apiKey,
     maxFileSize,
     ocr: params.ocr,
-    resourceType: isDocument ? "auto" : "image",
+    resourceType: isDocument ? "raw" : "image",
   })
 }

@@ -139,7 +139,7 @@ export function ProfessionalCard({ professional: pro }: Props) {
             Ver perfil
           </Link>
           <Link
-            href={`/solicitudes/nueva${mainCategory ? `?categoria=${mainCategory.slug}` : ""}`}
+            href={`/solicitudes/nueva?proId=${pro.id}${mainCategory ? `&categoria=${mainCategory.slug}` : ""}`}
             className="flex-1 text-center text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 py-2 rounded-lg transition-colors"
             onClick={(e) => e.stopPropagation()}
           >

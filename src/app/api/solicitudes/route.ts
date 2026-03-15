@@ -21,6 +21,8 @@ const createSchema = z.object({
   budgetMax: z.number().min(0).optional(),
   preferredTime: z.string().max(100).optional(),
   photos: z.array(z.string().url()).max(3).default([]),
+  // Solicitud directa: ID del perfil del profesional destino
+  targetProfessionalId: z.string().optional(),
 })
 
 // ─── POST ─────────────────────────────────────────────────────────
@@ -62,33 +64,78 @@ export async function POST(req: Request) {
   // Calcular expiración: 30 días desde hoy
   const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
 
-  // Crear la solicitud
-  const solicitud = await db.serviceRequest.create({
-    data: {
-      clientId: user.id,
-      categoryId: category.id,
-      subcategoryId,
-      title: data.title,
-      description: data.description,
-      photos: data.photos,
-      district: data.district,
-      address: data.address,
-      latitude: data.latitude,
-      longitude: data.longitude,
-      urgency: data.urgency,
-      budgetMin: data.budgetMin,
-      budgetMax: data.budgetMax,
-      preferredTime: data.preferredTime,
-      status: "OPEN",
-      expiresAt,
-    },
+  // Validar profesional destino si es solicitud directa
+  let targetPro: { id: string; userId: string; user: { name: string } } | null = null
+  if (data.targetProfessionalId) {
+    targetPro = await db.professionalProfile.findUnique({
+      where: { id: data.targetProfessionalId, status: { in: ["ACTIVE", "VERIFIED"] } },
+      select: { id: true, userId: true, user: { select: { name: true } } },
+    })
+    if (!targetPro) {
+      return NextResponse.json({ error: "Profesional no encontrado" }, { status: 404 })
+    }
+    // El cliente no puede enviarse solicitud a sí mismo
+    if (targetPro.userId === user.id) {
+      return NextResponse.json({ error: "No puedes enviarte una solicitud a ti mismo" }, { status: 400 })
+    }
+  }
+
+  // Crear solicitud + (si es directa) auto-aplicar al profesional
+  const solicitud = await db.$transaction(async (tx) => {
+    const req = await tx.serviceRequest.create({
+      data: {
+        clientId: user.id,
+        categoryId: category.id,
+        subcategoryId,
+        title: data.title,
+        description: data.description,
+        photos: data.photos,
+        district: data.district,
+        address: data.address,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        urgency: data.urgency,
+        budgetMin: data.budgetMin,
+        budgetMax: data.budgetMax,
+        preferredTime: data.preferredTime,
+        status: "OPEN",
+        expiresAt,
+        ...(targetPro ? { targetProfessionalId: targetPro.id } : {}),
+      },
+    })
+
+    // Solicitud directa: auto-aplicar al profesional sin cobrar créditos
+    if (targetPro) {
+      await tx.serviceApplication.create({
+        data: {
+          request: { connect: { id: req.id } },
+          professional: { connect: { id: targetPro.id } },
+          message: "",
+          creditsSpent: 0,
+          status: "PENDING",
+        },
+      })
+    }
+
+    return req
   })
 
-  // Notificar a los profesionales de esa categoría y zona
-  // (en background — no bloqueamos la respuesta)
-  notificarProfesionales(solicitud.id, category.id, data.district, category.name).catch(
-    (err) => console.error("[NOTIFICAR_PROFESIONALES]", err)
-  )
+  if (targetPro) {
+    // Notificar SOLO al profesional destino
+    const { createNotification } = await import("@/lib/notifications")
+    createNotification({
+      userId: targetPro.userId,
+      type: "NEW_APPLICATION",
+      title: "Nueva solicitud directa 📩",
+      message: `${user.name} te envió una solicitud directa: "${data.title}"`,
+      link: `/profesional/solicitudes/${solicitud.id}`,
+    }).catch(() => {})
+  } else {
+    // Solicitud general: notificar a profesionales de la zona
+    notificarProfesionales(solicitud.id, category.id, data.district, category.name).catch(
+      (err) => console.error("[NOTIFICAR_PROFESIONALES]", err)
+    )
+  }
 
   return NextResponse.json({ id: solicitud.id }, { status: 201 })
 }

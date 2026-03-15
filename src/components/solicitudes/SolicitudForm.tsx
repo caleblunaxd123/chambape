@@ -82,10 +82,11 @@ const URGENCIA_OPTS = [
 ]
 
 interface Props {
-  defaultCategoria?: string  // slug pre-seleccionado via query param
+  defaultCategoria?: string       // slug pre-seleccionado via query param
+  targetProfessionalId?: string   // solicitud directa desde perfil del profesional
 }
 
-export function SolicitudForm({ defaultCategoria }: Props) {
+export function SolicitudForm({ defaultCategoria, targetProfessionalId }: Props) {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -225,6 +226,7 @@ export function SolicitudForm({ defaultCategoria }: Props) {
           photos: fotos,
           latitude: mapLocation?.lat,
           longitude: mapLocation?.lng,
+          ...(targetProfessionalId ? { targetProfessionalId } : {}),
         }),
       })
 
@@ -234,7 +236,11 @@ export function SolicitudForm({ defaultCategoria }: Props) {
         return
       }
 
-      toast.success("¡Solicitud publicada! Los profesionales recibirán una notificación.")
+      toast.success(
+        targetProfessionalId
+          ? "¡Solicitud enviada! El profesional recibirá una notificación."
+          : "¡Solicitud publicada! Los profesionales recibirán una notificación."
+      )
       router.push(`/solicitudes/${json.id}`)
     } catch {
       toast.error("Error de conexión. Intenta de nuevo.")

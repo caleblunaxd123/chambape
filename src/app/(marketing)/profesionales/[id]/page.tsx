@@ -176,7 +176,7 @@ export default async function PerfilPublicoPage({ params }: Props) {
                   </Link>
                 )}
                 <Link
-                  href="/solicitudes/nueva"
+                  href={`/solicitudes/nueva?proId=${id}`}
                   className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition-colors shadow-sm"
                 >
                   <MessageCircle className="w-4 h-4" />

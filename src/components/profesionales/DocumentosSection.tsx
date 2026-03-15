@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { FileText, Trash2, Loader2, Plus, X, ExternalLink, ShieldCheck, Award, FileUser } from "lucide-react"
+import { FileText, Trash2, Loader2, Plus, X, ExternalLink, ShieldCheck, Award, FileUser, Download } from "lucide-react"
 import { DocumentUpload } from "@/components/shared/DocumentUpload"
 import { cn } from "@/lib/utils"
 
@@ -48,6 +48,16 @@ const TYPE_CONFIG = {
     titlePlaceholder: "Certificado de antecedentes penales",
     single: true,
   },
+}
+
+// Para PDFs guardados antes del fix (resource_type "auto" → /image/upload/),
+// los abrimos via Google Docs Viewer para que el browser los muestre correctamente.
+// Los nuevos (resource_type "raw" → /raw/upload/) se abren directamente.
+function getPdfViewUrl(fileUrl: string): string {
+  if (fileUrl.toLowerCase().endsWith(".pdf") && fileUrl.includes("/image/upload/")) {
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=false`
+  }
+  return fileUrl
 }
 
 type DocType = keyof typeof TYPE_CONFIG
@@ -186,13 +196,24 @@ export function DocumentosSection({ documentos: initial }: Props) {
                     </div>
                   </div>
                   <a
-                    href={doc.fileUrl}
+                    href={getPdfViewUrl(doc.fileUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
+                    title="Ver documento"
                     className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
                   >
                     <ExternalLink className="w-4 h-4" />
                   </a>
+                  {doc.fileUrl.toLowerCase().endsWith(".pdf") && (
+                    <a
+                      href={doc.fileUrl}
+                      download
+                      title="Descargar PDF"
+                      className="p-1.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors"
+                    >
+                      <Download className="w-4 h-4" />
+                    </a>
+                  )}
                   <button
                     type="button"
                     onClick={() => handleDelete(doc.id)}

@@ -28,6 +28,14 @@ function getFileKind(fileName: string | null, fileUrl: string | null): FileKind 
   return "other"
 }
 
+// PDFs guardados con /image/upload/ (antes del fix) los abrimos via Google Docs Viewer
+function getPdfViewUrl(fileUrl: string): string {
+  if (fileUrl.includes("/image/upload/")) {
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=false`
+  }
+  return fileUrl
+}
+
 function FileBubble({ fileUrl, fileName, isMe }: { fileUrl: string; fileName: string | null; isMe: boolean }) {
   const kind = getFileKind(fileName, fileUrl)
 
@@ -53,9 +61,11 @@ function FileBubble({ fileUrl, fileName, isMe }: { fileUrl: string; fileName: st
 
   const labelMap: Record<FileKind, string> = { image: "Imagen", pdf: "PDF", word: "Word", other: "Archivo" }
 
+  const href = kind === "pdf" ? getPdfViewUrl(fileUrl) : fileUrl
+
   return (
     <a
-      href={fileUrl}
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
