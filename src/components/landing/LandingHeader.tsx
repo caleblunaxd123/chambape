@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Menu, X, Wrench } from "lucide-react"
+import { Menu, X } from "lucide-react"
+import { Logo } from "@/components/shared/Logo"
 
 const NAV_LINKS = [
   { href: "/#como-funciona", label: "Cómo funciona" },
@@ -30,17 +31,7 @@ export function LandingHeader() {
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center shadow-md"
-            style={{ background: "var(--brand-gradient)" }}
-          >
-            <Wrench className="w-4 h-4 text-white" />
-          </div>
-          <span className="brand-name text-[1.2rem]" style={{ color: scrolled ? "#111" : "#111" }}>
-            Chamba<span className="text-orange-500">Pe</span>
-          </span>
-        </Link>
+        <Logo href="/" size="sm" className="shrink-0" />
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">

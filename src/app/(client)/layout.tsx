@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { requireAuth } from "@/lib/auth"
+import { Logo } from "@/components/shared/Logo"
 import { UserButton } from "@clerk/nextjs"
 import { LayoutDashboard, PlusCircle, ClipboardList, Heart, Bell, Users, MessageCircle } from "lucide-react"
 import { redirect } from "next/navigation"
@@ -27,14 +28,7 @@ export default async function ClientLayout({ children }: { children: React.React
     <div className="min-h-screen bg-[#f8f7f5]">
       {/* ── Header móvil ─────────────────────────── */}
       <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 h-14 flex items-center justify-between lg:hidden sticky top-0 z-40 shadow-sm">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm" style={{ background: "var(--brand-gradient)" }}>
-            <span className="text-white font-black text-xs leading-none" style={{ fontFamily: "Outfit, sans-serif" }}>C</span>
-          </div>
-          <span className="brand-name text-base text-gray-900">
-            Chamba<span className="text-orange-500">Pe</span>
-          </span>
-        </Link>
+        <Logo href="/dashboard" size="xs" />
         <div className="flex items-center gap-1.5">
           <NotificationBell count={unreadCount} href="/notificaciones" />
           <UserButton />

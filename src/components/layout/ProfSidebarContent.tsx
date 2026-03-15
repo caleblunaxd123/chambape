@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { UserButton } from "@clerk/nextjs"
 import { LayoutDashboard, Search, FileText, Coins, User, MessageCircle } from "lucide-react"
 import { NotificationBell } from "@/components/ui/NotificationBell"
+import { Logo } from "@/components/shared/Logo"
 
 const NAV_ITEMS = [
   {
@@ -59,14 +60,7 @@ export function ProfSidebarContent({ unreadCount, credits, planName }: ProfSideb
     <>
       {/* Logo */}
       <div className="px-4 py-5 border-b border-gray-100">
-        <Link href="/profesional/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm" style={{ background: "var(--brand-gradient)" }}>
-            <span className="text-white font-black text-sm leading-none" style={{ fontFamily: "Outfit, sans-serif" }}>C</span>
-          </div>
-          <span className="brand-name text-[1.15rem] text-gray-900">
-            Chamba<span className="text-orange-500">Pe</span>
-          </span>
-        </Link>
+        <Logo href="/profesional/dashboard" size="sm" />
         <div className="flex flex-wrap items-center gap-1.5 mt-1.5 pl-[2.375rem]">
           <span className="text-[11px] text-gray-400 font-medium">Panel profesional</span>
           <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-100">

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { UserButton } from "@clerk/nextjs"
 import { LayoutDashboard, PlusCircle, ClipboardList, Heart, Users, MessageCircle } from "lucide-react"
 import { NotificationBell } from "@/components/ui/NotificationBell"
+import { Logo } from "@/components/shared/Logo"
 
 const NAV_ITEMS = [
   {
@@ -57,14 +58,7 @@ export function ClientSidebarContent({ unreadCount }: ClientSidebarContentProps)
     <>
       {/* Logo */}
       <div className="px-4 py-5 border-b border-gray-100">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm" style={{ background: "var(--brand-gradient)" }}>
-            <span className="text-white font-black text-sm leading-none" style={{ fontFamily: "Outfit, sans-serif" }}>C</span>
-          </div>
-          <span className="brand-name text-[1.15rem] text-gray-900">
-            Chamba<span className="text-orange-500">Pe</span>
-          </span>
-        </Link>
+        <Logo href="/dashboard" size="sm" />
         <p className="text-[11px] text-gray-400 mt-1 pl-[2.375rem]">Panel de cliente</p>
       </div>
 

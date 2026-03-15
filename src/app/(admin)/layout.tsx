@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth"
 import Link from "next/link"
 import { LayoutDashboard, Users, ClipboardList, Star, Tag, CreditCard, Menu } from "lucide-react"
+import { Logo } from "@/components/shared/Logo"
 import { AdminSignOutButton } from "@/components/admin/AdminSignOutButton"
 
 const NAV = [
@@ -28,12 +29,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       {/* ── Header móvil ─────────────────────────── */}
       <header className="lg:hidden bg-[#0d1224] border-b border-white/5 px-4 h-14 flex items-center justify-between sticky top-0 z-40 backdrop-blur-md">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm" style={{ background: "var(--brand-gradient)" }}>
-            <span className="text-white font-black text-xs leading-none" style={{ fontFamily: "Outfit, sans-serif" }}>C</span>
-          </div>
-          <span className="brand-name text-base text-white">
-            Chamba<span className="text-orange-400">Pe</span>
-          </span>
+          <Logo size="xs" variant="dark" />
           <span className="text-[10px] font-bold uppercase tracking-wider text-orange-400 bg-orange-400/10 border border-orange-400/20 px-2 py-0.5 rounded-full">
             Admin
           </span>
@@ -46,19 +42,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <aside className="hidden lg:flex flex-col w-64 bg-[#0d1224] fixed inset-y-0 left-0 z-50 border-r border-white/5">
           {/* Logo */}
           <div className="px-5 py-5 border-b border-white/5">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style={{ background: "var(--brand-gradient)" }}>
-                <span className="text-white font-black text-base leading-none" style={{ fontFamily: "Outfit, sans-serif" }}>C</span>
-              </div>
-              <div>
-                <p className="brand-name text-[1.15rem] text-white leading-none">
-                  Chamba<span className="text-orange-400">Pe</span>
-                </p>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-orange-400/80">
-                  Admin
-                </span>
-              </div>
-            </div>
+            <Logo size="sm" variant="dark" href="/admin/dashboard" />
+            <span className="block text-[10px] font-bold uppercase tracking-widest text-orange-400/80 mt-1 pl-[2.5rem]">
+              Admin
+            </span>
           </div>
 
           {/* Nav */}

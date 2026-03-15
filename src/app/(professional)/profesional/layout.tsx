@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { requireProfessional } from "@/lib/auth"
+import { Logo } from "@/components/shared/Logo"
 import { UserButton } from "@clerk/nextjs"
 import { LayoutDashboard, Search, FileText, Coins, User, Bell, MessageCircle } from "lucide-react"
 import { db } from "@/lib/db"
@@ -26,14 +27,7 @@ export default async function ProfesionalLayout({ children }: { children: React.
     <div className="min-h-screen bg-[#f8f7f5]">
       {/* ── Header móvil ─────────────────────────── */}
       <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 h-14 flex items-center justify-between lg:hidden sticky top-0 z-40 shadow-sm">
-        <Link href="/profesional/dashboard" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm" style={{ background: "var(--brand-gradient)" }}>
-            <span className="text-white font-black text-xs leading-none" style={{ fontFamily: "Outfit, sans-serif" }}>C</span>
-          </div>
-          <span className="brand-name text-base text-gray-900">
-            Chamba<span className="text-orange-500">Pe</span>
-          </span>
-        </Link>
+        <Logo href="/profesional/dashboard" size="xs" />
         <div className="flex items-center gap-1.5">
           <span className="flex items-center gap-1 text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full">
             <Coins className="w-3 h-3" />
