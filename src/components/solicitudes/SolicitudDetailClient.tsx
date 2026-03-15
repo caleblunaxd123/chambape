@@ -13,14 +13,15 @@ interface Aplicacion {
   creditsSpent?: number
   status: string
   createdAt: Date | string
+  conversationId?: string | null
   professional: {
     id: string
     bio?: string | null
     avatarUrl?: string | null
-    rating?: number
-    totalReviews?: number
-    jobsCompleted?: number
-    user: { name: string; email: string; phone?: string | null }
+    avgRating?: number | null
+    totalReviews?: number | null
+    totalJobs?: number | null
+    user: { id: string; name: string; email: string; phone?: string | null }
     portfolioImages: Array<{ url: string; caption: string | null }>
   }
 }

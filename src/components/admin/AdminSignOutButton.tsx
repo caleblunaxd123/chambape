@@ -13,7 +13,7 @@ export function AdminSignOutButton({ compact = false }: Props) {
   if (compact) {
     return (
       <button
-        onClick={() => signOut({ redirectUrl: "/sign-in" })}
+        onClick={() => signOut({ redirectUrl: "/iniciar-sesion" })}
         className="text-gray-500 hover:text-white transition-colors p-1.5"
         title="Cerrar sesión"
       >
@@ -25,7 +25,7 @@ export function AdminSignOutButton({ compact = false }: Props) {
   return (
     <div className="px-3 py-4 border-t border-white/5">
       <button
-        onClick={() => signOut({ redirectUrl: "/sign-in" })}
+        onClick={() => signOut({ redirectUrl: "/iniciar-sesion" })}
         className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-all"
       >
         <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0">

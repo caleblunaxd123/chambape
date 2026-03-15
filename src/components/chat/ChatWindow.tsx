@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { toast } from "sonner"
-import { Send, Loader2, Paperclip, FileText, X, ArrowLeft, Smile, FileImage, File } from "lucide-react"
+import { Send, Loader2, Paperclip, FileText, X, ArrowLeft, Smile, FileImage, File, Play, Pause, Mic } from "lucide-react"
 import { cn, getInitials } from "@/lib/utils"
 import { DocumentUpload } from "@/components/shared/DocumentUpload"
 import { pusherClient } from "@/lib/pusher"
@@ -43,27 +43,119 @@ function getDownloadUrl(fileUrl: string): string {
   return fileUrl
 }
 
+// ── Reproductor de audio custom ───────────────────────────────
+function AudioPlayer({ fileUrl, fileName, isMe }: { fileUrl: string; fileName: string | null; isMe: boolean }) {
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState<number | null>(null)
+  const [progress, setProgress] = useState(0)
+
+  // Intentar extraer duración del fileName: "voice-45s.webm"
+  useEffect(() => {
+    const match = (fileName ?? "").match(/voice-(\d+)s\.webm/)
+    if (match) setDuration(parseInt(match[1], 10))
+  }, [fileName])
+
+  function formatTime(s: number) {
+    const m = Math.floor(s / 60)
+    return `${m}:${Math.floor(s % 60).toString().padStart(2, "0")}`
+  }
+
+  function togglePlay() {
+    const a = audioRef.current
+    if (!a) return
+    if (isPlaying) { a.pause() } else { a.play() }
+  }
+
+  function onTimeUpdate() {
+    const a = audioRef.current
+    if (!a) return
+    setCurrentTime(a.currentTime)
+    setProgress(a.duration ? (a.currentTime / a.duration) * 100 : 0)
+  }
+
+  function onLoadedMetadata() {
+    const a = audioRef.current
+    if (!a) return
+    if (isFinite(a.duration)) setDuration(Math.round(a.duration))
+  }
+
+  function onEnded() {
+    setIsPlaying(false)
+    setCurrentTime(0)
+    setProgress(0)
+    if (audioRef.current) audioRef.current.currentTime = 0
+  }
+
+  function seek(e: React.MouseEvent<HTMLDivElement>) {
+    const a = audioRef.current
+    if (!a || !a.duration) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const ratio = (e.clientX - rect.left) / rect.width
+    a.currentTime = ratio * a.duration
+  }
+
+  const displayTime = isPlaying ? formatTime(currentTime) : duration !== null ? formatTime(duration) : "--:--"
+
+  return (
+    <div className={cn(
+      "flex items-center gap-2.5 px-3 py-2.5 rounded-2xl w-full max-w-[260px]",
+      isMe ? "bg-orange-500 text-white rounded-br-md" : "bg-white border border-gray-100 shadow-sm rounded-bl-md"
+    )}>
+      <audio
+        ref={audioRef}
+        src={fileUrl}
+        onTimeUpdate={onTimeUpdate}
+        onLoadedMetadata={onLoadedMetadata}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onEnded={onEnded}
+        preload="metadata"
+      />
+
+      {/* Play/pause */}
+      <button
+        type="button"
+        onClick={togglePlay}
+        className={cn(
+          "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors",
+          isMe ? "bg-white/20 hover:bg-white/30" : "bg-orange-100 hover:bg-orange-200"
+        )}
+      >
+        {isPlaying
+          ? <Pause className={cn("w-3.5 h-3.5", isMe ? "text-white" : "text-orange-600")} />
+          : <Play className={cn("w-3.5 h-3.5 translate-x-px", isMe ? "text-white" : "text-orange-600")} />
+        }
+      </button>
+
+      {/* Waveform + progreso */}
+      <div className="flex-1 flex flex-col gap-1 min-w-0">
+        <div
+          className={cn("relative h-1.5 rounded-full cursor-pointer", isMe ? "bg-white/30" : "bg-gray-200")}
+          onClick={seek}
+        >
+          <div
+            className={cn("absolute left-0 top-0 h-full rounded-full transition-all", isMe ? "bg-white" : "bg-orange-500")}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="flex items-center gap-1">
+          <Mic className={cn("w-2.5 h-2.5 flex-shrink-0", isMe ? "text-white/70" : "text-gray-400")} />
+          <span className={cn("text-[10px] font-medium tabular-nums", isMe ? "text-white/80" : "text-gray-400")}>
+            {displayTime}
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function FileBubble({ fileUrl, fileName, isMe }: { fileUrl: string; fileName: string | null; isMe: boolean }) {
   const kind = getFileKind(fileName, fileUrl)
 
   if (kind === "audio") {
-    return (
-      <div className={cn(
-        "px-2 py-2 rounded-2xl w-full max-w-[260px]",
-        isMe ? "bg-orange-500/10" : "bg-white border border-gray-100"
-      )}>
-        <audio 
-          src={fileUrl} 
-          controls 
-          className="w-full h-8 outline-none"
-        />
-        {fileName && fileName !== "voice-message.webm" && (
-          <p className={cn("text-[10px] mt-1 px-1 truncate", isMe ? "text-orange-200" : "text-gray-400")}>
-            {fileName}
-          </p>
-        )}
-      </div>
-    )
+    return <AudioPlayer fileUrl={fileUrl} fileName={fileName} isMe={isMe} />
   }
 
   if (kind === "image") {
@@ -150,7 +242,7 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fileUrl: url,
-          fileName: "voice-message.webm",
+          fileName: `voice-${Math.round(duration)}s.webm`,
           fileType: "AUDIO"
         }),
       })
@@ -308,31 +400,37 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
     <div className="flex flex-col h-[calc(100vh-56px)] lg:h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow-sm">
-        <button type="button" onClick={() => router.push(backHref)} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="w-9 h-9 rounded-xl overflow-hidden bg-orange-100 flex-shrink-0">
-          {otherUser.avatarUrl ? (
-            <Image src={otherUser.avatarUrl} alt={otherUser.name} width={36} height={36} className="object-cover w-full h-full" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-orange-600 font-bold text-sm">
-              {getInitials(otherUser.name)}
-            </div>
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-900 text-sm truncate">{otherUser.name}</p>
-          <p className={cn(
-            "text-xs font-medium transition-colors",
-            isTyping ? "text-orange-500" : "text-gray-400"
-          )}>
-            {isTyping ? "Escribiendo..." : ""}
-          </p>
+        <div className="w-full max-w-3xl mx-auto flex items-center gap-3">
+          <button type="button" onClick={() => router.push(backHref)} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="w-9 h-9 rounded-xl overflow-hidden bg-orange-100 flex-shrink-0">
+            {otherUser.avatarUrl ? (
+              <Image src={otherUser.avatarUrl} alt={otherUser.name} width={36} height={36} className="object-cover w-full h-full" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-orange-600 font-bold text-sm">
+                {getInitials(otherUser.name)}
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-gray-900 text-sm truncate">{otherUser.name}</p>
+            <p className={cn(
+              "text-xs font-medium transition-colors",
+              isTyping ? "text-orange-500" : "text-gray-400"
+            )}>
+              {isTyping ? "Escribiendo..." : ""}
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Mensajes */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto">
+        <div className="flex flex-col min-h-full px-4 py-4 max-w-3xl mx-auto w-full">
+          {/* Espaciador: empuja los mensajes hacia abajo cuando hay pocos */}
+          <div className="flex-1" />
+          <div className="space-y-2">
         {messages.length === 0 && (
           <div className="text-center py-16">
             <div className="text-4xl mb-3">💬</div>
@@ -416,7 +514,7 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
         ))}
         
         {isTyping && (
-          <div className="flex items-center gap-2 my-2 px-2">
+          <div className="flex items-center gap-2 mt-2 px-2">
             <div className="w-6 h-6 rounded-full overflow-hidden bg-orange-100 flex-shrink-0 relative">
               {otherUser.avatarUrl ? (
                 <Image src={otherUser.avatarUrl} alt={otherUser.name} fill sizes="24px" className="object-cover" />
@@ -435,7 +533,9 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
           </div>
         )}
         <div ref={bottomRef} />
-      </div>
+        </div>{/* fin space-y-2 */}
+        </div>{/* fin flex-col min-h-full */}
+      </div>{/* fin overflow-y-auto */}
 
       {/* Archivo pendiente preview */}
       {pendingFile && (
@@ -503,59 +603,61 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
       )}
 
       {/* Input bar */}
-      <div className="bg-white border-t border-gray-100 px-3 py-2.5 flex items-end gap-2">
-        <button
-          type="button"
-          onClick={() => { setShowAttach((v) => !v); setShowStickers(false) }}
-          className={cn(
-            "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
-            showAttach ? "bg-orange-100 text-orange-500" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-          )}
-        >
-          <Paperclip className="w-4 h-4" />
-        </button>
+      <div className="bg-white border-t border-gray-100 px-3 py-2.5">
+        <div className="flex items-end gap-2 max-w-3xl mx-auto w-full">
+          <button
+            type="button"
+            onClick={() => { setShowAttach((v) => !v); setShowStickers(false) }}
+            className={cn(
+              "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
+              showAttach ? "bg-orange-100 text-orange-500" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+            )}
+          >
+            <Paperclip className="w-4 h-4" />
+          </button>
 
-        <button
-          type="button"
-          onClick={() => { setShowStickers((v) => !v); setShowAttach(false) }}
-          className={cn(
-            "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
-            showStickers ? "bg-orange-100 text-orange-500" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-          )}
-        >
-          <Smile className="w-4 h-4" />
-        </button>
+          <button
+            type="button"
+            onClick={() => { setShowStickers((v) => !v); setShowAttach(false) }}
+            className={cn(
+              "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
+              showStickers ? "bg-orange-100 text-orange-500" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+            )}
+          >
+            <Smile className="w-4 h-4" />
+          </button>
 
-        {!isRecording && (
-          <VoiceRecorder 
-            onRecordingComplete={(url, dur) => {
-              sendAudio(url, dur)
-            }}
-            onCancel={() => setIsRecording(false)}
-            disabled={sending}
+          {!isRecording && (
+            <VoiceRecorder
+              onRecordingComplete={(url, dur) => {
+                sendAudio(url, dur)
+              }}
+              onCancel={() => setIsRecording(false)}
+              disabled={sending}
+            />
+          )}
+
+          <textarea
+            ref={textareaRef}
+            value={text}
+            onChange={handleTextChange}
+            onKeyDown={onKey}
+            placeholder="Escribe un mensaje..."
+            rows={1}
+            maxLength={2000}
+            className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-300 resize-none min-h-[40px] max-h-32 overflow-y-auto"
+            style={{ lineHeight: "1.4" }}
           />
-        )}
 
-        <textarea
-          ref={textareaRef}
-          value={text}
-          onChange={handleTextChange}
-          onKeyDown={onKey}
-          placeholder="Escribe un mensaje..."
-          rows={1}
-          maxLength={2000}
-          className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-300 resize-none min-h-[40px] max-h-32 overflow-y-auto"
-          style={{ lineHeight: "1.4" }}
-        />
-
-        <button
-          type="button"
-          onClick={() => sendMessage()}
-          disabled={sending || (!text.trim() && !pendingFile)}
-          className="w-9 h-9 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-colors shadow-sm"
-        >
-          {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-        </button>
+          <button
+            type="button"
+            onClick={() => sendMessage()}
+            disabled={sending || (!text.trim() && !pendingFile)}
+            className="w-9 h-9 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-colors shadow-sm"
+          >
+            {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
     </div>
   )

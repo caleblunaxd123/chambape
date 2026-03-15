@@ -31,7 +31,7 @@ export default async function AdminDashboardPage() {
     db.serviceRequest.count({ where: { status: "COMPLETED" } }),
     db.review.count({ where: { hidden: false } }),
     db.creditTransaction.aggregate({
-      where: { type: { in: ["PURCHASE", "SUBSCRIPTION_PAYMENT"] } },
+      where: { type: "PURCHASE", amountPen: { not: null } },
       _sum: { amountPen: true },
     }),
     db.professionalProfile.count({

@@ -67,14 +67,31 @@ export function LandingHeader() {
           </Link>
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          className={`md:hidden p-2 rounded-lg transition-colors ${scrolled ? "text-gray-700 hover:bg-gray-100" : "text-gray-700 hover:bg-white/60"}`}
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Menú"
-        >
-          {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        {/* Mobile: botones visibles + hamburguesa */}
+        <div className="flex items-center gap-1 md:hidden">
+          <Link
+            href="/iniciar-sesion"
+            className={`text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+              scrolled ? "text-gray-700 hover:bg-gray-100" : "text-gray-700 hover:bg-white/60"
+            }`}
+          >
+            Entrar
+          </Link>
+          <Link
+            href="/registrarse"
+            className="text-xs font-bold text-white px-3 py-1.5 rounded-xl"
+            style={{ background: "var(--brand-gradient)" }}
+          >
+            Gratis
+          </Link>
+          <button
+            className={`p-2 rounded-lg transition-colors ${scrolled ? "text-gray-700 hover:bg-gray-100" : "text-gray-700 hover:bg-white/60"}`}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Menú"
+          >
+            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile dropdown */}

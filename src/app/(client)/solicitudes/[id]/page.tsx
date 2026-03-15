@@ -47,8 +47,8 @@ export default async function SolicitudDetailPage({ params }: Props) {
         include: {
           professional: {
             include: {
-              user: { select: { name: true, email: true, phone: true } },
-              portfolioImages: { take: 3 },
+              user: { select: { id: true, name: true, email: true, phone: true } },
+              portfolioImages: { take: 6 },
             },
           },
         },
@@ -65,6 +65,15 @@ export default async function SolicitudDetailPage({ params }: Props) {
 
   // Solo el dueño puede ver esta página
   if (solicitud.clientId !== user.id) redirect("/solicitudes")
+
+  // Buscar conversación existente con el profesional aceptado
+  const acceptedApp = solicitud.applications.find((a) => a.status === "ACCEPTED")
+  const existingConv = acceptedApp
+    ? await db.conversation.findFirst({
+        where: { clientId: user.id, professionalUserId: acceptedApp.professional.user.id },
+        select: { id: true },
+      })
+    : null
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
@@ -178,7 +187,10 @@ export default async function SolicitudDetailPage({ params }: Props) {
         <SolicitudDetailClient
           solicitudId={id}
           solicitudStatus={solicitud.status}
-          aplicaciones={solicitud.applications}
+          aplicaciones={solicitud.applications.map((a) => ({
+            ...a,
+            conversationId: a.status === "ACCEPTED" ? (existingConv?.id ?? null) : null,
+          }))}
           totalAplicaciones={solicitud._count.applications}
           existingReview={!!solicitud.review}
         />
