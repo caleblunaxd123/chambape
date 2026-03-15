@@ -100,3 +100,30 @@ export async function enviarEmailCreditosBajos(
     `,
   })
 }
+
+export async function enviarEmailNuevaOportunidad(
+  to: string,
+  nombreProfesional: string,
+  categoria: string,
+  distrito: string,
+  requestId: string
+) {
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: `¡Nueva oportunidad en ${distrito}! 🔧`,
+    html: `
+      <h2>Hola ${nombreProfesional},</h2>
+      <p>Hay un nuevo trabajo de <strong>${categoria}</strong> disponible en <strong>${distrito}</strong>.</p>
+      <p>Sé uno de los primeros en postular para aumentar tus posibilidades de ser elegido.</p>
+      <a href="${process.env.NEXT_PUBLIC_APP_URL}/profesional/oportunidades/${requestId}"
+         style="background:#f97316;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:16px">
+        Ver detalles de la chamba
+      </a>
+      <p style="margin-top:24px;color:#6b7280;font-size:14px">
+        El equipo de ChambaPe 🔧
+      </p>
+    `,
+  })
+}
+

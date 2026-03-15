@@ -256,10 +256,46 @@ export default async function PerfilPublicoPage({ params }: Props) {
 
             {/* Bio */}
             {profile.bio && (
-              <p className="text-sm text-gray-600 leading-relaxed bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3">
+              <p className="text-sm text-gray-600 leading-relaxed bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 mb-4">
                 {profile.bio}
               </p>
             )}
+
+            {/* Nivel y Membresía Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className={cn(
+                "p-4 rounded-2xl border flex items-center gap-4 transition-all",
+                badge.nivel === "elite" ? "bg-violet-50 border-violet-100" :
+                badge.nivel === "oro"   ? "bg-amber-50 border-amber-100" :
+                badge.nivel === "plata" ? "bg-slate-50 border-slate-200" :
+                "bg-gray-50 border-gray-100"
+              )}>
+                <div className="text-3xl">{badge.emoji}</div>
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Estatus</p>
+                  <p className={cn("text-base font-black leading-none", 
+                    badge.nivel === "elite" ? "text-violet-700" : 
+                    badge.nivel === "oro" ? "text-amber-700" : 
+                    "text-gray-900"
+                  )}>{badge.label}</p>
+                </div>
+              </div>
+
+              <div className={cn(
+                "p-4 rounded-2xl border flex items-center gap-4 transition-all",
+                hasPro ? "bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-100" : "bg-gray-50 border-gray-100 opacity-60"
+              )}>
+                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", hasPro ? "bg-indigo-500 text-white shadow-lg shadow-indigo-200" : "bg-gray-200 text-gray-400")}>
+                  <Zap className={cn("w-5 h-5", hasPro && "fill-current")} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Membresía</p>
+                  <p className={cn("text-base font-black leading-none", hasPro ? "text-indigo-700" : "text-gray-600")}>
+                    {hasPro ? profile.subscription!.plan.name : "Plan Estándar"}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

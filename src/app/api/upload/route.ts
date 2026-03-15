@@ -15,9 +15,11 @@ const schema = z.object({
     "solicitudes",
     "documentos",
     "certificados",
+    "mensajes",
   ]),
   // Extensión del archivo (sin punto), solo para carpetas de documentos
   ext: z.string().regex(/^[a-zA-Z0-9]{1,10}$/).optional(),
+  resourceType: z.enum(["image", "video", "raw", "auto"]).optional(),
 })
 
 export async function POST(req: Request) {
@@ -57,14 +59,25 @@ export async function POST(req: Request) {
     solicitudes:    8 * 1024 * 1024,
     documentos:    10 * 1024 * 1024,   // 10 MB
     certificados:  10 * 1024 * 1024,
+    mensajes:      10 * 1024 * 1024,
   }
   const maxFileSize = MAX_FILE_SIZES[parsed.data.folder] ?? 5 * 1024 * 1024
 
   // Nota: max_file_size NO va en la firma — solo es válido en upload presets (unsigned).
   // Para signed uploads se valida solo del lado cliente antes de subir.
   const isDocument = ["documentos", "certificados"].includes(parsed.data.folder)
+  const isAudio = parsed.data.resourceType === "video" || parsed.data.ext === "webm" || parsed.data.ext === "mp3"
 
   const params: Record<string, string | number> = { timestamp }
+
+  // Si viene resourceType explícito, lo respetamos
+  let resourceType = parsed.data.resourceType ?? (isDocument ? "raw" : "image")
+  if (parsed.data.folder === "mensajes" && !parsed.data.resourceType) {
+    // Si no se especifica y es mensajes, dejamos que auto detecte o forzamos según extensión
+    if (parsed.data.ext?.match(/jpg|jpeg|png|webp|gif/)) resourceType = "image"
+    else if (parsed.data.ext?.match(/pdf|doc|docx/)) resourceType = "raw"
+    else resourceType = "auto"
+  }
 
   // Documentos/certificados: resource_type "raw" para no hacer procesamiento ni moderación.
   // Incluimos el public_id con extensión para que la URL sea accesible directamente.
@@ -77,8 +90,8 @@ export async function POST(req: Request) {
     params.folder = folder
   }
 
-  // Si es el frente del DNI, solicitamos OCR de Google
-  if (parsed.data.folder === "dniFrente") {
+  // Si es material de verificación (DNI o Selfie), solicitamos OCR de Google
+  if (["dniFrente", "dniReverso", "selfieDni"].includes(parsed.data.folder)) {
     params.ocr = "adv_ocr"
   }
 
@@ -97,6 +110,6 @@ export async function POST(req: Request) {
     apiKey,
     maxFileSize,
     ocr: params.ocr,
-    resourceType: isDocument ? "raw" : "image",
+    resourceType,
   })
 }

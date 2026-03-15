@@ -14,37 +14,55 @@ interface DocumentState {
 
 interface Props {
   dniEsperado?: string
+  userName?: string
   defaultValues?: Partial<DocumentState>
   onNext: (data: DocumentState) => Promise<void>
   loading: boolean
 }
 
-export function Step4Verificacion({ dniEsperado, defaultValues, onNext, loading }: Props) {
+export function Step4Verificacion({ dniEsperado, userName, defaultValues, onNext, loading }: Props) {
   const [docs, setDocs] = useState<Partial<DocumentState>>(defaultValues ?? {})
-  const [verificando, setVerificando] = useState(false)
-  const [errorValidacion, setErrorValidacion] = useState<string | null>(null)
+  const [errores, setErrores] = useState<Record<string, string | null>>({})
 
-  function handleOCR(result: any) {
+  function validateOCR(result: any, type: keyof DocumentState) {
     if (!dniEsperado) return
 
-    // Estructura de Cloudinary con Google OCR
     const annotations = result?.info?.ocr?.adv_ocr?.data?.[0]?.textAnnotations
-    const fullText = annotations?.[0]?.description ?? ""
+    const fullText = (annotations?.[0]?.description ?? "").toUpperCase()
 
     if (!fullText) {
-      console.warn("No se detectó texto en el DNI")
+      console.warn(`No se detectó texto en ${type}`)
       return
     }
 
-    // Buscamos un bloque de 8 números que coincida con el dniEsperado
-    // El DNI en Perú tiene 8 dígitos.
-    const dniEncontrado = fullText.includes(dniEsperado)
+    const newErrores = { ...errores }
+    
+    // 1. Validar Número de DNI (Coincidencia parcial o total)
+    const hasDni = fullText.includes(dniEsperado)
+    
+    // 2. Validar Nombre (si es el frente)
+    let nameMatch = true
+    if (type === "dniFrontUrl" && userName) {
+      const nameParts = userName.toUpperCase().split(" ").filter(p => p.length > 2)
+      // Buscamos que al menos 2 partes del nombre aparezcan en el OCR
+      const matches = nameParts.filter(part => fullText.includes(part))
+      nameMatch = matches.length >= 2
+    }
 
-    if (!dniEncontrado) {
-      setErrorValidacion(`El DNI en la foto no parece coincidir con el número ${dniEsperado} que ingresaste.`)
+    if (!hasDni && type !== "dniBackUrl") {
+      newErrores[type] = `El DNI en la foto no coincide con ${dniEsperado}.`
+    } else if (type === "dniFrontUrl" && !nameMatch) {
+      newErrores[type] = `Los nombres en el DNI no parecen coincidir con "${userName}".`
     } else {
-      setErrorValidacion(null)
-      toast.success("DNI validado visualmente con éxito")
+      newErrores[type] = null
+    }
+
+    setErrores(newErrores)
+    
+    if (!newErrores[type]) {
+      toast.success(`${type === "dniFrontUrl" ? "Frente" : type === "dniBackUrl" ? "Reverso" : "Selfie"} validado con éxito`)
+    } else {
+      toast.error(newErrores[type])
     }
   }
 
@@ -53,10 +71,13 @@ export function Step4Verificacion({ dniEsperado, defaultValues, onNext, loading 
       toast.error("Debes subir los 3 documentos requeridos")
       return
     }
-    if (errorValidacion) {
-      toast.error("No puedes continuar: " + errorValidacion)
+    
+    const hasErrors = Object.values(errores).some(e => e !== null)
+    if (hasErrors) {
+      toast.error("Por favor, corrige los errores en las fotos antes de continuar.")
       return
     }
+
     onNext(docs as DocumentState)
   }
 
@@ -78,22 +99,20 @@ export function Step4Verificacion({ dniEsperado, defaultValues, onNext, loading 
       <ImageUpload
         folder="dniFrente"
         label="Foto del DNI — parte frontal"
-        hint="Asegúrate de que el número de DNI se vea claramente"
+        hint="Asegúrate de que el número de DNI y tus nombres se vean claramente"
         aspectRatio="landscape"
         value={docs.dniFrontUrl}
-        onResult={handleOCR}
+        onResult={(res) => validateOCR(res, "dniFrontUrl")}
         onChange={(url) => setDocs((prev) => ({ ...prev, dniFrontUrl: url }))}
         onRemove={() => {
           setDocs((prev) => ({ ...prev, dniFrontUrl: undefined }))
-          setErrorValidacion(null)
+          setErrores(prev => ({ ...prev, dniFrontUrl: null }))
         }}
       />
-
-      {errorValidacion && (
-        <div className="bg-red-50 text-red-600 p-3 rounded-xl text-xs flex gap-2 animate-in fade-in slide-in-from-top-1">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <p>{errorValidacion}</p>
-        </div>
+      {errores.dniFrontUrl && (
+        <p className="text-[10px] text-red-500 font-bold bg-red-50 p-2 rounded-lg flex gap-1.5 items-center">
+          <AlertCircle className="w-3 h-3" /> {errores.dniFrontUrl}
+        </p>
       )}
 
       {/* DNI Reverso */}
@@ -103,20 +122,38 @@ export function Step4Verificacion({ dniEsperado, defaultValues, onNext, loading 
         hint="Incluye la parte con el código de barras"
         aspectRatio="landscape"
         value={docs.dniBackUrl}
+        onResult={(res) => validateOCR(res, "dniBackUrl")}
         onChange={(url) => setDocs((prev) => ({ ...prev, dniBackUrl: url }))}
-        onRemove={() => setDocs((prev) => ({ ...prev, dniBackUrl: undefined }))}
+        onRemove={() => {
+          setDocs((prev) => ({ ...prev, dniBackUrl: undefined }))
+          setErrores(prev => ({ ...prev, dniBackUrl: null }))
+        }}
       />
+      {errores.dniBackUrl && (
+        <p className="text-[10px] text-red-500 font-bold bg-red-50 p-2 rounded-lg flex gap-1.5 items-center">
+          <AlertCircle className="w-3 h-3" /> {errores.dniBackUrl}
+        </p>
+      )}
 
       {/* Selfie con DNI */}
       <ImageUpload
         folder="selfieDni"
         label="Selfie sosteniendo tu DNI"
-        hint="Tómate una foto sosteniendo tu DNI cerca de tu rostro. Asegúrate de que tu cara y el DNI se vean claros."
+        hint="Tómate una foto sosteniendo tu DNI cerca de tu rostro. Identificaremos el carnet para mayor seguridad."
         aspectRatio="portrait"
         value={docs.selfieDniUrl}
+        onResult={(res) => validateOCR(res, "selfieDniUrl")}
         onChange={(url) => setDocs((prev) => ({ ...prev, selfieDniUrl: url }))}
-        onRemove={() => setDocs((prev) => ({ ...prev, selfieDniUrl: undefined }))}
+        onRemove={() => {
+          setDocs((prev) => ({ ...prev, selfieDniUrl: undefined }))
+          setErrores(prev => ({ ...prev, selfieDniUrl: null }))
+        }}
       />
+      {errores.selfieDniUrl && (
+        <p className="text-[10px] text-red-500 font-bold bg-red-50 p-2 rounded-lg flex gap-1.5 items-center">
+          <AlertCircle className="w-3 h-3" /> {errores.selfieDniUrl}
+        </p>
+      )}
 
       {/* Aviso de revisión */}
       <div className="flex gap-2 bg-amber-50 rounded-xl p-3 text-xs text-amber-700">
@@ -130,7 +167,7 @@ export function Step4Verificacion({ dniEsperado, defaultValues, onNext, loading 
       <Button
         type="button"
         onClick={handleSubmit}
-        disabled={loading || !allUploaded || !!errorValidacion}
+        disabled={loading || !allUploaded || Object.values(errores).some(e => e !== null)}
         className="w-full bg-orange-500 hover:bg-orange-600 text-white h-11"
       >
         {loading ? "Guardando..." : "Continuar"}

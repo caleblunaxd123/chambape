@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { Users, ClipboardList, Coins, TrendingUp, Clock, CheckCircle2, AlertCircle } from "lucide-react"
 import Link from "next/link"
+import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard"
 
 export const metadata = { title: "Panel Maestro — ChambaPe" }
 
@@ -172,6 +173,14 @@ export default async function AdminDashboardPage() {
             <p className="text-4xl font-black text-slate-900" style={{ fontFamily: "Outfit, sans-serif" }}>{solicitudesAbiertas}</p>
             <p className="text-sm text-slate-400 mt-2 font-bold">Solicitudes abiertas</p>
           </div>
+        </div>
+{/* Analytics Section */}
+        <div className="animate-fade-up">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1.5 h-8 bg-orange-500 rounded-full" />
+            <h2 className="text-3xl font-black text-slate-900" style={{ fontFamily: "Outfit, sans-serif" }}>Analíticas de Plataforma</h2>
+          </div>
+          <AnalyticsDashboard />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

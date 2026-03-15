@@ -48,6 +48,7 @@ export default async function RegistrarseProfesionalPage() {
       <OnboardingWizard
         currentStep={currentStep}
         categoryMap={categoryMap}
+        userName={user.name}
         initialData={{
           step1: profile ? { dni: profile.dni ?? "", phone: user.phone ?? "" } : undefined,
           step2: profile ? { selectedCategoryIds: profile.categories.map((c) => c.categoryId) } : undefined,

@@ -33,10 +33,11 @@ interface InitialData {
 interface Props {
   currentStep: number
   categoryMap: Record<string, string>
+  userName: string
   initialData: InitialData
 }
 
-export function OnboardingWizard({ currentStep: initialStep, categoryMap, initialData }: Props) {
+export function OnboardingWizard({ currentStep: initialStep, categoryMap, userName, initialData }: Props) {
   const router = useRouter()
   const [step, setStep] = useState(initialStep)
   const [loading, setLoading] = useState(false)
@@ -225,6 +226,7 @@ export function OnboardingWizard({ currentStep: initialStep, categoryMap, initia
         {step === 4 && (
           <Step4Verificacion
             dniEsperado={wizardData.step1?.dni}
+            userName={userName}
             defaultValues={wizardData.step4}
             onNext={(data) => handleNext(4, data)}
             loading={loading}

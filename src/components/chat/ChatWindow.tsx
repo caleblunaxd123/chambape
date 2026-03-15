@@ -8,6 +8,7 @@ import { Send, Loader2, Paperclip, FileText, X, ArrowLeft, Smile, FileImage, Fil
 import { cn, getInitials } from "@/lib/utils"
 import { DocumentUpload } from "@/components/shared/DocumentUpload"
 import { pusherClient } from "@/lib/pusher"
+import { VoiceRecorder } from "./VoiceRecorder"
 
 // ── Sticker sets ──────────────────────────────────────────────
 const STICKER_SETS = [
@@ -18,16 +19,19 @@ const STICKER_SETS = [
 ]
 
 // ── File type helpers ─────────────────────────────────────────
-type FileKind = "image" | "pdf" | "word" | "other"
+type FileKind = "image" | "pdf" | "word" | "audio" | "other"
 
 function getFileKind(fileName: string | null, fileUrl: string | null): FileKind {
   // Intentar detectar por fileName primero (más confiable, tiene extensión original)
-  const name = fileName ?? ""
-  const urlName = fileUrl ?? ""
-  const ext = (name || urlName).split(".").pop()?.toLowerCase() ?? ""
+  const name = (fileName ?? "").toLowerCase()
+  const urlName = (fileUrl ?? "").toLowerCase()
+  const ext = (name || urlName).split(".").pop() ?? ""
+  
   if (["jpg","jpeg","png","webp","gif"].includes(ext)) return "image"
   if (ext === "pdf") return "pdf"
   if (["doc","docx"].includes(ext)) return "word"
+  if (["webm","mp3","wav","m4a","ogg"].includes(ext)) return "audio"
+  
   // Sin extensión pero en /raw/upload/ → probablemente PDF (documentos/certificados)
   if (urlName.includes("/raw/upload/") && !ext) return "pdf"
   return "other"
@@ -41,6 +45,26 @@ function getDownloadUrl(fileUrl: string): string {
 
 function FileBubble({ fileUrl, fileName, isMe }: { fileUrl: string; fileName: string | null; isMe: boolean }) {
   const kind = getFileKind(fileName, fileUrl)
+
+  if (kind === "audio") {
+    return (
+      <div className={cn(
+        "px-2 py-2 rounded-2xl w-full max-w-[260px]",
+        isMe ? "bg-orange-500/10" : "bg-white border border-gray-100"
+      )}>
+        <audio 
+          src={fileUrl} 
+          controls 
+          className="w-full h-8 outline-none"
+        />
+        {fileName && fileName !== "voice-message.webm" && (
+          <p className={cn("text-[10px] mt-1 px-1 truncate", isMe ? "text-orange-200" : "text-gray-400")}>
+            {fileName}
+          </p>
+        )}
+      </div>
+    )
+  }
 
   if (kind === "image") {
     return (
@@ -62,7 +86,7 @@ function FileBubble({ fileUrl, fileName, isMe }: { fileUrl: string; fileName: st
     ? <span className="text-xl leading-none">📝</span>
     : <File className="w-5 h-5 text-gray-500" />
 
-  const labelMap: Record<FileKind, string> = { image: "Imagen", pdf: "PDF", word: "Word", other: "Archivo" }
+  const labelMap: Record<FileKind, string> = { image: "Imagen", pdf: "PDF", word: "Word", audio: "Nota de voz", other: "Archivo" }
 
   const href = (kind === "pdf" || kind === "word" || kind === "other") ? getDownloadUrl(fileUrl) : fileUrl
 
@@ -115,6 +139,31 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const lastCreatedAt = useRef<string>(initialMessages.at(-1)?.createdAt ?? new Date(0).toISOString())
+
+  const [isRecording, setIsRecording] = useState(false)
+
+  async function sendAudio(url: string, duration: number) {
+    setSending(true)
+    try {
+      const res = await fetch(`/api/chat/${conversationId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileUrl: url,
+          fileName: "voice-message.webm",
+          fileType: "AUDIO"
+        }),
+      })
+      if (!res.ok) { toast.error("Error al enviar audio"); return }
+      const newMsg: ChatMessage = await res.json()
+      lastCreatedAt.current = newMsg.createdAt
+    } catch {
+      toast.error("Error de conexión")
+    } finally {
+      setSending(false)
+      setIsRecording(false)
+    }
+  }
 
   function scrollToBottom(smooth = true) {
     bottomRef.current?.scrollIntoView({ behavior: smooth ? "smooth" : "auto" })
@@ -471,6 +520,16 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
         >
           <Smile className="w-4 h-4" />
         </button>
+
+        {!isRecording && (
+          <VoiceRecorder 
+            onRecordingComplete={(url, dur) => {
+              sendAudio(url, dur)
+            }}
+            onCancel={() => setIsRecording(false)}
+            disabled={sending}
+          />
+        )}
 
         <textarea
           ref={textareaRef}

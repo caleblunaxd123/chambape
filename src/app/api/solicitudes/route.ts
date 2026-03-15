@@ -172,22 +172,29 @@ async function notificarProfesionales(
   district: string,
   categoryName: string
 ) {
-  // Buscar profesionales activos en esa categoría y zona
+  // Buscar profesionales activos en esa categoría y zona, incluyendo sus datos de usuario
   const profesionales = await db.professionalProfile.findMany({
     where: {
       status: { in: ["VERIFIED", "ACTIVE"] },
       districts: { has: district },
       categories: { some: { categoryId } },
     },
-    select: { userId: true },
+    select: { 
+      userId: true,
+      user: { select: { email: true, name: true } }
+    },
     take: 50,  // máximo 50 notificaciones por solicitud
   })
 
+  const { enviarEmailNuevaOportunidad } = await import("@/lib/resend")
   const distritoNombre = getDistritoName(district)
 
   await Promise.allSettled(
-    profesionales.map((p) =>
-      notifyNuevaSolicitud(p.userId, categoryName, distritoNombre, requestId)
-    )
+    profesionales.flatMap((p) => [
+      // Notificación en la plataforma (Realtime Pusher)
+      notifyNuevaSolicitud(p.userId, categoryName, distritoNombre, requestId),
+      // Alerta por Email
+      enviarEmailNuevaOportunidad(p.user.email, p.user.name, categoryName, distritoNombre, requestId)
+    ])
   )
 }

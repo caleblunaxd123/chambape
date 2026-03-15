@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,9 +7,367 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ─────────────────────────────────────────
-// ENUMS
-// ─────────────────────────────────────────
+model User {
+  id                        String               @id @default(cuid())
+  clerkId                   String               @unique
+  email                     String               @unique
+  phone                     String?
+  name                      String
+  role                      UserRole             @default(CLIENT)
+  avatarUrl                 String?
+  active                    Boolean              @default(true)
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+  clientConversations       Conversation[]       @relation("ClientConversations")
+  professionalConversations Conversation[]       @relation("ProfessionalConversations")
+  favorites                 Favorite[]
+  sentMessages              Message[]            @relation("SentMessages")
+  notifications             Notification[]
+  professionalProfile       ProfessionalProfile?
+  reviewsGiven              Review[]             @relation("ClientReviews")
+  requests                  ServiceRequest[]     @relation("ClientRequests")
+
+  @@map("users")
+}
+
+model ProfessionalProfile {
+  id                 String                    @id @default(cuid())
+  userId             String                    @unique
+  dni                String                    @unique
+  dniFrontUrl        String?
+  dniBackUrl         String?
+  selfieDniUrl       String?
+  bio                String?
+  avatarUrl          String?
+  districts          String[]
+  avgRating          Float                     @default(0)
+  totalJobs          Int                       @default(0)
+  credits            Int                       @default(0)
+  status             ProfessionalStatus        @default(PENDING_VERIFICATION)
+  verifiedAt         DateTime?
+  rejectionReason    String?
+  onboardingStep     Int                       @default(1)
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  creditTransactions CreditTransaction[]
+  favoritedBy        Favorite[]
+  portfolioImages    PortfolioImage[]
+  badges             ProfessionalBadge[]
+  categories         ProfessionalCategory[]
+  documents          ProfessionalDocument[]
+  user               User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription       ProfessionalSubscription?
+  reviewsReceived    Review[]                  @relation("ProfessionalReviews")
+  applications       ServiceApplication[]
+  directRequests     ServiceRequest[]          @relation("DirectRequests")
+  workExperiences    WorkExperience[]
+
+  @@map("professional_profiles")
+}
+
+model ServiceCategory {
+  id            String                 @id @default(cuid())
+  name          String
+  slug          String                 @unique
+  icon          String
+  description   String?
+  creditCost    Int                    @default(5)
+  active        Boolean                @default(true)
+  order         Int                    @default(0)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  professionals ProfessionalCategory[]
+  requests      ServiceRequest[]
+  subcategories ServiceSubcategory[]
+
+  @@map("service_categories")
+}
+
+model ServiceSubcategory {
+  id         String           @id @default(cuid())
+  categoryId String
+  name       String
+  slug       String           @unique
+  active     Boolean          @default(true)
+  order      Int              @default(0)
+  createdAt  DateTime         @default(now())
+  requests   ServiceRequest[]
+  category   ServiceCategory  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("service_subcategories")
+}
+
+model ProfessionalCategory {
+  professionalId String
+  categoryId     String
+  assignedAt     DateTime            @default(now())
+  category       ServiceCategory     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@id([professionalId, categoryId])
+  @@map("professional_categories")
+}
+
+model ServiceRequest {
+  id                   String               @id @default(cuid())
+  clientId             String
+  categoryId           String
+  subcategoryId        String?
+  title                String
+  description          String
+  photos               String[]
+  district             String
+  urgency              Urgency              @default(FLEXIBLE)
+  budgetMin            Int?
+  budgetMax            Int?
+  preferredTime        String?
+  status               RequestStatus        @default(OPEN)
+  maxApplications      Int                  @default(5)
+  viewCount            Int                  @default(0)
+  expiresAt            DateTime?
+  completedAt          DateTime?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  address              String?
+  latitude             Float?
+  longitude            Float?
+  targetProfessionalId String?
+  review               Review?
+  applications         ServiceApplication[]
+  category             ServiceCategory      @relation(fields: [categoryId], references: [id])
+  client               User                 @relation("ClientRequests", fields: [clientId], references: [id])
+  subcategory          ServiceSubcategory?  @relation(fields: [subcategoryId], references: [id])
+  targetProfessional   ProfessionalProfile? @relation("DirectRequests", fields: [targetProfessionalId], references: [id])
+
+  @@map("service_requests")
+}
+
+model ServiceApplication {
+  id             String              @id @default(cuid())
+  requestId      String
+  professionalId String
+  message        String
+  proposedBudget Int?
+  creditsSpent   Int
+  status         ApplicationStatus   @default(PENDING)
+  acceptedAt     DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  review         Review?
+  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id])
+  request        ServiceRequest      @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, professionalId])
+  @@map("service_applications")
+}
+
+model Review {
+  id                  String              @id @default(cuid())
+  requestId           String              @unique
+  applicationId       String              @unique
+  clientId            String
+  professionalId      String
+  rating              Int
+  comment             String
+  professionalReply   String?
+  repliedAt           DateTime?
+  reportedBy          String?
+  reportReason        String?
+  moderatedAt         DateTime?
+  hidden              Boolean             @default(false)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  clientRatingComment String?
+  clientRatingScore   Int?
+  application         ServiceApplication  @relation(fields: [applicationId], references: [id])
+  client              User                @relation("ClientReviews", fields: [clientId], references: [id])
+  professional        ProfessionalProfile @relation("ProfessionalReviews", fields: [professionalId], references: [id])
+  request             ServiceRequest      @relation(fields: [requestId], references: [id])
+
+  @@map("reviews")
+}
+
+model CreditPackage {
+  id        String   @id @default(cuid())
+  name      String
+  credits   Int
+  pricePen  Int
+  savings   String?
+  popular   Boolean  @default(false)
+  active    Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("credit_packages")
+}
+
+model SubscriptionPlan {
+  id              String                     @id @default(cuid())
+  mpPlanId        String?                    @unique
+  name            String
+  creditsPerMonth Int
+  pricePen        Int
+  active          Boolean                    @default(true)
+  features        String[]
+  createdAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @updatedAt
+  subscriptions   ProfessionalSubscription[]
+
+  @@map("subscription_plans")
+}
+
+model ProfessionalSubscription {
+  id               String              @id @default(cuid())
+  professionalId   String              @unique
+  planId           String
+  mpSubscriptionId String?             @unique
+  status           SubscriptionStatus  @default(ACTIVE)
+  nextBillingDate  DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  plan             SubscriptionPlan    @relation(fields: [planId], references: [id])
+  professional     ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@map("professional_subscriptions")
+}
+
+model CreditTransaction {
+  id             String              @id @default(cuid())
+  professionalId String
+  type           TransactionType
+  credits        Int
+  amountPen      Int?
+  balance        Int
+  description    String
+  packageId      String?
+  requestId      String?
+  culqiChargeId  String?
+  metadata       Json?
+  createdAt      DateTime            @default(now())
+  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id])
+
+  @@map("credit_transactions")
+}
+
+model PortfolioImage {
+  id             String              @id @default(cuid())
+  professionalId String
+  url            String
+  caption        String?
+  order          Int                 @default(0)
+  createdAt      DateTime            @default(now())
+  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@map("portfolio_images")
+}
+
+model Badge {
+  id            String              @id @default(cuid())
+  slug          String              @unique
+  name          String
+  description   String
+  icon          String
+  professionals ProfessionalBadge[]
+
+  @@map("badges")
+}
+
+model ProfessionalBadge {
+  professionalId String
+  badgeId        String
+  awardedAt      DateTime            @default(now())
+  badge          Badge               @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@id([professionalId, badgeId])
+  @@map("professional_badges")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  link      String?
+  read      Boolean          @default(false)
+  readAt    DateTime?
+  metadata  Json?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model Conversation {
+  id                 String    @id @default(cuid())
+  clientId           String
+  professionalUserId String
+  lastMessageAt      DateTime  @default(now())
+  createdAt          DateTime  @default(now())
+  client             User      @relation("ClientConversations", fields: [clientId], references: [id], onDelete: Cascade)
+  professionalUser   User      @relation("ProfessionalConversations", fields: [professionalUserId], references: [id], onDelete: Cascade)
+  messages           Message[]
+
+  @@unique([clientId, professionalUserId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String           @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String?
+  fileUrl        String?
+  fileType       MessageFileType?
+  fileName       String?
+  readAt         DateTime?
+  createdAt      DateTime         @default(now())
+  conversation   Conversation     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User             @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model WorkExperience {
+  id             String              @id @default(cuid())
+  professionalId String
+  company        String
+  role           String
+  startYear      Int
+  endYear        Int?
+  description    String?
+  createdAt      DateTime            @default(now())
+  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@map("work_experiences")
+}
+
+model ProfessionalDocument {
+  id             String              @id @default(cuid())
+  professionalId String
+  type           DocumentType
+  title          String
+  fileUrl        String
+  isPublic       Boolean             @default(true)
+  createdAt      DateTime            @default(now())
+  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@map("professional_documents")
+}
+
+model Favorite {
+  id             String              @id @default(cuid())
+  userId         String
+  professionalId String
+  createdAt      DateTime            @default(now())
+  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, professionalId])
+  @@map("favorites")
+}
 
 enum UserRole {
   CLIENT
@@ -80,6 +436,7 @@ enum DocumentType {
 enum MessageFileType {
   IMAGE
   PDF
+  AUDIO
   OTHER
 }
 
@@ -88,471 +445,4 @@ enum Urgency {
   THIS_WEEK
   THIS_MONTH
   FLEXIBLE
-}
-
-// ─────────────────────────────────────────
-// USUARIOS
-// ─────────────────────────────────────────
-
-model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String   @unique
-  phone     String?
-  name      String
-  role      UserRole @default(CLIENT)
-  avatarUrl String?
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  professionalProfile       ProfessionalProfile?
-  requests                  ServiceRequest[]      @relation("ClientRequests")
-  reviewsGiven              Review[]              @relation("ClientReviews")
-  notifications             Notification[]
-  favorites                 Favorite[]
-  clientConversations       Conversation[]        @relation("ClientConversations")
-  professionalConversations Conversation[]        @relation("ProfessionalConversations")
-  sentMessages              Message[]             @relation("SentMessages")
-
-  @@map("users")
-}
-
-// ─────────────────────────────────────────
-// PERFIL PROFESIONAL
-// ─────────────────────────────────────────
-
-model ProfessionalProfile {
-  id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Identidad y verificación
-  dni          String  @unique
-  dniFrontUrl  String?
-  dniBackUrl   String?
-  selfieDniUrl String?
-
-  // Info pública
-  bio       String?
-  avatarUrl String?
-
-  // Cobertura (slugs de distritos)
-  districts String[]
-
-  // Estadísticas
-  avgRating Float @default(0)
-  totalJobs Int   @default(0)
-  credits   Int   @default(0)
-
-  // Estado
-  status          ProfessionalStatus @default(PENDING_VERIFICATION)
-  verifiedAt      DateTime?
-  rejectionReason String?
-
-  // Progreso del wizard de onboarding (1-6)
-  onboardingStep Int @default(1)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  categories         ProfessionalCategory[]
-  applications       ServiceApplication[]
-  reviewsReceived    Review[]               @relation("ProfessionalReviews")
-  creditTransactions CreditTransaction[]
-  portfolioImages    PortfolioImage[]
-  badges             ProfessionalBadge[]
-  favoritedBy        Favorite[]
-  subscription       ProfessionalSubscription?
-  workExperiences    WorkExperience[]
-  documents          ProfessionalDocument[]
-  directRequests     ServiceRequest[]       @relation("DirectRequests")
-
-  @@map("professional_profiles")
-}
-
-// ─────────────────────────────────────────
-// CATEGORÍAS DE SERVICIOS
-// ─────────────────────────────────────────
-
-model ServiceCategory {
-  id          String  @id @default(cuid())
-  name        String
-  slug        String  @unique
-  icon        String
-  description String?
-  creditCost  Int     @default(5)
-  active      Boolean @default(true)
-  order       Int     @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  subcategories ServiceSubcategory[]
-  professionals ProfessionalCategory[]
-  requests      ServiceRequest[]
-
-  @@map("service_categories")
-}
-
-model ServiceSubcategory {
-  id         String          @id @default(cuid())
-  categoryId String
-  category   ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  name       String
-  slug       String          @unique
-  active     Boolean         @default(true)
-  order      Int             @default(0)
-
-  createdAt DateTime @default(now())
-
-  requests ServiceRequest[]
-
-  @@map("service_subcategories")
-}
-
-model ProfessionalCategory {
-  professionalId String
-  categoryId     String
-  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
-  category       ServiceCategory     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  assignedAt     DateTime            @default(now())
-
-  @@id([professionalId, categoryId])
-  @@map("professional_categories")
-}
-
-// ─────────────────────────────────────────
-// SOLICITUDES DE SERVICIO
-// ─────────────────────────────────────────
-
-model ServiceRequest {
-  id            String              @id @default(cuid())
-  clientId      String
-  client        User                @relation("ClientRequests", fields: [clientId], references: [id])
-  categoryId    String
-  category      ServiceCategory     @relation(fields: [categoryId], references: [id])
-  subcategoryId String?
-  subcategory   ServiceSubcategory? @relation(fields: [subcategoryId], references: [id])
-
-  title         String
-  description   String
-  photos        String[]
-
-  district      String
-  address       String?  // Dirección de referencia (calle, número, referencia)
-  latitude      Float?
-  longitude     Float?
-  urgency       Urgency @default(FLEXIBLE)
-  budgetMin     Int?
-  budgetMax     Int?
-  preferredTime String?
-
-  status          RequestStatus @default(OPEN)
-  maxApplications Int           @default(5)
-  viewCount       Int           @default(0)
-
-  // Solicitud directa a un profesional específico (desde su perfil público)
-  targetProfessionalId String?
-  targetProfessional   ProfessionalProfile? @relation("DirectRequests", fields: [targetProfessionalId], references: [id])
-
-  expiresAt   DateTime?
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  applications ServiceApplication[]
-  review       Review?
-
-  @@map("service_requests")
-}
-
-// ─────────────────────────────────────────
-// APLICACIONES / PROPUESTAS
-// ─────────────────────────────────────────
-
-model ServiceApplication {
-  id             String              @id @default(cuid())
-  requestId      String
-  request        ServiceRequest      @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  professionalId String
-  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id])
-
-  message        String
-  proposedBudget Int?
-  creditsSpent   Int
-
-  status     ApplicationStatus @default(PENDING)
-  acceptedAt DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  review Review?
-
-  @@unique([requestId, professionalId])
-  @@map("service_applications")
-}
-
-// ─────────────────────────────────────────
-// RESEÑAS
-// ─────────────────────────────────────────
-
-model Review {
-  id             String              @id @default(cuid())
-  requestId      String              @unique
-  request        ServiceRequest      @relation(fields: [requestId], references: [id])
-  applicationId  String              @unique
-  application    ServiceApplication  @relation(fields: [applicationId], references: [id])
-  clientId       String
-  client         User                @relation("ClientReviews", fields: [clientId], references: [id])
-  professionalId String
-  professional   ProfessionalProfile @relation("ProfessionalReviews", fields: [professionalId], references: [id])
-
-  rating            Int
-  comment           String
-  professionalReply String?
-  repliedAt         DateTime?
-
-  // Calificación del cliente por el profesional
-  clientRatingScore   Int?
-  clientRatingComment String?
-
-  reportedBy   String?
-  reportReason String?
-  moderatedAt  DateTime?
-  hidden       Boolean  @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("reviews")
-}
-
-// ─────────────────────────────────────────
-// SISTEMA DE CRÉDITOS
-// ─────────────────────────────────────────
-
-model CreditPackage {
-  id       String  @id @default(cuid())
-  name     String
-  credits  Int
-  pricePen Int
-  savings  String?
-  popular  Boolean @default(false)
-  active   Boolean @default(true)
-  order    Int     @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("credit_packages")
-}
-
-model SubscriptionPlan {
-  id              String   @id @default(cuid())
-  mpPlanId        String?  @unique // ID del plan preapproval en MercadoPago
-  name            String
-  creditsPerMonth Int
-  pricePen        Int
-  active          Boolean  @default(true)
-  features        String[]
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  subscriptions   ProfessionalSubscription[]
-
-  @@map("subscription_plans")
-}
-
-model ProfessionalSubscription {
-  id               String   @id @default(cuid())
-  professionalId   String   @unique
-  professional     ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
-  
-  planId           String
-  plan             SubscriptionPlan @relation(fields: [planId], references: [id])
-  
-  mpSubscriptionId String?  @unique // preapproval_id de MercadoPago
-  status           SubscriptionStatus @default(ACTIVE)
-  nextBillingDate  DateTime?
-  
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  @@map("professional_subscriptions")
-}
-
-model CreditTransaction {
-  id             String              @id @default(cuid())
-  professionalId String
-  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id])
-
-  type          TransactionType
-  credits       Int
-  amountPen     Int?
-  balance       Int
-  description   String
-  packageId     String?
-  requestId     String?
-  culqiChargeId String?
-  metadata      Json?
-
-  createdAt DateTime @default(now())
-
-  @@map("credit_transactions")
-}
-
-// ─────────────────────────────────────────
-// PORTFOLIO E INSIGNIAS
-// ─────────────────────────────────────────
-
-model PortfolioImage {
-  id             String              @id @default(cuid())
-  professionalId String
-  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
-
-  url     String
-  caption String?
-  order   Int     @default(0)
-
-  createdAt DateTime @default(now())
-
-  @@map("portfolio_images")
-}
-
-model Badge {
-  id          String @id @default(cuid())
-  slug        String @unique
-  name        String
-  description String
-  icon        String
-
-  professionals ProfessionalBadge[]
-
-  @@map("badges")
-}
-
-model ProfessionalBadge {
-  professionalId String
-  badgeId        String
-  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
-  badge          Badge               @relation(fields: [badgeId], references: [id], onDelete: Cascade)
-  awardedAt      DateTime            @default(now())
-
-  @@id([professionalId, badgeId])
-  @@map("professional_badges")
-}
-
-// ─────────────────────────────────────────
-// NOTIFICACIONES
-// ─────────────────────────────────────────
-
-model Notification {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  type    NotificationType
-  title   String
-  message String
-  link    String?
-  read    Boolean  @default(false)
-  readAt  DateTime?
-
-  metadata Json?
-
-  createdAt DateTime @default(now())
-
-  @@map("notifications")
-}
-
-// ─────────────────────────────────────────
-// CHAT / MENSAJERÍA
-// ─────────────────────────────────────────
-
-model Conversation {
-  id                 String   @id @default(cuid())
-  clientId           String
-  client             User     @relation("ClientConversations", fields: [clientId], references: [id], onDelete: Cascade)
-  professionalUserId String
-  professionalUser   User     @relation("ProfessionalConversations", fields: [professionalUserId], references: [id], onDelete: Cascade)
-
-  messages      Message[]
-  lastMessageAt DateTime  @default(now())
-  createdAt     DateTime  @default(now())
-
-  @@unique([clientId, professionalUserId])
-  @@map("conversations")
-}
-
-model Message {
-  id             String       @id @default(cuid())
-  conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  senderId       String
-  sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-
-  content  String?
-  fileUrl  String?
-  fileType MessageFileType?
-  fileName String?
-  readAt   DateTime?
-
-  createdAt DateTime @default(now())
-
-  @@map("messages")
-}
-
-// ─────────────────────────────────────────
-// EXPERIENCIA Y DOCUMENTOS
-// ─────────────────────────────────────────
-
-model WorkExperience {
-  id             String              @id @default(cuid())
-  professionalId String
-  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
-
-  company     String
-  role        String
-  startYear   Int
-  endYear     Int?        // null = trabajo actual
-  description String?
-
-  createdAt DateTime @default(now())
-
-  @@map("work_experiences")
-}
-
-model ProfessionalDocument {
-  id             String              @id @default(cuid())
-  professionalId String
-  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
-
-  type     DocumentType
-  title    String
-  fileUrl  String
-  isPublic Boolean @default(true)
-
-  createdAt DateTime @default(now())
-
-  @@map("professional_documents")
-}
-
-// ─────────────────────────────────────────
-// FAVORITOS
-// ─────────────────────────────────────────
-
-model Favorite {
-  id             String @id @default(cuid())
-  userId         String
-  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  professionalId String
-  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@unique([userId, professionalId])
-  @@map("favorites")
 }

@@ -1,5 +1,7 @@
 import { db } from "@/lib/db"
 import { NotificationType } from "@prisma/client"
+import { pusherServer } from "@/lib/pusher"
+import { beamsServer } from "@/lib/pusher-beams"
 
 interface CreateNotificationParams {
   userId: string
@@ -11,7 +13,7 @@ interface CreateNotificationParams {
 }
 
 export async function createNotification(params: CreateNotificationParams) {
-  return db.notification.create({
+  const notification = await db.notification.create({
     data: {
       userId: params.userId,
       type: params.type,
@@ -21,6 +23,40 @@ export async function createNotification(params: CreateNotificationParams) {
       metadata: params.metadata,
     },
   })
+
+  // 1. Trigger realtime notification via Pusher Channels
+  try {
+    await pusherServer.trigger(`user-${params.userId}`, "new-notification", {
+      id: notification.id,
+      title: params.title,
+      message: params.message,
+      type: params.type,
+      link: params.link,
+      createdAt: notification.createdAt,
+    })
+  } catch (error) {
+    console.error("[PUSHER_CHANNELS_ERROR]", error)
+  }
+
+  // 2. Trigger native push notification via Pusher Beams
+  if (beamsServer) {
+    try {
+      await beamsServer.publishToInterests([`user-${params.userId}`], {
+        web: {
+          notification: {
+            title: params.title,
+            body: params.message,
+            deep_link: `${process.env.NEXT_PUBLIC_APP_URL}${params.link || ""}`,
+            icon: `${process.env.NEXT_PUBLIC_APP_URL}/icons/icon-192x192.png`,
+          },
+        },
+      })
+    } catch (error) {
+      console.error("[PUSHER_BEAMS_ERROR]", error)
+    }
+  }
+
+  return notification
 }
 
 // ─── Helpers por tipo de evento ──────────────────────────────────

@@ -61,4 +61,5 @@ export const CLOUDINARY_FOLDERS = {
   solicitudes: "chambape/solicitudes",
   documentos: "chambape/documentos",
   certificados: "chambape/certificados",
+  mensajes: "chambape/mensajes",
 }

@@ -66,8 +66,15 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
             include: { category: { select: { name: true, icon: true, slug: true } } },
             take: 4,
           },
+          subscription: {
+            select: { status: true }
+          }
         },
-        orderBy: [{ avgRating: "desc" }, { totalJobs: "desc" }],
+        orderBy: [
+          { subscription: { status: "asc" } }, // 'ACTIVE' viene antes que nulo/otros en asc? No, Prisma maneja nulls.
+          { avgRating: "desc" }, 
+          { totalJobs: "desc" }
+        ],
         skip: (page - 1) * PAGE_SIZE,
         take: PAGE_SIZE,
       }),

@@ -16,6 +16,7 @@ interface Props {
     districts: string[]
     user: { name: string }
     categories: Array<{ category: { name: string; icon: string; slug: string } }>
+    subscription?: { status: string } | null
   }
 }
 
@@ -37,11 +38,15 @@ export function ProfessionalCard({ professional: pro }: Props) {
   const firstName = pro.user.name.split(" ")[0]
   const mainCategory = pro.categories[0]?.category
   const extraCats = pro.categories.length - 1
+  const isPro = pro.subscription?.status === "ACTIVE"
 
   return (
     <Link
       href={`/profesionales/${pro.id}`}
-      className="group bg-white border border-gray-100 hover:border-orange-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 flex flex-col"
+      className={cn(
+        "group bg-white border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 flex flex-col",
+        isPro ? "border-amber-200 shadow-amber-500/5 ring-1 ring-amber-50" : "border-gray-100 hover:border-orange-200"
+      )}
     >
       {/* Top color bar based on badge */}
       <div className={cn(
@@ -71,9 +76,16 @@ export function ProfessionalCard({ professional: pro }: Props) {
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-gray-900 text-base leading-tight group-hover:text-orange-600 transition-colors truncate">
-              {pro.user.name}
-            </h3>
+            <div className="flex items-center justify-between gap-1">
+              <h3 className="font-bold text-gray-900 text-base leading-tight group-hover:text-orange-600 transition-colors truncate">
+                {pro.user.name}
+              </h3>
+              {isPro && (
+                <span className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md shadow-sm shrink-0">
+                  PRO
+                </span>
+              )}
+            </div>
             {mainCategory && (
               <p className="text-xs text-gray-500 mt-0.5 truncate">
                 {mainCategory.icon} {mainCategory.name}
