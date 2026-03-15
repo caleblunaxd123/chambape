@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
 
 export const dynamic = "force-dynamic"
+export const maxDuration = 60
 
 export async function GET(req: Request) {
   const { userId: clerkId } = await auth()
@@ -23,6 +24,14 @@ export async function GET(req: Request) {
     start(controller) {
       // Ping inicial
       controller.enqueue(encoder.encode(": ping\n\n"))
+
+      // Cerrar conexión a los 55s para evitar timeout de Vercel (límite: 60s)
+      // El EventSource del cliente se reconecta automáticamente
+      const closeTimeout = setTimeout(() => {
+        closed = true
+        clearInterval(interval)
+        try { controller.close() } catch {}
+      }, 55_000)
 
       const interval = setInterval(async () => {
         if (closed) return
@@ -86,6 +95,7 @@ export async function GET(req: Request) {
       req.signal.addEventListener("abort", () => {
         closed = true
         clearInterval(interval)
+        clearTimeout(closeTimeout)
         try { controller.close() } catch {}
       })
     },
