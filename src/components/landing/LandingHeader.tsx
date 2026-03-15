@@ -40,8 +40,8 @@ export function LandingHeader() {
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-        {/* Logo */}
-        <Logo href="/" size="sm" className="shrink-0" />
+        {/* Logo — blanco sobre fondo oscuro, oscuro sobre fondo blanco */}
+        <Logo href="/" size="sm" className="shrink-0" variant={scrolled ? "light" : "dark"} />
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
@@ -50,7 +50,9 @@ export function LandingHeader() {
               key={l.href}
               href={l.href}
               className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${
-                scrolled ? "text-gray-600 hover:text-gray-900 hover:bg-gray-50" : "text-gray-700 hover:text-gray-900 hover:bg-white/60"
+                scrolled
+                  ? "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
               }`}
             >
               {l.label}
@@ -69,7 +71,7 @@ export function LandingHeader() {
                 className={`flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-xl transition-all ${
                   scrolled
                     ? "text-gray-700 hover:text-orange-600 hover:bg-orange-50 border border-gray-200 hover:border-orange-200"
-                    : "text-gray-800 bg-white/80 hover:bg-white hover:text-orange-600 border border-white/30"
+                    : "text-white bg-white/15 hover:bg-white/25 border border-white/30"
                 }`}
               >
                 <LayoutDashboard className="w-4 h-4" />
@@ -82,7 +84,9 @@ export function LandingHeader() {
               <Link
                 href="/iniciar-sesion"
                 className={`text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
-                  scrolled ? "text-gray-600 hover:text-gray-900" : "text-gray-700 hover:text-gray-900"
+                  scrolled
+                    ? "text-gray-600 hover:text-gray-900"
+                    : "text-white/80 hover:text-white"
                 }`}
               >
                 Iniciar sesión
@@ -105,7 +109,9 @@ export function LandingHeader() {
               <Link
                 href={panelHref}
                 className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-lg transition-colors ${
-                  scrolled ? "text-orange-600 bg-orange-50 border border-orange-100" : "text-orange-600 bg-white/80 border border-white/30"
+                  scrolled
+                    ? "text-orange-600 bg-orange-50 border border-orange-100"
+                    : "text-white bg-white/15 border border-white/30"
                 }`}
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
@@ -118,7 +124,7 @@ export function LandingHeader() {
               <Link
                 href="/iniciar-sesion"
                 className={`text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors ${
-                  scrolled ? "text-gray-700 hover:bg-gray-100" : "text-gray-700 hover:bg-white/60"
+                  scrolled ? "text-gray-700 hover:bg-gray-100" : "text-white/80 hover:text-white hover:bg-white/10"
                 }`}
               >
                 Entrar
@@ -133,7 +139,9 @@ export function LandingHeader() {
             </>
           )}
           <button
-            className={`p-2 rounded-lg transition-colors ${scrolled ? "text-gray-700 hover:bg-gray-100" : "text-gray-700 hover:bg-white/60"}`}
+            className={`p-2 rounded-lg transition-colors ${
+              scrolled ? "text-gray-700 hover:bg-gray-100" : "text-white/80 hover:text-white hover:bg-white/10"
+            }`}
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menú"
           >
