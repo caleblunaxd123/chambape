@@ -28,10 +28,11 @@ function getFileKind(fileName: string | null, fileUrl: string | null): FileKind 
   return "other"
 }
 
-// PDFs guardados con /image/upload/ (antes del fix) los abrimos via Google Docs Viewer
-function getPdfViewUrl(fileUrl: string): string {
+// PDFs viejos (/image/upload/): fl_attachment fuerza descarga del PDF original desde Cloudinary.
+// PDFs nuevos (/raw/upload/): el browser los muestra directamente.
+function getPdfOpenUrl(fileUrl: string): string {
   if (fileUrl.includes("/image/upload/")) {
-    return `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=false`
+    return fileUrl.replace("/image/upload/", "/image/upload/fl_attachment/")
   }
   return fileUrl
 }
@@ -61,7 +62,7 @@ function FileBubble({ fileUrl, fileName, isMe }: { fileUrl: string; fileName: st
 
   const labelMap: Record<FileKind, string> = { image: "Imagen", pdf: "PDF", word: "Word", other: "Archivo" }
 
-  const href = kind === "pdf" ? getPdfViewUrl(fileUrl) : fileUrl
+  const href = kind === "pdf" ? getPdfOpenUrl(fileUrl) : fileUrl
 
   return (
     <a

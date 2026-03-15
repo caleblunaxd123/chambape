@@ -50,12 +50,12 @@ const TYPE_CONFIG = {
   },
 }
 
-// Para PDFs guardados antes del fix (resource_type "auto" → /image/upload/),
-// los abrimos via Google Docs Viewer para que el browser los muestre correctamente.
-// Los nuevos (resource_type "raw" → /raw/upload/) se abren directamente.
-function getPdfViewUrl(fileUrl: string): string {
+// PDFs viejos (resource_type "image" → /image/upload/): usamos fl_attachment para
+// que Cloudinary sirva el PDF original con Content-Disposition: attachment.
+// PDFs nuevos (resource_type "raw" → /raw/upload/): el browser los muestra directamente.
+function getPdfOpenUrl(fileUrl: string): string {
   if (fileUrl.toLowerCase().endsWith(".pdf") && fileUrl.includes("/image/upload/")) {
-    return `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=false`
+    return fileUrl.replace("/image/upload/", "/image/upload/fl_attachment/")
   }
   return fileUrl
 }
@@ -196,24 +196,14 @@ export function DocumentosSection({ documentos: initial }: Props) {
                     </div>
                   </div>
                   <a
-                    href={getPdfViewUrl(doc.fileUrl)}
+                    href={getPdfOpenUrl(doc.fileUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title="Ver documento"
+                    title={doc.fileUrl.toLowerCase().endsWith(".pdf") ? "Descargar / ver PDF" : "Ver archivo"}
                     className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
                   >
-                    <ExternalLink className="w-4 h-4" />
+                    {doc.fileUrl.toLowerCase().endsWith(".pdf") ? <Download className="w-4 h-4" /> : <ExternalLink className="w-4 h-4" />}
                   </a>
-                  {doc.fileUrl.toLowerCase().endsWith(".pdf") && (
-                    <a
-                      href={doc.fileUrl}
-                      download
-                      title="Descargar PDF"
-                      className="p-1.5 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors"
-                    >
-                      <Download className="w-4 h-4" />
-                    </a>
-                  )}
                   <button
                     type="button"
                     onClick={() => handleDelete(doc.id)}
