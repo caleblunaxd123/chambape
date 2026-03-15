@@ -4,6 +4,7 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { db } from "@/lib/db"
 import { requireProfessional } from "@/lib/auth"
+import { deleteCloudinaryFile } from "@/lib/cloudinary"
 
 const schema = z.object({
   bio: z.string().max(600).optional(),
@@ -23,6 +24,18 @@ export async function PATCH(req: Request) {
   }
 
   const { bio, avatarUrl, districts, categoryIds, phone } = parsed.data
+
+  // Si el avatar cambió, borrar el anterior de Cloudinary
+  if (avatarUrl !== undefined) {
+    const current = await db.professionalProfile.findUnique({
+      where: { id: profile.id },
+      select: { avatarUrl: true },
+    })
+    const oldUrl = current?.avatarUrl
+    if (oldUrl && avatarUrl !== oldUrl) {
+      deleteCloudinaryFile(oldUrl).catch(() => {})
+    }
+  }
 
   await db.$transaction(async (tx) => {
     // Actualizar teléfono en User si se envió
@@ -45,19 +58,16 @@ export async function PATCH(req: Request) {
 
     // Actualizar categorías si se enviaron
     if (categoryIds) {
-      // Verificar que las categorías existen
       const categoriasExistentes = await tx.serviceCategory.findMany({
         where: { id: { in: categoryIds }, active: true },
         select: { id: true },
       })
       const idsValidos = categoriasExistentes.map((c) => c.id)
 
-      // Eliminar todas las categorías actuales
       await tx.professionalCategory.deleteMany({
         where: { professionalId: profile.id },
       })
 
-      // Insertar las nuevas
       if (idsValidos.length > 0) {
         await tx.professionalCategory.createMany({
           data: idsValidos.map((categoryId) => ({

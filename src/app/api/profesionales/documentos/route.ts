@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { DocumentType } from "@prisma/client"
+import { deleteCloudinaryFile } from "@/lib/cloudinary"
 
 const schema = z.object({
   type: z.nativeEnum(DocumentType),
@@ -19,18 +20,16 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Datos inválidos" }, { status: 400 })
   }
 
-  // Solo un CV permitido: eliminar el anterior si existe
-  if (parsed.data.type === "CV") {
-    await db.professionalDocument.deleteMany({
-      where: { professionalId: profile.id, type: "CV" },
+  // Para tipos únicos (CV y CRIMINAL_RECORD), borrar el anterior de Cloudinary y DB
+  if (parsed.data.type === "CV" || parsed.data.type === "CRIMINAL_RECORD") {
+    const existing = await db.professionalDocument.findFirst({
+      where: { professionalId: profile.id, type: parsed.data.type },
+      select: { id: true, fileUrl: true },
     })
-  }
-
-  // Solo un antecedente permitido: eliminar el anterior si existe
-  if (parsed.data.type === "CRIMINAL_RECORD") {
-    await db.professionalDocument.deleteMany({
-      where: { professionalId: profile.id, type: "CRIMINAL_RECORD" },
-    })
+    if (existing) {
+      deleteCloudinaryFile(existing.fileUrl).catch(() => {})
+      await db.professionalDocument.delete({ where: { id: existing.id } })
+    }
   }
 
   const doc = await db.professionalDocument.create({

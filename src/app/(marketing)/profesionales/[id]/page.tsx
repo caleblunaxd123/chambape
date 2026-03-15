@@ -10,6 +10,7 @@ import { getInitials } from "@/lib/utils"
 import { auth } from "@clerk/nextjs/server"
 import { FavoriteButton } from "@/components/ui/FavoriteButton"
 import { BadgeNivel } from "@/components/ui/BadgeNivel"
+import { PortfolioLightbox } from "@/components/ui/PortfolioLightbox"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -317,19 +318,11 @@ export default async function PerfilPublicoPage({ params }: Props) {
             <h2 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
               <span className="w-1 h-5 bg-emerald-500 rounded-full block" />
               Trabajos anteriores
+              <span className="ml-auto text-xs text-gray-400 font-normal">Haz clic para ampliar</span>
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {profile.portfolioImages.map((img) => (
-                <div key={img.id} className="group relative aspect-square rounded-xl overflow-hidden bg-gray-100">
-                  <Image src={img.url} alt={img.caption ?? "Trabajo"} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
-                  {img.caption && (
-                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent px-2 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <p className="text-xs text-white line-clamp-1">{img.caption}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+            <PortfolioLightbox
+              images={profile.portfolioImages.map((img) => ({ url: img.url, caption: img.caption }))}
+            />
           </div>
         )}
 

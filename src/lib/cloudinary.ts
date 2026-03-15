@@ -18,7 +18,35 @@ export async function generateUploadSignature(folder: string) {
   return { timestamp, signature }
 }
 
-// Elimina una imagen de Cloudinary
+// Extrae el public_id de una URL de Cloudinary
+// Ej: https://res.cloudinary.com/cloud/image/upload/v123/chambape/avatares/foto.jpg → chambape/avatares/foto
+export function extractPublicId(url: string): string {
+  if (!url || !url.includes("cloudinary.com")) return ""
+  const uploadIdx = url.indexOf("/upload/")
+  if (uploadIdx === -1) return ""
+  const afterUpload = url.slice(uploadIdx + 8)
+  // Quitar versión (v1234567890/)
+  const withoutVersion = afterUpload.replace(/^v\d+\//, "")
+  // Quitar extensión
+  return withoutVersion.replace(/\.[^./]+$/, "")
+}
+
+// Elimina cualquier archivo de Cloudinary (imagen o PDF)
+export async function deleteCloudinaryFile(url: string): Promise<void> {
+  const publicId = extractPublicId(url)
+  if (!publicId) return
+  // Detectar si es raw (PDF) o imagen
+  const isRaw = url.toLowerCase().endsWith(".pdf") || url.includes("/raw/upload/")
+  try {
+    await cloudinary.uploader.destroy(publicId, {
+      resource_type: isRaw ? "raw" : "image",
+    })
+  } catch {
+    // No bloquear si falla el borrado (la imagen puede no existir o ya fue borrada)
+  }
+}
+
+// Elimina una imagen de Cloudinary (alias mantenido por compatibilidad)
 export async function deleteCloudinaryImage(publicId: string) {
   return cloudinary.uploader.destroy(publicId)
 }
