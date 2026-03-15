@@ -8,7 +8,7 @@ import { z } from "zod"
 import { toast } from "sonner"
 import dynamic from "next/dynamic"
 import {
-  ArrowRight, ArrowLeft, CheckCircle, Upload, X, Loader2, MapPin
+  ArrowRight, ArrowLeft, CheckCircle, Upload, X, Loader2, MapPin, Camera, ImagePlus
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -465,38 +465,84 @@ export function SolicitudForm({ defaultCategoria, targetProfessionalId }: Props)
 
             {/* Fotos */}
             <div>
-              <Label className="mb-1.5 block">Fotos del problema (opcional, máx. 3)</Label>
-              <div className="flex gap-2 flex-wrap">
-                {fotos.map((url, i) => (
-                  <div key={url} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
-                    <img src={url} alt="" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => setFotos((prev) => prev.filter((_, j) => j !== i))}
-                      className="absolute top-1 right-1 bg-black/50 rounded-full p-0.5"
-                    >
-                      <X className="w-3 h-3 text-white" />
-                    </button>
-                  </div>
-                ))}
-                {fotos.length < 3 && (
-                  <label className={cn(
-                    "w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-orange-400 transition-colors",
-                    uploadingFoto && "opacity-50 pointer-events-none"
-                  )}>
-                    {uploadingFoto
-                      ? <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
-                      : <Upload className="w-5 h-5 text-gray-400" />}
-                    <span className="text-[9px] text-gray-400">Agregar</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleFotoUpload}
-                    />
-                  </label>
+              <div className="flex items-center justify-between mb-2">
+                <Label>Fotos del problema <span className="text-gray-400 font-normal text-xs">(opcional)</span></Label>
+                {fotos.length > 0 && (
+                  <span className="text-xs text-orange-600 font-semibold">{fotos.length}/3</span>
                 )}
               </div>
+
+              {/* Miniaturas de fotos subidas */}
+              {fotos.length > 0 && (
+                <div className="flex gap-2 flex-wrap mb-3">
+                  {fotos.map((url, i) => (
+                    <div key={url} className="relative w-20 h-20 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                      <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setFotos((prev) => prev.filter((_, j) => j !== i))}
+                        className="absolute top-1 right-1 bg-black/60 rounded-full p-0.5"
+                        aria-label="Eliminar foto"
+                      >
+                        <X className="w-3 h-3 text-white" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Zona de carga */}
+              {fotos.length < 3 ? (
+                <div className={cn(
+                  "rounded-xl border-2 border-dashed border-gray-200 p-4 transition-colors",
+                  uploadingFoto ? "opacity-60 pointer-events-none" : "hover:border-orange-300"
+                )}>
+                  {uploadingFoto ? (
+                    <div className="flex items-center justify-center gap-2 py-1 text-orange-500">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span className="text-sm font-medium">Subiendo foto...</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-xs text-gray-400 text-center">
+                        {fotos.length === 0
+                          ? "Las fotos ayudan al profesional a entender el problema"
+                          : `Puedes agregar ${3 - fotos.length} foto${3 - fotos.length !== 1 ? "s" : ""} más`}
+                      </p>
+                      <div className="flex gap-2">
+                        {/* Tomar foto — con cámara trasera en móvil/PWA */}
+                        <label className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border-2 border-orange-200 bg-orange-50 text-orange-700 cursor-pointer hover:bg-orange-100 active:scale-95 transition-all text-sm font-semibold">
+                          <Camera className="w-4 h-4 shrink-0" />
+                          <span>Tomar foto</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            onChange={handleFotoUpload}
+                          />
+                        </label>
+                        {/* Seleccionar de galería / archivos */}
+                        <label className="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border-2 border-gray-200 bg-gray-50 text-gray-600 cursor-pointer hover:bg-gray-100 active:scale-95 transition-all text-sm font-semibold">
+                          <ImagePlus className="w-4 h-4 shrink-0" />
+                          <span>Galería</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleFotoUpload}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-xl bg-green-50 border border-green-100 p-2.5 flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+                  <p className="text-xs text-green-700 font-medium">3 fotos agregadas. Eliminá una si querés cambiarla.</p>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-2">
@@ -613,10 +659,13 @@ export function SolicitudForm({ defaultCategoria, targetProfessionalId }: Props)
             ))}
 
             {fotos.length > 0 && (
-              <div className="flex gap-2 pt-1">
-                {fotos.map((url, i) => (
-                  <img key={i} src={url} alt="" className="w-14 h-14 rounded-lg object-cover border border-gray-200" />
-                ))}
+              <div className="py-2">
+                <p className="text-xs font-medium text-gray-400 mb-2">Fotos ({fotos.length})</p>
+                <div className="flex gap-2 flex-wrap">
+                  {fotos.map((url, i) => (
+                    <img key={i} src={url} alt={`Foto ${i + 1}`} className="w-16 h-16 rounded-xl object-cover border border-gray-200 shadow-sm" />
+                  ))}
+                </div>
               </div>
             )}
 
