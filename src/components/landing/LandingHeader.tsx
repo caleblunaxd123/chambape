@@ -33,15 +33,13 @@ export function LandingHeader() {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "bg-white/80 backdrop-blur-2xl border-b border-white/50 shadow-xl shadow-slate-900/5 py-1"
-          : "bg-transparent py-2"
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-white border-b border-gray-100 ${
+        scrolled ? "shadow-md shadow-gray-200/60 py-0" : "shadow-sm py-0"
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-        {/* Logo — blanco sobre fondo oscuro, oscuro sobre fondo blanco */}
-        <Logo href="/" size="sm" className="shrink-0" variant={scrolled ? "light" : "dark"} />
+        {/* Logo */}
+        <Logo href="/" size="sm" className="shrink-0" variant="light" />
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
@@ -49,11 +47,7 @@ export function LandingHeader() {
             <Link
               key={l.href}
               href={l.href}
-              className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${
-                scrolled
-                  ? "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
-              }`}
+              className="text-sm font-medium px-4 py-2 rounded-lg transition-colors text-gray-600 hover:text-orange-600 hover:bg-orange-50"
             >
               {l.label}
             </Link>
@@ -63,16 +57,12 @@ export function LandingHeader() {
         {/* Desktop CTAs — cambia según auth */}
         <div className="hidden md:flex items-center gap-2">
           {!isLoaded ? (
-            <div className="w-28 h-9 bg-white/20 rounded-xl animate-pulse" />
+            <div className="w-28 h-9 bg-gray-100 rounded-xl animate-pulse" />
           ) : isSignedIn ? (
             <div className="flex items-center gap-2.5">
               <Link
                 href={panelHref}
-                className={`flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-xl transition-all ${
-                  scrolled
-                    ? "text-gray-700 hover:text-orange-600 hover:bg-orange-50 border border-gray-200 hover:border-orange-200"
-                    : "text-white bg-white/15 hover:bg-white/25 border border-white/30"
-                }`}
+                className="flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-xl transition-all text-gray-700 hover:text-orange-600 hover:bg-orange-50 border border-gray-200 hover:border-orange-200"
               >
                 <LayoutDashboard className="w-4 h-4" />
                 Mi panel
@@ -83,11 +73,7 @@ export function LandingHeader() {
             <>
               <Link
                 href="/iniciar-sesion"
-                className={`text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
-                  scrolled
-                    ? "text-gray-600 hover:text-gray-900"
-                    : "text-white/80 hover:text-white"
-                }`}
+                className="text-sm font-semibold px-4 py-2 rounded-lg transition-colors text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               >
                 Iniciar sesión
               </Link>
@@ -108,11 +94,7 @@ export function LandingHeader() {
             <>
               <Link
                 href={panelHref}
-                className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-lg transition-colors ${
-                  scrolled
-                    ? "text-orange-600 bg-orange-50 border border-orange-100"
-                    : "text-white bg-white/15 border border-white/30"
-                }`}
+                className="flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-lg transition-colors text-orange-600 bg-orange-50 border border-orange-100"
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
                 Panel
@@ -123,9 +105,7 @@ export function LandingHeader() {
             <>
               <Link
                 href="/iniciar-sesion"
-                className={`text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors ${
-                  scrolled ? "text-gray-700 hover:bg-gray-100" : "text-white/80 hover:text-white hover:bg-white/10"
-                }`}
+                className="text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors text-gray-700 hover:bg-gray-100"
               >
                 Entrar
               </Link>
@@ -139,9 +119,7 @@ export function LandingHeader() {
             </>
           )}
           <button
-            className={`p-2 rounded-lg transition-colors ${
-              scrolled ? "text-gray-700 hover:bg-gray-100" : "text-white/80 hover:text-white hover:bg-white/10"
-            }`}
+            className="p-2 rounded-lg transition-colors text-gray-700 hover:bg-gray-100"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menú"
           >
