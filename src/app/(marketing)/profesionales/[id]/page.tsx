@@ -438,7 +438,7 @@ export default async function PerfilPublicoPage({ params }: Props) {
                   </a>
                 ) : (
                   <Link
-                    href="/solicitudes/nueva"
+                    href={`/solicitudes/nueva?proId=${id}`}
                     className="inline-flex items-center gap-2 bg-violet-500 hover:bg-violet-600 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors shadow-sm"
                   >
                     <MessageCircle className="w-4 h-4" />
@@ -493,7 +493,7 @@ export default async function PerfilPublicoPage({ params }: Props) {
             Publica tu solicitud gratis y recibe su propuesta directamente
           </p>
           <Link
-            href="/solicitudes/nueva"
+            href={`/solicitudes/nueva?proId=${id}`}
             className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-6 py-2.5 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
           >
             Publicar solicitud

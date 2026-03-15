@@ -20,19 +20,26 @@ const STICKER_SETS = [
 type FileKind = "image" | "pdf" | "word" | "other"
 
 function getFileKind(fileName: string | null, fileUrl: string | null): FileKind {
-  const name = fileName ?? fileUrl ?? ""
-  const ext = name.split(".").pop()?.toLowerCase() ?? ""
+  // Intentar detectar por fileName primero (más confiable, tiene extensión original)
+  const name = fileName ?? ""
+  const urlName = fileUrl ?? ""
+  const ext = (name || urlName).split(".").pop()?.toLowerCase() ?? ""
   if (["jpg","jpeg","png","webp","gif"].includes(ext)) return "image"
   if (ext === "pdf") return "pdf"
   if (["doc","docx"].includes(ext)) return "word"
+  // Sin extensión pero en /raw/upload/ → probablemente PDF (documentos/certificados)
+  if (urlName.includes("/raw/upload/") && !ext) return "pdf"
   return "other"
 }
 
-// PDFs viejos (/image/upload/): fl_attachment fuerza descarga del PDF original desde Cloudinary.
-// PDFs nuevos (/raw/upload/): el browser los muestra directamente.
-function getPdfOpenUrl(fileUrl: string): string {
-  if (fileUrl.includes("/image/upload/")) {
+// fl_attachment en Cloudinary fuerza Content-Disposition: attachment.
+// Funciona en /image/upload/ (PDFs stored as image) y /raw/upload/ (archivos raw).
+function getDownloadUrl(fileUrl: string): string {
+  if (fileUrl.includes("/image/upload/") && !fileUrl.includes("fl_attachment")) {
     return fileUrl.replace("/image/upload/", "/image/upload/fl_attachment/")
+  }
+  if (fileUrl.includes("/raw/upload/") && !fileUrl.includes("fl_attachment")) {
+    return fileUrl.replace("/raw/upload/", "/raw/upload/fl_attachment/")
   }
   return fileUrl
 }
@@ -62,7 +69,7 @@ function FileBubble({ fileUrl, fileName, isMe }: { fileUrl: string; fileName: st
 
   const labelMap: Record<FileKind, string> = { image: "Imagen", pdf: "PDF", word: "Word", other: "Archivo" }
 
-  const href = kind === "pdf" ? getPdfOpenUrl(fileUrl) : fileUrl
+  const href = (kind === "pdf" || kind === "word" || kind === "other") ? getDownloadUrl(fileUrl) : fileUrl
 
   return (
     <a

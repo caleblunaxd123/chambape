@@ -50,14 +50,26 @@ const TYPE_CONFIG = {
   },
 }
 
-// PDFs viejos (resource_type "image" → /image/upload/): usamos fl_attachment para
-// que Cloudinary sirva el PDF original con Content-Disposition: attachment.
-// PDFs nuevos (resource_type "raw" → /raw/upload/): el browser los muestra directamente.
-function getPdfOpenUrl(fileUrl: string): string {
-  if (fileUrl.toLowerCase().endsWith(".pdf") && fileUrl.includes("/image/upload/")) {
+// Cloudinary fl_attachment: fuerza Content-Disposition: attachment para descarga directa.
+// Funciona tanto en /image/upload/ como en /raw/upload/.
+// - PDFs en /image/upload/ (auto/image resource): fl_attachment descarga el PDF original
+// - Archivos en /raw/upload/ (con o sin extensión): fl_attachment descarga el archivo
+function getDownloadUrl(fileUrl: string): string {
+  if (fileUrl.includes("/image/upload/") && !fileUrl.includes("/image/upload/fl_attachment/")) {
     return fileUrl.replace("/image/upload/", "/image/upload/fl_attachment/")
   }
+  if (fileUrl.includes("/raw/upload/") && !fileUrl.includes("/raw/upload/fl_attachment/")) {
+    return fileUrl.replace("/raw/upload/", "/raw/upload/fl_attachment/")
+  }
   return fileUrl
+}
+
+// Determina si el archivo es descargable (PDF o raw sin extensión de imagen)
+function isDownloadable(fileUrl: string): boolean {
+  const lower = fileUrl.toLowerCase()
+  if (lower.includes("/raw/upload/")) return true
+  if (lower.endsWith(".pdf")) return true
+  return false
 }
 
 type DocType = keyof typeof TYPE_CONFIG
@@ -196,13 +208,13 @@ export function DocumentosSection({ documentos: initial }: Props) {
                     </div>
                   </div>
                   <a
-                    href={getPdfOpenUrl(doc.fileUrl)}
+                    href={isDownloadable(doc.fileUrl) ? getDownloadUrl(doc.fileUrl) : doc.fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title={doc.fileUrl.toLowerCase().endsWith(".pdf") ? "Descargar / ver PDF" : "Ver archivo"}
+                    title={isDownloadable(doc.fileUrl) ? "Descargar archivo" : "Ver archivo"}
                     className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
                   >
-                    {doc.fileUrl.toLowerCase().endsWith(".pdf") ? <Download className="w-4 h-4" /> : <ExternalLink className="w-4 h-4" />}
+                    {isDownloadable(doc.fileUrl) ? <Download className="w-4 h-4" /> : <ExternalLink className="w-4 h-4" />}
                   </a>
                   <button
                     type="button"

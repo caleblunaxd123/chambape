@@ -72,8 +72,9 @@ export async function POST(req: Request) {
     apiSecret
   )
 
-  // documentos y certificados usan resource_type "raw" para que los PDFs
-  // se sirvan tal cual (no convertidos a imagen) y el browser los muestre correctamente
+  // documentos y certificados usan "auto" para que Cloudinary preserve la extensión
+  // en la URL (.pdf, .jpg, etc.) aunque el recurso quede como image type.
+  // El PDF original se descarga via fl_attachment en el cliente.
   const isDocument = ["documentos", "certificados"].includes(parsed.data.folder)
 
   return NextResponse.json({
@@ -84,6 +85,6 @@ export async function POST(req: Request) {
     apiKey,
     maxFileSize,
     ocr: params.ocr,
-    resourceType: isDocument ? "raw" : "image",
+    resourceType: isDocument ? "auto" : "image",
   })
 }
