@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import { requireProfessional } from "@/lib/auth"
 import { UserButton } from "@clerk/nextjs"
-import { LayoutDashboard, Search, FileText, Coins, User, Bell } from "lucide-react"
+import { LayoutDashboard, Search, FileText, Coins, User, Bell, MessageCircle } from "lucide-react"
 import { db } from "@/lib/db"
 import { NotificationBell } from "@/components/ui/NotificationBell"
 import { ProfSidebarContent } from "@/components/layout/ProfSidebarContent"
@@ -10,8 +10,8 @@ import { ProfSidebarContent } from "@/components/layout/ProfSidebarContent"
 const NAV_MOBILE = [
   { href: "/profesional/dashboard", icon: LayoutDashboard, label: "Panel" },
   { href: "/profesional/oportunidades", icon: Search, label: "Oportunidades" },
+  { href: "/profesional/mensajes", icon: MessageCircle, label: "Mensajes" },
   { href: "/profesional/aplicaciones", icon: FileText, label: "Aplicaciones" },
-  { href: "/profesional/creditos", icon: Coins, label: "Créditos" },
   { href: "/profesional/perfil/editar", icon: User, label: "Perfil" },
 ]
 

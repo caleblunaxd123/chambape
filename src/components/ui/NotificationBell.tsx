@@ -1,12 +1,36 @@
+"use client"
+
 import Link from "next/link"
 import { Bell } from "lucide-react"
+import { useState, useEffect } from "react"
 
 interface Props {
   count: number
   href: string
 }
 
-export function NotificationBell({ count, href }: Props) {
+export function NotificationBell({ count: initialCount, href }: Props) {
+  const [count, setCount] = useState(initialCount)
+
+  useEffect(() => {
+    setCount(initialCount)
+  }, [initialCount])
+
+  useEffect(() => {
+    const es = new EventSource("/api/notifications/stream")
+
+    es.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data)
+        if (data.type === "notification") {
+          setCount(data.count)
+        }
+      } catch {}
+    }
+
+    return () => es.close()
+  }, [])
+
   return (
     <Link href={href} className="relative p-2 text-gray-400 hover:text-orange-500 transition-colors">
       <Bell className="w-5 h-5" />

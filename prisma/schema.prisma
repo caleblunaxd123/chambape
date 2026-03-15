@@ -68,12 +68,19 @@ enum NotificationType {
   NEW_REVIEW
   REVIEW_REPLY
   REQUEST_EXPIRED
+  NEW_MESSAGE
 }
 
 enum DocumentType {
   CV
   CERTIFICATE
   CRIMINAL_RECORD
+}
+
+enum MessageFileType {
+  IMAGE
+  PDF
+  OTHER
 }
 
 enum Urgency {
@@ -99,11 +106,14 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  professionalProfile ProfessionalProfile?
-  requests            ServiceRequest[]      @relation("ClientRequests")
-  reviewsGiven        Review[]              @relation("ClientReviews")
-  notifications       Notification[]
-  favorites           Favorite[]
+  professionalProfile       ProfessionalProfile?
+  requests                  ServiceRequest[]      @relation("ClientRequests")
+  reviewsGiven              Review[]              @relation("ClientReviews")
+  notifications             Notification[]
+  favorites                 Favorite[]
+  clientConversations       Conversation[]        @relation("ClientConversations")
+  professionalConversations Conversation[]        @relation("ProfessionalConversations")
+  sentMessages              Message[]             @relation("SentMessages")
 
   @@map("users")
 }
@@ -299,6 +309,10 @@ model Review {
   professionalReply String?
   repliedAt         DateTime?
 
+  // Calificación del cliente por el profesional
+  clientRatingScore   Int?
+  clientRatingComment String?
+
   reportedBy   String?
   reportReason String?
   moderatedAt  DateTime?
@@ -447,6 +461,43 @@ model Notification {
   createdAt DateTime @default(now())
 
   @@map("notifications")
+}
+
+// ─────────────────────────────────────────
+// CHAT / MENSAJERÍA
+// ─────────────────────────────────────────
+
+model Conversation {
+  id                 String   @id @default(cuid())
+  clientId           String
+  client             User     @relation("ClientConversations", fields: [clientId], references: [id], onDelete: Cascade)
+  professionalUserId String
+  professionalUser   User     @relation("ProfessionalConversations", fields: [professionalUserId], references: [id], onDelete: Cascade)
+
+  messages      Message[]
+  lastMessageAt DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+
+  @@unique([clientId, professionalUserId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  content  String?
+  fileUrl  String?
+  fileType MessageFileType?
+  fileName String?
+  readAt   DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@map("messages")
 }
 
 // ─────────────────────────────────────────

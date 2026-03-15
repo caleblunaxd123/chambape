@@ -61,7 +61,7 @@ export default async function PerfilPublicoPage({ params }: Props) {
   const profile = await db.professionalProfile.findUnique({
     where: { id },
     include: {
-      user: { select: { name: true, createdAt: true, phone: true } },
+      user: { select: { id: true, name: true, createdAt: true, phone: true } },
       categories: { include: { category: true } },
       portfolioImages: { orderBy: { order: "asc" } },
       badges: { include: { badge: true } },
@@ -163,6 +163,15 @@ export default async function PerfilPublicoPage({ params }: Props) {
               <div className="flex items-center gap-2 pb-1">
                 {currentUserId && (
                   <FavoriteButton professionalId={id} isFavorite={isFavorite} iconOnly />
+                )}
+                {currentUserId && currentUserId !== profile.user.id && (
+                  <Link
+                    href={`/mensajes/nuevo?pro=${profile.user.id}`}
+                    className="inline-flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-bold text-sm px-4 py-2.5 rounded-xl transition-colors shadow-sm border border-gray-200"
+                  >
+                    <MessageCircleMore className="w-4 h-4 text-orange-500" />
+                    Mensaje
+                  </Link>
                 )}
                 <Link
                   href="/solicitudes/nueva"

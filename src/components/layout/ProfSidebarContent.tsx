@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { UserButton } from "@clerk/nextjs"
-import { LayoutDashboard, Search, FileText, Coins, User } from "lucide-react"
+import { LayoutDashboard, Search, FileText, Coins, User, MessageCircle } from "lucide-react"
 import { NotificationBell } from "@/components/ui/NotificationBell"
 
 const NAV_ITEMS = [
@@ -31,6 +31,12 @@ const NAV_ITEMS = [
     icon: Coins,
     label: "Créditos",
     desc: "Saldo y recargas",
+  },
+  {
+    href: "/profesional/mensajes",
+    icon: MessageCircle,
+    label: "Mensajes",
+    desc: "Chat con clientes",
   },
   {
     href: "/profesional/perfil/editar",

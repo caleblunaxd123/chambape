@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { UserButton } from "@clerk/nextjs"
-import { LayoutDashboard, PlusCircle, ClipboardList, Heart, Users } from "lucide-react"
+import { LayoutDashboard, PlusCircle, ClipboardList, Heart, Users, MessageCircle } from "lucide-react"
 import { NotificationBell } from "@/components/ui/NotificationBell"
 
 const NAV_ITEMS = [
@@ -31,6 +31,12 @@ const NAV_ITEMS = [
     icon: Users,
     label: "Profesionales",
     desc: "Buscar y contactar pros",
+  },
+  {
+    href: "/mensajes",
+    icon: MessageCircle,
+    label: "Mensajes",
+    desc: "Chat con profesionales",
   },
   {
     href: "/favoritos",
