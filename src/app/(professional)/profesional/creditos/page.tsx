@@ -105,6 +105,8 @@ export default function CreditosPage() {
   const [loadingProfile, setLoadingProfile] = useState(true)
   const [purchasing, setPurchasing] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<"SUBS" | "RECARGAS">("SUBS")
+  const [cancelling, setCancelling] = useState(false)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
 
   useEffect(() => {
     const status = searchParams.get("status")
@@ -184,6 +186,27 @@ export default function CreditosPage() {
     }
   }
 
+  async function handleCancelar() {
+    setCancelling(true)
+    try {
+      const res = await fetch("/api/creditos/cancelar-suscripcion", { method: "POST" })
+      const json = await res.json()
+      if (!res.ok) {
+        toast.error(json.error ?? "Error al cancelar la suscripción")
+      } else {
+        toast.success("Suscripción cancelada. Tu plan sigue activo hasta fin del período.")
+        setShowCancelConfirm(false)
+        // Recargar perfil actualizado
+        const data = await fetch("/api/creditos/balance").then((r) => r.json())
+        setProfile(data)
+      }
+    } catch {
+      toast.error("Error de conexión. Intenta de nuevo.")
+    } finally {
+      setCancelling(false)
+    }
+  }
+
   const hasActiveSub = profile?.subscription?.status === "ACTIVE"
 
   return (
@@ -212,19 +235,60 @@ export default function CreditosPage() {
       </div>
 
       {hasActiveSub && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-              <ShieldCheck className="w-6 h-6 text-emerald-600" />
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
+                <ShieldCheck className="w-6 h-6 text-emerald-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-emerald-900">Suscripción Activa</h3>
+                <p className="text-sm text-emerald-700">
+                  Se renueva el{" "}
+                  {profile?.subscription?.nextBillingDate
+                    ? new Date(profile.subscription.nextBillingDate).toLocaleDateString("es-PE", {
+                        day: "numeric", month: "long", year: "numeric",
+                      })
+                    : "próximo mes"}
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-emerald-900">Suscripción Activa</h3>
-              <p className="text-sm text-emerald-700">Tu plan se renovará automáticamente el {profile?.subscription?.nextBillingDate ? new Date(profile.subscription.nextBillingDate).toLocaleDateString() : "próximo mes"}.</p>
-            </div>
+            <button
+              onClick={() => setShowCancelConfirm(!showCancelConfirm)}
+              className="text-sm font-bold text-emerald-800 hover:text-red-600 px-4 py-2 bg-emerald-100 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-200"
+            >
+              Cancelar plan
+            </button>
           </div>
-          <button className="text-sm font-bold text-emerald-800 hover:text-emerald-900 px-4 py-2 bg-emerald-100 hover:bg-emerald-200 rounded-lg transition-colors">
-            Gestionar
-          </button>
+
+          {/* Confirmación de cancelación */}
+          {showCancelConfirm && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+              <p className="text-sm font-semibold text-red-800 mb-1">¿Confirmas la cancelación?</p>
+              <p className="text-xs text-red-600 mb-4">
+                Tu suscripción se cancelará de inmediato en MercadoPago. Los créditos que ya tienes no se pierden.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCancelar}
+                  disabled={cancelling}
+                  className="flex items-center gap-2 text-sm font-bold text-white bg-red-500 hover:bg-red-600 disabled:opacity-60 px-4 py-2 rounded-lg transition-colors"
+                >
+                  {cancelling ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Cancelando...</>
+                  ) : (
+                    "Sí, cancelar suscripción"
+                  )}
+                </button>
+                <button
+                  onClick={() => setShowCancelConfirm(false)}
+                  className="text-sm font-bold text-gray-600 hover:text-gray-800 px-4 py-2 bg-white border border-gray-200 hover:border-gray-300 rounded-lg transition-colors"
+                >
+                  No, mantener
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
