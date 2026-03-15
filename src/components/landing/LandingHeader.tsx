@@ -22,10 +22,10 @@ export function LandingHeader() {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-white/95 backdrop-blur-md shadow-[0_1px_16px_rgba(0,0,0,0.08)]"
-          : "bg-transparent"
+          ? "bg-white/80 backdrop-blur-2xl border-b border-white/50 shadow-xl shadow-slate-900/5 py-1"
+          : "bg-transparent py-2"
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">

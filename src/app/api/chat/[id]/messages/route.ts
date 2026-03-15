@@ -5,6 +5,7 @@ import { db } from "@/lib/db"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { MessageFileType } from "@prisma/client"
+import { pusherServer } from "@/lib/pusher"
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -102,6 +103,12 @@ export async function POST(req: Request, { params }: Params) {
       },
     }),
   ])
+
+  try {
+    await pusherServer.trigger(`chat-${id}`, "new-message", message)
+  } catch (error) {
+    console.error("[PUSHER_TRIGGER_ERROR]", error)
+  }
 
   return NextResponse.json(message)
 }

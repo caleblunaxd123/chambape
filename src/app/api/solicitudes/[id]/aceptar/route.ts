@@ -12,6 +12,7 @@ import {
   notifyAplicacionAceptada,
   createNotification,
 } from "@/lib/notifications"
+import { pusherServer } from "@/lib/pusher"
 
 const schema = z.object({
   applicationId: z.string().min(1),
@@ -82,16 +83,37 @@ export async function POST(
       data: { status: "ACCEPTED" },
     })
 
-    // Rechazar las otras aplicaciones
-    const otrasIds = solicitud.applications
-      .filter((a) => a.id !== applicationId && a.status === "PENDING")
-      .map((a) => a.id)
+    // Rechazar las otras aplicaciones y preparar reembolsos
+    const rechazados = solicitud.applications.filter(
+      (a) => a.id !== applicationId && a.status === "PENDING"
+    )
 
-    if (otrasIds.length > 0) {
+    if (rechazados.length > 0) {
+      const otrasIds = rechazados.map((a) => a.id)
       await tx.serviceApplication.updateMany({
         where: { id: { in: otrasIds } },
         data: { status: "REJECTED" },
       })
+
+      // Reembolsar créditos
+      for (const r of rechazados) {
+        if (r.creditsSpent > 0) {
+          const profileRechazado = await tx.professionalProfile.update({
+            where: { id: r.professionalId },
+            data: { credits: { increment: r.creditsSpent } },
+          })
+
+          await tx.creditTransaction.create({
+            data: {
+              professionalId: r.professionalId,
+              type: "REFUND",
+              credits: r.creditsSpent,
+              balance: profileRechazado.credits,
+              description: `Reembolso por no selección: ${solicitud.title.slice(0, 40)}`,
+            },
+          })
+        }
+      }
     }
 
     // Cambiar estado de la solicitud
@@ -108,16 +130,17 @@ export async function POST(
     id
   ).catch((err) => console.error("[NOTIFY_ACEPTADA]", err))
 
-  // Notificar a los rechazados
-  const rechazados = solicitud.applications.filter(
+  const rechazadosParaNotificar = solicitud.applications.filter(
     (a) => a.id !== applicationId && a.status === "PENDING"
   )
-  for (const r of rechazados) {
+
+  for (const r of rechazadosParaNotificar) {
+    const devolucion = r.creditsSpent > 0 ? ` Se te han devuelto ${r.creditsSpent} créditos.` : ""
     createNotification({
       userId: r.professional.userId,
       type: "APPLICATION_REJECTED",
-      title: "Propuesta no seleccionada",
-      message: `El cliente eligió a otro profesional para "${solicitud.title}". ¡Sigue aplicando!`,
+      title: "Propuesta no cubierta",
+      message: `El cliente eligió a otro profesional para "${solicitud.title}".${devolucion} ¡Sigue aplicando!`,
       link: `/profesional/aplicaciones`,
       metadata: { requestId: id },
     }).catch(() => {})

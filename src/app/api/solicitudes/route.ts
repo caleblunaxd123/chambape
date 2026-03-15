@@ -80,55 +80,39 @@ export async function POST(req: Request) {
     }
   }
 
-  // Crear solicitud + (si es directa) auto-aplicar al profesional
-  const solicitud = await db.$transaction(async (tx) => {
-    const req = await tx.serviceRequest.create({
-      data: {
-        clientId: user.id,
-        categoryId: category.id,
-        subcategoryId,
-        title: data.title,
-        description: data.description,
-        photos: data.photos,
-        district: data.district,
-        address: data.address,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        urgency: data.urgency,
-        budgetMin: data.budgetMin,
-        budgetMax: data.budgetMax,
-        preferredTime: data.preferredTime,
-        status: "OPEN",
-        expiresAt,
-        ...(targetPro ? { targetProfessionalId: targetPro.id } : {}),
-      },
-    })
-
-    // Solicitud directa: auto-aplicar al profesional sin cobrar créditos
-    if (targetPro) {
-      await tx.serviceApplication.create({
-        data: {
-          request: { connect: { id: req.id } },
-          professional: { connect: { id: targetPro.id } },
-          message: "",
-          creditsSpent: 0,
-          status: "PENDING",
-        },
-      })
-    }
-
-    return req
+  // Crear solicitud
+  const solicitud = await db.serviceRequest.create({
+    data: {
+      clientId: user.id,
+      categoryId: category.id,
+      subcategoryId,
+      title: data.title,
+      description: data.description,
+      photos: data.photos,
+      district: data.district,
+      address: data.address,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      urgency: data.urgency,
+      budgetMin: data.budgetMin,
+      budgetMax: data.budgetMax,
+      preferredTime: data.preferredTime,
+      status: "OPEN",
+      expiresAt,
+      ...(targetPro ? { targetProfessionalId: targetPro.id } : {}),
+    },
   })
 
+  const { createNotification } = await import("@/lib/notifications")
+
   if (targetPro) {
-    // Notificar SOLO al profesional destino
-    const { createNotification } = await import("@/lib/notifications")
+    // Notificar SOLO al profesional destino para que aplique
     createNotification({
       userId: targetPro.userId,
       type: "NEW_APPLICATION",
       title: "Nueva solicitud directa 📩",
-      message: `${user.name} te envió una solicitud directa: "${data.title}"`,
-      link: `/profesional/solicitudes/${solicitud.id}`,
+      message: `${user.name} te ha enviado una solicitud de trabajo exclusiva: "${data.title}". ¡Aplica ahora!`,
+      link: `/profesional/oportunidades`,
     }).catch(() => {})
   } else {
     // Solicitud general: notificar a profesionales de la zona

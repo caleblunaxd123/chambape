@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { Send, Loader2, Paperclip, FileText, X, ArrowLeft, Smile, FileImage, File } from "lucide-react"
 import { cn, getInitials } from "@/lib/utils"
 import { DocumentUpload } from "@/components/shared/DocumentUpload"
+import { pusherClient } from "@/lib/pusher"
 
 // ── Sticker sets ──────────────────────────────────────────────
 const STICKER_SETS = [
@@ -130,27 +131,58 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
     ta.style.height = Math.min(ta.scrollHeight, 128) + "px"
   }, [text])
 
-  // Polling cada 4 segundos
-  const poll = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/chat/${conversationId}/messages?since=${encodeURIComponent(lastCreatedAt.current)}`)
-      if (!res.ok) return
-      const data = await res.json()
-      if (data.messages.length > 0) {
-        lastCreatedAt.current = data.messages.at(-1).createdAt
-        setMessages((prev) => {
-          const existingIds = new Set(prev.map((m) => m.id))
-          const newOnes = data.messages.filter((m: ChatMessage) => !existingIds.has(m.id))
-          return newOnes.length > 0 ? [...prev, ...newOnes] : prev
-        })
-      }
-    } catch {}
-  }, [conversationId])
+  const [isTyping, setIsTyping] = useState(false)
+  const typingTimeoutRef = useRef<NodeJS.Timeout>(null!)
+  const lastTypingRef = useRef<number>(0)
 
   useEffect(() => {
-    const interval = setInterval(poll, 4000)
-    return () => clearInterval(interval)
-  }, [poll])
+    // 1. Marcar como leído al abrir
+    fetch(`/api/chat/${conversationId}/read`, { method: "POST" }).catch(() => {})
+
+    // 2. Suscribirse a canal
+    const channel = pusherClient.subscribe(`chat-${conversationId}`)
+
+    channel.bind("new-message", (newMsg: ChatMessage) => {
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === newMsg.id)) return prev
+        return [...prev, newMsg]
+      })
+      lastCreatedAt.current = newMsg.createdAt
+      
+      // Si recibo un msj y no soy yo, marcar como leído
+      if (newMsg.sender.id !== currentUserId) {
+        fetch(`/api/chat/${conversationId}/read`, { method: "POST" }).catch(() => {})
+      }
+    })
+
+    channel.bind("typing", (data: { userId: string }) => {
+      if (data.userId !== currentUserId) {
+        setIsTyping(true)
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
+        typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 3000)
+      }
+    })
+
+    channel.bind("messages-read", (data: { readByUserId: string, readAt: string }) => {
+      if (data.readByUserId !== currentUserId) {
+        setMessages((prev) => prev.map(m => (!m.readAt && m.sender.id === currentUserId) ? { ...m, readAt: data.readAt } : m))
+      }
+    })
+
+    return () => {
+      pusherClient.unsubscribe(`chat-${conversationId}`)
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
+    }
+  }, [conversationId, currentUserId])
+
+  function handleTextChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    setText(e.target.value)
+    const now = Date.now()
+    if (now - lastTypingRef.current > 2000) {
+      lastTypingRef.current = now
+      fetch(`/api/chat/${conversationId}/typing`, { method: "POST" }).catch(() => {})
+    }
+  }
 
   async function sendMessage(overrideContent?: string) {
     const content = overrideContent ?? text.trim()
@@ -177,7 +209,6 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
 
       const newMsg: ChatMessage = await res.json()
       lastCreatedAt.current = newMsg.createdAt
-      setMessages((prev) => [...prev, newMsg])
       if (!overrideContent) setText("")
       setPendingFile(null)
       setShowAttach(false)
@@ -312,10 +343,16 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
                         </>
                       )}
 
-                      <span className={cn("text-[10px] text-gray-400 px-1", isMe && "text-right")}>
-                        {formatTime(msg.createdAt)}
-                        {isMe && msg.readAt && " ✓✓"}
-                      </span>
+                      <div className={cn("flex items-center gap-1 mt-0.5 px-1 justify-end", isMe ? "" : "flex-row-reverse")}>
+                        <span className="text-[10px] text-gray-400">
+                          {formatTime(msg.createdAt)}
+                        </span>
+                        {isMe && (
+                          <span className={cn("text-xs font-bold leading-none translate-y-px", msg.readAt ? "text-blue-500" : "text-gray-400")}>
+                            ✓✓
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )
@@ -323,6 +360,26 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
             </div>
           </div>
         ))}
+        
+        {isTyping && (
+          <div className="flex items-center gap-2 my-2 px-2">
+            <div className="w-6 h-6 rounded-full overflow-hidden bg-orange-100 flex-shrink-0 relative">
+              {otherUser.avatarUrl ? (
+                <Image src={otherUser.avatarUrl} alt={otherUser.name} fill sizes="24px" className="object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-orange-600 font-bold text-[10px]">
+                  {getInitials(otherUser.name)}
+                </div>
+              )}
+            </div>
+            <div className="bg-white border border-gray-100 shadow-sm rounded-2xl rounded-bl-md px-3.5 py-2.5 flex items-center gap-1.5 h-9">
+               <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+               <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+               <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+            <span className="text-xs text-gray-400 italic">Escribiendo...</span>
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
 
@@ -418,7 +475,7 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
         <textarea
           ref={textareaRef}
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={handleTextChange}
           onKeyDown={onKey}
           placeholder="Escribe un mensaje..."
           rows={1}

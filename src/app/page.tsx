@@ -86,59 +86,39 @@ export default function LandingPage() {
       {/* ════════════════════════════════════════
           HERO
       ════════════════════════════════════════ */}
-      <section className="relative pt-24 pb-20 md:pt-36 md:pb-32 overflow-hidden bg-[#fafafa]">
-        {/* Background blobs */}
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-orange-400/20 rounded-full blur-[100px] mix-blend-multiply pointer-events-none animate-pulse-glow" />
-        <div className="absolute -top-32 left-0 w-[600px] h-[600px] bg-purple-400/15 rounded-full blur-[100px] mix-blend-multiply pointer-events-none" />
-        <div className="absolute bottom-0 right-1/3 w-[500px] h-[500px] bg-amber-300/20 rounded-full blur-[120px] mix-blend-multiply pointer-events-none" />
+      <section className="relative pt-24 pb-20 md:pt-36 md:pb-32 overflow-hidden bg-white noise-bg">
+        {/* Background Mesh Gradients - Much more vibrant now */}
+        <div className="absolute top-[-10%] right-[-10%] w-[800px] h-[800px] bg-orange-400/30 rounded-full blur-[130px] animate-pulse-glow mix-blend-soft-light pointer-events-none" />
+        <div className="absolute top-[20%] left-[-15%] w-[600px] h-[600px] bg-indigo-500/25 rounded-full blur-[110px] mix-blend-multiply pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[10%] w-[700px] h-[700px] bg-amber-200/40 rounded-full blur-[140px] mix-blend-soft-light pointer-events-none" />
+        <div className="absolute top-[10%] left-[30%] w-[400px] h-[400px] bg-purple-400/20 rounded-full blur-[100px] mix-blend-multiply pointer-events-none" />
 
-        {/* Grid pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)",
-            backgroundSize: "32px 32px",
-          }}
-        />
-
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center gap-12 md:gap-8">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center gap-12 md:gap-8 z-10">
           {/* Left: copy */}
           <div className="flex-1 max-w-xl animate-fade-up">
             {/* Live badge */}
-            <div className="inline-flex items-center gap-2 glass-panel text-orange-600 text-xs font-bold px-4 py-2 rounded-full mb-6 relative">
-              <span className="absolute inset-0 rounded-full animate-pulse-glow" />
-              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse relative z-10" />
-              <span className="relative z-10">Más de 500 profesionales activos en Lima</span>
+            <div className="inline-flex items-center gap-2 glass-panel bg-white/60 border-white/80 py-2 px-4 rounded-full mb-8 shadow-xl shadow-orange-500/5 hover:scale-105 transition-transform duration-300">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+              </span>
+              <span className="text-orange-600 text-xs font-black uppercase tracking-wider">Más de 500 expertos listos</span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-[4rem] font-black text-slate-900 leading-[1.05] mb-5 tracking-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 leading-[0.9] mb-6 tracking-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
               El técnico que{" "}
-              <span className="relative inline-block text-orange-500">
+              <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-600">
                 necesitas
-                <svg
-                  className="absolute -bottom-2 left-0 w-full"
-                  viewBox="0 0 200 8"
-                  preserveAspectRatio="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M0 6 Q50 1 100 5 Q150 9 200 3"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                    strokeLinecap="round"
-                    className="opacity-40"
-                  />
+                <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 8" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M0 6 Q50 1 100 5 Q150 9 200 3" stroke="#f97316" strokeWidth="4" fill="none" strokeLinecap="round" className="opacity-40" />
                 </svg>
               </span>
               ,<br />
-              cuando lo necesitas
+              al instante
             </h1>
 
-            <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-md">
-              Gasfiteros, electricistas, pintores y más. Profesionales verificados
-              en Lima listos para ayudarte.{" "}
-              <span className="font-bold text-slate-800">Presupuestos gratis en minutos.</span>
+            <p className="text-xl text-slate-600 leading-relaxed mb-10 max-w-md font-medium">
+              Conectamos a miles de limeños con profesionales <span className="text-slate-900 font-bold underline decoration-orange-300 decoration-4">verificados</span> para el hogar.
             </p>
 
             {/* CTAs */}
@@ -155,7 +135,7 @@ export default function LandingPage() {
               </Link>
               <Link
                 href="/registrarse"
-                className="glass-panel text-slate-700 hover:text-orange-600 font-bold px-8 py-4 rounded-2xl transition-all text-base hover:-translate-y-1 flex items-center justify-center gap-2 border border-slate-200"
+                className="glass-panel bg-white/40 text-slate-700 hover:text-orange-600 font-bold px-8 py-4 rounded-2xl transition-all text-base hover:-translate-y-1 flex items-center justify-center gap-2 border border-white"
               >
                 Soy profesional →
               </Link>
@@ -164,7 +144,7 @@ export default function LandingPage() {
             {/* Trust chips */}
             <div className="flex flex-wrap gap-4 mt-8">
               {["Gratis para clientes", "Sin tarjeta de crédito", "Profesionales verificados"].map((t) => (
-                <span key={t} className="flex items-center gap-2 text-sm text-slate-500 font-medium">
+                <span key={t} className="flex items-center gap-2 text-sm text-slate-500 font-bold">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   {t}
                 </span>
@@ -173,71 +153,77 @@ export default function LandingPage() {
           </div>
 
           {/* Right: floating UI cards */}
-          <div className="hidden md:flex flex-col gap-4 flex-1 items-end relative h-[500px]">
-            {/* Background glowing orb for cards */}
-            <div className="absolute top-1/2 right-10 -translate-y-1/2 w-64 h-64 bg-orange-400/30 rounded-full blur-[80px] z-0 pointer-events-none animate-pulse-glow" />
+          <div className="hidden md:flex flex-col gap-4 flex-1 items-end relative h-[550px]">
+            {/* Background glowing orb for cards - Enhanced */}
+            <div className="absolute top-1/2 right-0 -translate-y-1/2 w-80 h-80 bg-orange-400/40 rounded-full blur-[100px] z-0 pointer-events-none animate-pulse-glow" />
 
             {/* Notification badge */}
-            <div className="absolute top-10 right-4 z-30 flex items-center gap-2 glass-panel text-orange-600 text-xs font-bold px-4 py-2 rounded-full animate-float delay-100">
-              <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-              3 propuestas nuevas 🎉
+            <div className="absolute top-0 right-4 z-40 flex items-center gap-3 glass-panel border-white py-2.5 px-5 rounded-3xl animate-float delay-100 shadow-2xl">
+              <span className="flex h-2.5 w-2.5 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              </span>
+              <p className="text-slate-800 text-[13px] font-black tracking-tight">3 propuestas nuevas 🎉</p>
             </div>
 
             {/* Card 1 — Proposal */}
-            <div className="w-[320px] glass-panel p-5 relative z-20 animate-float translate-y-16 -translate-x-12">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold shadow-lg shrink-0" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)" }}>
+            <div className="w-[340px] glass-panel bg-white/50 border-white p-6 relative z-20 animate-float translate-y-20 -translate-x-12 shadow-2xl hover:scale-[1.02] transition-transform duration-500">
+              <div className="flex items-center gap-4 mb-5">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-xl shrink-0" style={{ background: "linear-gradient(135deg, #4f46e5, #9333ea)" }}>
                   CM
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-slate-900">Carlos M. — Gasfitero</p>
-                  <p className="text-xs text-slate-500 mt-0.5">Disponible hoy · Miraflores</p>
-                  <div className="flex items-center gap-1 mt-1">
+                  <p className="text-base font-black text-slate-900 leading-none">Carlos M.</p>
+                  <p className="text-xs font-bold text-orange-600 mt-1 uppercase tracking-wider">Gasfitería Pro</p>
+                  <div className="flex items-center gap-1.5 mt-1.5">
                     <div className="flex gap-0.5">
                       {[1,2,3,4,5].map((i) => (
-                        <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                        <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                       ))}
                     </div>
-                    <span className="text-[10px] text-slate-500 font-medium">5.0 (34)</span>
+                    <span className="text-xs text-slate-500 font-bold">5.0</span>
                   </div>
                 </div>
               </div>
-              <div className="bg-orange-50/80 rounded-xl p-3 border border-orange-100/50 backdrop-blur-sm">
-                <p className="text-xs text-orange-800 leading-relaxed font-medium">
-                  💬 &ldquo;Puedo atenderte hoy por la tarde. Presupuesto estimado: <strong>S/.80</strong> incluye materiales.&rdquo;
+              <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-4 border border-orange-100/50">
+                <p className="text-[13px] text-orange-900 leading-relaxed font-semibold">
+                  💬 &ldquo;Puedo atenderte hoy mismo. Mi trabajo tiene 1 año de garantía.&rdquo;
                 </p>
               </div>
-              <div className="flex gap-2 mt-4">
-                <button className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 transition-all hover:-translate-y-0.5">
-                  ✓ Elegir
+              <div className="flex gap-3 mt-5">
+                <button className="flex-1 bg-slate-900 hover:bg-black text-white text-[13px] font-black py-3 rounded-2xl shadow-xl transition-all hover:-translate-y-1">
+                  Elegir
                 </button>
-                <button className="flex-1 bg-white/50 border border-slate-200 hover:bg-white text-slate-600 text-xs font-bold py-2.5 rounded-xl transition-all hover:bg-slate-50">
-                  Ver perfil
+                <button className="flex-1 bg-white border border-slate-200 text-slate-700 text-[13px] font-black py-3 rounded-2xl hover:bg-slate-50 transition-all">
+                  Perfil
                 </button>
               </div>
             </div>
 
             {/* Card 2 — Another pro */}
-            <div className="absolute top-64 right-16 w-[280px] glass-panel p-4 z-10 animate-float delay-300">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-md shrink-0" style={{ background: "linear-gradient(135deg, #f59e0b, #f97316)" }}>
+            <div className="absolute top-[320px] right-24 w-[300px] glass-panel bg-white/40 border-white/60 p-5 z-10 animate-float delay-500 shadow-2xl hover:scale-[1.02] transition-transform duration-500">
+              <div className="flex items-center gap-4">
+                <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-white font-black text-lg shadow-lg shrink-0" style={{ background: "linear-gradient(135deg, #f97316, #ec4899)" }}>
                   JR
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-slate-900">Juan R. — Electricista</p>
-                  <p className="text-xs text-slate-500 mt-0.5">A 2km de tu ubicación</p>
+                  <p className="text-sm font-black text-slate-900">Juan R. — Electricista</p>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <p className="text-[11px] font-bold text-emerald-600 uppercase tracking-tighter">A 2km de distancia</p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Card 3 — Completed */}
-            <div className="absolute top-20 right-64 w-[220px] glass-panel bg-emerald-50/90 border-emerald-200/50 px-4 py-3 flex items-center gap-3 z-0 animate-float delay-200">
-              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm shrink-0 shadow-md shadow-emerald-500/20">
-                ✓
+            <div className="absolute top-24 right-72 w-[240px] glass-panel bg-emerald-500/10 border-emerald-500/20 px-5 py-4 flex items-center gap-4 z-0 animate-float delay-300 shadow-xl">
+              <div className="w-9 h-9 bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-lg shrink-0 shadow-lg shadow-emerald-500/30">
+                <CheckCircle2 className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-emerald-800 truncate">Trabajo exitoso</p>
-                <p className="text-[10px] text-emerald-600 truncate mt-0.5">María C. dejó 5 ★</p>
+                <p className="text-[11px] font-black text-emerald-800 uppercase tracking-wider">Éxito</p>
+                <p className="text-[13px] text-emerald-900 font-bold truncate">¡Trabajo listo!</p>
               </div>
             </div>
           </div>
