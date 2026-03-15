@@ -4,46 +4,105 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { toast } from "sonner"
-import { Send, Loader2, Paperclip, FileText, X, ArrowLeft } from "lucide-react"
+import { Send, Loader2, Paperclip, FileText, X, ArrowLeft, Smile, FileImage, File } from "lucide-react"
 import { cn, getInitials } from "@/lib/utils"
 import { DocumentUpload } from "@/components/shared/DocumentUpload"
 
-interface MessageSender {
-  id: string
-  name: string
-  avatarUrl: string | null
+// ── Sticker sets ──────────────────────────────────────────────
+const STICKER_SETS = [
+  { label: "Caras", emojis: ["😀","😂","🥹","😍","🤩","😎","🥳","😴","🤔","😤","😢","😭","😱","🤗","😏","🙃"] },
+  { label: "Gestos", emojis: ["👍","👎","👏","🙌","🤝","🫶","🤜","💪","🙏","✌️","🤞","👌","🫡","🤙","👋","🫰"] },
+  { label: "Trabajo", emojis: ["🔧","🛠️","🎨","🧹","🔑","⚡","🚿","🪣","🧰","📋","🔨","🪚","🧲","🔩","🪜","🏗️"] },
+  { label: "Extras", emojis: ["❤️","🔥","✅","💯","🎉","⭐","💰","🏆","⏰","🆗","📌","🚀","💡","🎯","📞","📸"] },
+]
+
+// ── File type helpers ─────────────────────────────────────────
+type FileKind = "image" | "pdf" | "word" | "other"
+
+function getFileKind(fileName: string | null, fileUrl: string | null): FileKind {
+  const name = fileName ?? fileUrl ?? ""
+  const ext = name.split(".").pop()?.toLowerCase() ?? ""
+  if (["jpg","jpeg","png","webp","gif"].includes(ext)) return "image"
+  if (ext === "pdf") return "pdf"
+  if (["doc","docx"].includes(ext)) return "word"
+  return "other"
 }
 
+function FileBubble({ fileUrl, fileName, isMe }: { fileUrl: string; fileName: string | null; isMe: boolean }) {
+  const kind = getFileKind(fileName, fileUrl)
+
+  if (kind === "image") {
+    return (
+      <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="block">
+        <img
+          src={fileUrl}
+          alt={fileName ?? "imagen"}
+          className="max-w-[220px] rounded-xl object-cover border border-white/20 shadow-sm hover:opacity-90 transition-opacity"
+          style={{ maxHeight: 220 }}
+        />
+      </a>
+    )
+  }
+
+  const iconBg = isMe ? "bg-white/20" : kind === "pdf" ? "bg-red-50" : kind === "word" ? "bg-blue-50" : "bg-gray-100"
+  const icon = kind === "pdf"
+    ? <span className="text-xl leading-none">📄</span>
+    : kind === "word"
+    ? <span className="text-xl leading-none">📝</span>
+    : <File className="w-5 h-5 text-gray-500" />
+
+  const labelMap: Record<FileKind, string> = { image: "Imagen", pdf: "PDF", word: "Word", other: "Archivo" }
+
+  return (
+    <a
+      href={fileUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        "flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm transition-colors",
+        isMe
+          ? "bg-orange-400/80 text-white hover:bg-orange-400 rounded-br-md"
+          : "bg-white border border-gray-100 text-gray-700 hover:bg-gray-50 shadow-sm rounded-bl-md"
+      )}
+    >
+      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0", iconBg)}>
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <p className="truncate max-w-[140px] font-medium text-sm">{fileName ?? "Archivo"}</p>
+        <p className={cn("text-xs mt-0.5", isMe ? "text-orange-100" : "text-gray-400")}>{labelMap[kind]}</p>
+      </div>
+    </a>
+  )
+}
+
+// ── Tipos ─────────────────────────────────────────────────────
+interface MessageSender { id: string; name: string; avatarUrl: string | null }
 interface ChatMessage {
-  id: string
-  content: string | null
-  fileUrl: string | null
-  fileType: string | null
-  fileName: string | null
-  createdAt: string
-  readAt: string | null
-  sender: MessageSender
+  id: string; content: string | null; fileUrl: string | null
+  fileType: string | null; fileName: string | null
+  createdAt: string; readAt: string | null; sender: MessageSender
 }
-
 interface Props {
-  conversationId: string
-  currentUserId: string
+  conversationId: string; currentUserId: string
   otherUser: { id: string; name: string; avatarUrl: string | null }
-  initialMessages: ChatMessage[]
-  backHref: string
+  initialMessages: ChatMessage[]; backHref: string
 }
 
+// ── Componente principal ──────────────────────────────────────
 export function ChatWindow({ conversationId, currentUserId, otherUser, initialMessages, backHref }: Props) {
   const router = useRouter()
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [text, setText] = useState("")
   const [sending, setSending] = useState(false)
   const [showAttach, setShowAttach] = useState(false)
+  const [showStickers, setShowStickers] = useState(false)
+  const [stickerTab, setStickerTab] = useState(0)
   const [pendingFile, setPendingFile] = useState<{ url: string; name: string } | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const lastCreatedAt = useRef<string>(initialMessages.at(-1)?.createdAt ?? new Date(0).toISOString())
 
-  // Auto-scroll al fondo
   function scrollToBottom(smooth = true) {
     bottomRef.current?.scrollIntoView({ behavior: smooth ? "smooth" : "auto" })
   }
@@ -51,7 +110,15 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
   useEffect(() => { scrollToBottom(false) }, [])
   useEffect(() => { scrollToBottom() }, [messages])
 
-  // Polling cada 4 segundos para nuevos mensajes
+  // Auto-resize textarea
+  useEffect(() => {
+    const ta = textareaRef.current
+    if (!ta) return
+    ta.style.height = "auto"
+    ta.style.height = Math.min(ta.scrollHeight, 128) + "px"
+  }, [text])
+
+  // Polling cada 4 segundos
   const poll = useCallback(async () => {
     try {
       const res = await fetch(`/api/chat/${conversationId}/messages?since=${encodeURIComponent(lastCreatedAt.current)}`)
@@ -73,17 +140,20 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
     return () => clearInterval(interval)
   }, [poll])
 
-  async function sendMessage() {
-    if (!text.trim() && !pendingFile) return
+  async function sendMessage(overrideContent?: string) {
+    const content = overrideContent ?? text.trim()
+    if (!content && !pendingFile) return
     setSending(true)
     try {
       const body: Record<string, unknown> = {}
-      if (text.trim()) body.content = text.trim()
+      if (content) body.content = content
       if (pendingFile) {
         body.fileUrl = pendingFile.url
         body.fileName = pendingFile.name
         const ext = pendingFile.name.split(".").pop()?.toLowerCase()
-        body.fileType = ext === "pdf" ? "PDF" : ext?.match(/jpg|jpeg|png|webp|gif/) ? "IMAGE" : "OTHER"
+        body.fileType = ext === "pdf" ? "PDF"
+          : ext?.match(/jpg|jpeg|png|webp|gif/) ? "IMAGE"
+          : "OTHER"
       }
 
       const res = await fetch(`/api/chat/${conversationId}/messages`, {
@@ -96,14 +166,20 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
       const newMsg: ChatMessage = await res.json()
       lastCreatedAt.current = newMsg.createdAt
       setMessages((prev) => [...prev, newMsg])
-      setText("")
+      if (!overrideContent) setText("")
       setPendingFile(null)
       setShowAttach(false)
+      setShowStickers(false)
     } catch {
       toast.error("Error de conexión")
     } finally {
       setSending(false)
     }
+  }
+
+  function sendSticker(emoji: string) {
+    setShowStickers(false)
+    sendMessage(emoji)
   }
 
   function onKey(e: React.KeyboardEvent) {
@@ -114,8 +190,7 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
   }
 
   function formatTime(iso: string) {
-    const d = new Date(iso)
-    return d.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" })
+    return new Date(iso).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" })
   }
 
   function formatDate(iso: string) {
@@ -128,7 +203,7 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
     return d.toLocaleDateString("es-PE", { day: "numeric", month: "short" })
   }
 
-  // Agrupar mensajes por fecha
+  // Agrupar por fecha
   const grouped: { date: string; msgs: ChatMessage[] }[] = []
   for (const msg of messages) {
     const date = formatDate(msg.createdAt)
@@ -141,11 +216,7 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
     <div className="flex flex-col h-[calc(100vh-56px)] lg:h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow-sm">
-        <button
-          type="button"
-          onClick={() => router.push(backHref)}
-          className="text-gray-400 hover:text-gray-600 transition-colors p-1"
-        >
+        <button type="button" onClick={() => router.push(backHref)} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="w-9 h-9 rounded-xl overflow-hidden bg-orange-100 flex-shrink-0">
@@ -175,7 +246,6 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
 
         {grouped.map(({ date, msgs }) => (
           <div key={date}>
-            {/* Separador de fecha */}
             <div className="flex items-center gap-3 my-3">
               <div className="flex-1 h-px bg-gray-200" />
               <span className="text-[11px] text-gray-400 font-medium bg-gray-50 px-2">{date}</span>
@@ -186,10 +256,14 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
               {msgs.map((msg, i) => {
                 const isMe = msg.sender.id === currentUserId
                 const prevSame = i > 0 && msgs[i - 1].sender.id === msg.sender.id
+                // Sticker: solo emoji (1-2 chars), sin archivo
+                const isSticker = !!msg.content && !msg.fileUrl &&
+                  [...msg.content].length <= 2 &&
+                  /\p{Emoji}/u.test(msg.content)
 
                 return (
                   <div key={msg.id} className={cn("flex items-end gap-2", isMe ? "flex-row-reverse" : "flex-row")}>
-                    {/* Avatar (solo si cambia el remitente) */}
+                    {/* Avatar */}
                     <div className={cn("w-7 h-7 rounded-full flex-shrink-0", prevSame && "invisible")}>
                       {!isMe && (
                         <div className="w-7 h-7 rounded-full overflow-hidden bg-orange-100">
@@ -204,34 +278,26 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
                       )}
                     </div>
 
-                    {/* Burbuja */}
-                    <div className={cn("max-w-[75%] space-y-1", isMe ? "items-end" : "items-start", "flex flex-col")}>
-                      {msg.content && (
-                        <div className={cn(
-                          "px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed",
-                          isMe
-                            ? "bg-orange-500 text-white rounded-br-md"
-                            : "bg-white border border-gray-100 text-gray-800 shadow-sm rounded-bl-md"
-                        )}>
-                          {msg.content}
-                        </div>
-                      )}
-
-                      {msg.fileUrl && (
-                        <a
-                          href={msg.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={cn(
-                            "flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-sm transition-colors",
-                            isMe
-                              ? "bg-orange-400 text-white hover:bg-orange-500 rounded-br-md"
-                              : "bg-white border border-gray-100 text-gray-700 hover:bg-gray-50 shadow-sm rounded-bl-md"
+                    {/* Contenido */}
+                    <div className={cn("max-w-[75%] space-y-1 flex flex-col", isMe ? "items-end" : "items-start")}>
+                      {isSticker ? (
+                        <span className="text-5xl leading-none select-none">{msg.content}</span>
+                      ) : (
+                        <>
+                          {msg.content && (
+                            <div className={cn(
+                              "px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed",
+                              isMe
+                                ? "bg-orange-500 text-white rounded-br-md"
+                                : "bg-white border border-gray-100 text-gray-800 shadow-sm rounded-bl-md"
+                            )}>
+                              {msg.content}
+                            </div>
                           )}
-                        >
-                          <FileText className="w-4 h-4 flex-shrink-0" />
-                          <span className="truncate max-w-[150px]">{msg.fileName ?? "Archivo"}</span>
-                        </a>
+                          {msg.fileUrl && (
+                            <FileBubble fileUrl={msg.fileUrl} fileName={msg.fileName} isMe={isMe} />
+                          )}
+                        </>
                       )}
 
                       <span className={cn("text-[10px] text-gray-400 px-1", isMe && "text-right")}>
@@ -248,10 +314,14 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
         <div ref={bottomRef} />
       </div>
 
-      {/* Archivo pendiente */}
+      {/* Archivo pendiente preview */}
       {pendingFile && (
         <div className="bg-orange-50 border-t border-orange-100 px-4 py-2 flex items-center gap-2">
-          <FileText className="w-4 h-4 text-orange-500 flex-shrink-0" />
+          {getFileKind(pendingFile.name, pendingFile.url) === "image" ? (
+            <FileImage className="w-4 h-4 text-orange-500 flex-shrink-0" />
+          ) : (
+            <FileText className="w-4 h-4 text-orange-500 flex-shrink-0" />
+          )}
           <span className="text-sm text-orange-700 truncate flex-1">{pendingFile.name}</span>
           <button type="button" onClick={() => setPendingFile(null)} className="text-orange-400 hover:text-orange-600">
             <X className="w-4 h-4" />
@@ -262,32 +332,78 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
       {/* Upload adjunto */}
       {showAttach && !pendingFile && (
         <div className="bg-white border-t border-gray-100 px-4 py-3">
-          <p className="text-xs font-semibold text-gray-600 mb-2">Adjuntar archivo (PDF, imagen)</p>
+          <p className="text-xs font-semibold text-gray-600 mb-2">Adjuntar archivo (PDF, imagen, Word)</p>
           <DocumentUpload
             folder="documentos"
             onUploaded={(url, name) => {
               setPendingFile({ url, name })
               setShowAttach(false)
             }}
-            hint="Antecedentes, CV, foto de trabajo, etc."
+            hint="Antecedentes, CV, foto de trabajo, contrato, etc."
           />
         </div>
       )}
 
-      {/* Input */}
-      <div className="bg-white border-t border-gray-100 px-4 py-3 flex items-end gap-2">
+      {/* Sticker picker */}
+      {showStickers && (
+        <div className="bg-white border-t border-gray-100 shadow-lg">
+          <div className="flex border-b border-gray-100 px-3 pt-2">
+            {STICKER_SETS.map((set, i) => (
+              <button
+                key={set.label}
+                type="button"
+                onClick={() => setStickerTab(i)}
+                className={cn(
+                  "px-3 py-1.5 text-xs font-semibold rounded-t-lg transition-colors",
+                  stickerTab === i ? "bg-orange-50 text-orange-600 border-b-2 border-orange-500" : "text-gray-400 hover:text-gray-600"
+                )}
+              >
+                {set.label}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-8 gap-1 p-3 max-h-36 overflow-y-auto">
+            {STICKER_SETS[stickerTab].emojis.map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => sendSticker(emoji)}
+                disabled={sending}
+                className="text-2xl w-9 h-9 flex items-center justify-center rounded-xl hover:bg-orange-50 transition-colors"
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Input bar */}
+      <div className="bg-white border-t border-gray-100 px-3 py-2.5 flex items-end gap-2">
         <button
           type="button"
-          onClick={() => setShowAttach((v) => !v)}
+          onClick={() => { setShowAttach((v) => !v); setShowStickers(false) }}
           className={cn(
             "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
             showAttach ? "bg-orange-100 text-orange-500" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
           )}
         >
-          <Paperclip className="w-4.5 h-4.5" />
+          <Paperclip className="w-4 h-4" />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => { setShowStickers((v) => !v); setShowAttach(false) }}
+          className={cn(
+            "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors",
+            showStickers ? "bg-orange-100 text-orange-500" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+          )}
+        >
+          <Smile className="w-4 h-4" />
         </button>
 
         <textarea
+          ref={textareaRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={onKey}
@@ -300,7 +416,7 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
 
         <button
           type="button"
-          onClick={sendMessage}
+          onClick={() => sendMessage()}
           disabled={sending || (!text.trim() && !pendingFile)}
           className="w-9 h-9 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-colors shadow-sm"
         >

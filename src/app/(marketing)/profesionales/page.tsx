@@ -6,6 +6,7 @@ import { CATEGORIAS } from "@/constants/categorias"
 import { DISTRITOS } from "@/constants/distritos"
 import { ProfessionalCard } from "@/components/profesionales/ProfessionalCard"
 import { LandingHeader } from "@/components/landing/LandingHeader"
+import { DistrictFilter } from "@/components/profesionales/DistrictFilter"
 
 export const metadata = {
   title: "Profesionales verificados en Lima — ChambaPe",
@@ -174,26 +175,11 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
               {distrito && ` en ${DISTRITOS.find((d) => d.slug === distrito)?.name ?? distrito}`}
             </span>
           </div>
-          <form action="/profesionales" method="GET" className="flex items-center gap-2">
-            {categoria && <input type="hidden" name="categoria" value={categoria} />}
-            {q && <input type="hidden" name="q" value={q} />}
-            <select
-              name="distrito"
-              defaultValue={distrito ?? ""}
-              onChange={(e) => {
-                // handled via form submit on change
-              }}
-              className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:border-orange-300 cursor-pointer"
-            >
-              <option value="">Todos los distritos</option>
-              {DISTRITOS.map((d) => (
-                <option key={d.slug} value={d.slug}>{d.name}</option>
-              ))}
-            </select>
-            <noscript>
-              <button type="submit" className="text-xs bg-orange-500 text-white px-3 py-2 rounded-xl">Filtrar</button>
-            </noscript>
-          </form>
+          <DistrictFilter
+            currentDistrito={distrito}
+            currentCategoria={categoria}
+            currentQ={q}
+          />
         </div>
 
         {/* Grid de profesionales */}
