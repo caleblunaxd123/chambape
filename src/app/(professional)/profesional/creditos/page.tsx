@@ -40,9 +40,9 @@ const PAC_RECARGAS = [
     credits: 70,
     price: 70,
     priceLabel: "S/.70",
-    icon: <Crown className="w-6 h-6 text-purple-500" />,
-    color: "border-gray-200 hover:border-purple-300",
-    bg: "bg-purple-50 border border-purple-100",
+    icon: <Crown className="w-6 h-6 text-amber-600" />,
+    color: "border-gray-200 hover:border-amber-300",
+    bg: "bg-amber-50 border border-amber-100",
     popular: false,
     features: ["70 créditos extras", "Precio más bajo por crédito", "Pago único — no es suscripción", "Sin fecha de vencimiento"],
     btn: "bg-gray-900 hover:bg-gray-800",
@@ -189,23 +189,23 @@ export default function CreditosPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-8">
       {/* Header con saldo */}
-      <div className="relative bg-[#1e1b4b] rounded-3xl p-8 sm:p-10 text-white overflow-hidden shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-        <div className="absolute -top-24 -right-10 w-96 h-96 bg-orange-500 rounded-full blur-[100px] opacity-20 pointer-events-none" />
+      <div className="relative rounded-3xl p-8 sm:p-10 text-white overflow-hidden shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6" style={{ background: "var(--brand-gradient)" }}>
+        <div className="absolute -top-24 -right-10 w-96 h-96 bg-white rounded-full blur-[100px] opacity-10 pointer-events-none" />
         <div className="relative z-10">
           <h1 className="text-2xl font-black mb-1" style={{ fontFamily: "Outfit, sans-serif" }}>Créditos</h1>
-          <p className="text-sm text-indigo-200">Adquiere créditos para aplicar a oportunidades de trabajo.</p>
+          <p className="text-sm text-orange-100">Adquiere créditos para aplicar a oportunidades de trabajo.</p>
         </div>
-        
+
         <div className="relative z-10 text-right">
-          <p className="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-1">Tu saldo actual</p>
+          <p className="text-sm font-bold text-orange-200 uppercase tracking-widest mb-1">Tu saldo actual</p>
           {loadingProfile ? (
             <div className="w-32 h-14 bg-white/10 rounded-2xl animate-pulse ml-auto" />
           ) : (
             <div className="flex items-baseline justify-end gap-3">
-              <span className="text-6xl sm:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300" style={{ fontFamily: "Outfit, sans-serif" }}>
+              <span className="text-6xl sm:text-7xl font-black text-white drop-shadow-lg" style={{ fontFamily: "Outfit, sans-serif" }}>
                 {profile?.credits ?? 0}
               </span>
-              <span className="text-xl sm:text-2xl font-bold text-indigo-100">créditos</span>
+              <span className="text-xl sm:text-2xl font-bold text-white/80">créditos</span>
             </div>
           )}
         </div>

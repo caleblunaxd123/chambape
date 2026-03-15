@@ -23,9 +23,9 @@ interface Props {
 
 const AVATAR_GRADIENTS = [
   "from-orange-400 to-pink-500",
-  "from-blue-400 to-indigo-500",
+  "from-blue-400 to-blue-600",
   "from-emerald-400 to-teal-500",
-  "from-violet-400 to-purple-500",
+  "from-rose-400 to-pink-500",
   "from-amber-400 to-orange-500",
 ]
 
@@ -36,7 +36,7 @@ function getAvatarGradient(name: string) {
 // Cover gradient based on badge level
 function getCoverStyle(nivel: string, isPro: boolean) {
   if (isPro) return "from-amber-400 via-orange-400 to-amber-500"
-  if (nivel === "elite") return "from-violet-500 via-indigo-500 to-purple-600"
+  if (nivel === "elite") return "from-gray-800 via-gray-700 to-gray-800"
   if (nivel === "oro")   return "from-yellow-400 via-amber-400 to-orange-400"
   if (nivel === "plata") return "from-slate-400 via-gray-400 to-slate-500"
   if (nivel === "bronce")return "from-amber-600 via-yellow-600 to-amber-700"

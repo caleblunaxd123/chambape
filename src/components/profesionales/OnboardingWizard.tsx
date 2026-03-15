@@ -141,20 +141,20 @@ export function OnboardingWizard({ currentStep: initialStep, categoryMap, userNa
   return (
     <div className="bg-white rounded-3xl shadow-sm overflow-hidden w-full border border-gray-100">
       {/* Header del wizard */}
-      <div className="bg-[#1e1b4b] relative overflow-hidden px-6 pt-8 pb-6">
-        <div className="absolute -top-16 -right-16 w-48 h-48 bg-orange-500 rounded-full blur-[70px] opacity-20 pointer-events-none" />
+      <div className="relative overflow-hidden px-6 pt-8 pb-6" style={{ background: "var(--brand-gradient)" }}>
+        <div className="absolute -top-16 -right-16 w-48 h-48 bg-white rounded-full blur-[70px] opacity-10 pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-white font-black text-xl tracking-wide" style={{ fontFamily: "Outfit, sans-serif" }}>Registro profesional</h1>
-            <span className="text-indigo-200 font-bold text-xs bg-indigo-900/50 px-3 py-1.5 rounded-full">
+            <span className="text-orange-100 font-bold text-xs bg-white/20 px-3 py-1.5 rounded-full">
               Paso {step} de {PASOS.length}
             </span>
           </div>
 
           {/* Barra de progreso */}
-          <div className="w-full bg-indigo-950 rounded-full h-2 mb-6 overflow-hidden shadow-inner">
+          <div className="w-full bg-white/20 rounded-full h-2 mb-6 overflow-hidden shadow-inner">
             <div
-              className="bg-gradient-to-r from-orange-500 to-amber-400 rounded-full h-2 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(249,115,22,0.5)]"
+              className="bg-white rounded-full h-2 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(255,255,255,0.4)]"
               style={{ width: `${(step / PASOS.length) * 100}%` }}
             />
           </div>
@@ -172,8 +172,8 @@ export function OnboardingWizard({ currentStep: initialStep, categoryMap, userNa
                       isPast
                         ? "bg-emerald-500 text-white"
                         : isActive
-                        ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)] scale-110"
-                        : "bg-indigo-900/50 text-indigo-400 border border-indigo-800"
+                        ? "bg-white text-orange-600 shadow-[0_0_15px_rgba(255,255,255,0.4)] scale-110"
+                        : "bg-white/20 text-white/60 border border-white/30"
                     )}
                     style={{ fontFamily: "Outfit, sans-serif" }}
                   >
@@ -182,7 +182,7 @@ export function OnboardingWizard({ currentStep: initialStep, categoryMap, userNa
                   <span
                     className={cn(
                       "text-[9px] font-bold uppercase tracking-wider hidden sm:block transition-colors duration-300",
-                      isActive ? "text-amber-400" : isPast ? "text-indigo-200" : "text-indigo-800"
+                      isActive ? "text-white" : isPast ? "text-orange-100" : "text-white/40"
                     )}
                   >
                     {p.label}

@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props) {
 
 // Gradientes de hero según nivel de badge
 const HERO_GRADIENTS: Record<string, string> = {
-  elite:   "from-violet-600 via-purple-600 to-indigo-700",
+  elite:   "from-gray-900 via-gray-800 to-gray-900",
   oro:     "from-yellow-500 via-amber-500 to-orange-500",
   plata:   "from-slate-500 via-slate-400 to-gray-500",
   bronce:  "from-amber-700 via-amber-600 to-yellow-600",
@@ -93,7 +93,7 @@ export default async function PerfilPublicoPage({ params }: Props) {
   const DOC_TYPE_CONFIG = {
     CV: { label: "Currículum Vitae", icon: FileUser, color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100" },
     CERTIFICATE: { label: "Certificado", icon: Award, color: "text-emerald-500", bg: "bg-emerald-50", border: "border-emerald-100" },
-    CRIMINAL_RECORD: { label: "Antecedentes penales", icon: ShieldCheck, color: "text-violet-500", bg: "bg-violet-50", border: "border-violet-100" },
+    CRIMINAL_RECORD: { label: "Antecedentes penales", icon: ShieldCheck, color: "text-orange-500", bg: "bg-orange-50", border: "border-orange-100" },
   }
 
   return (
@@ -190,7 +190,7 @@ export default async function PerfilPublicoPage({ params }: Props) {
                   {profile.user.name}
                 </h1>
                 {hasPro && (
-                  <span className="inline-flex items-center gap-1 bg-gradient-to-r from-violet-500 to-indigo-500 text-white text-[11px] font-black px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center gap-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[11px] font-black px-2 py-0.5 rounded-full">
                     <Zap className="w-2.5 h-2.5 fill-current" />
                     {profile.subscription!.plan.name}
                   </span>
@@ -263,7 +263,7 @@ export default async function PerfilPublicoPage({ params }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className={cn(
                 "p-4 rounded-2xl border flex items-center gap-4 transition-all",
-                badge.nivel === "elite" ? "bg-violet-50 border-violet-100" :
+                badge.nivel === "elite" ? "bg-gray-50 border-gray-200" :
                 badge.nivel === "oro"   ? "bg-amber-50 border-amber-100" :
                 badge.nivel === "plata" ? "bg-slate-50 border-slate-200" :
                 "bg-gray-50 border-gray-100"
@@ -271,9 +271,9 @@ export default async function PerfilPublicoPage({ params }: Props) {
                 <div className="text-3xl">{badge.emoji}</div>
                 <div>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Estatus</p>
-                  <p className={cn("text-base font-black leading-none", 
-                    badge.nivel === "elite" ? "text-violet-700" : 
-                    badge.nivel === "oro" ? "text-amber-700" : 
+                  <p className={cn("text-base font-black leading-none",
+                    badge.nivel === "elite" ? "text-gray-900" :
+                    badge.nivel === "oro" ? "text-amber-700" :
                     "text-gray-900"
                   )}>{badge.label}</p>
                 </div>
@@ -281,14 +281,14 @@ export default async function PerfilPublicoPage({ params }: Props) {
 
               <div className={cn(
                 "p-4 rounded-2xl border flex items-center gap-4 transition-all",
-                hasPro ? "bg-gradient-to-br from-indigo-50 to-blue-50 border-indigo-100" : "bg-gray-50 border-gray-100 opacity-60"
+                hasPro ? "bg-gradient-to-br from-orange-50 to-amber-50 border-orange-100" : "bg-gray-50 border-gray-100 opacity-60"
               )}>
-                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", hasPro ? "bg-indigo-500 text-white shadow-lg shadow-indigo-200" : "bg-gray-200 text-gray-400")}>
+                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", hasPro ? "bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-200" : "bg-gray-200 text-gray-400")}>
                   <Zap className={cn("w-5 h-5", hasPro && "fill-current")} />
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Membresía</p>
-                  <p className={cn("text-base font-black leading-none", hasPro ? "text-indigo-700" : "text-gray-600")}>
+                  <p className={cn("text-base font-black leading-none", hasPro ? "text-orange-700" : "text-gray-600")}>
                     {hasPro ? profile.subscription!.plan.name : "Plan Estándar"}
                   </p>
                 </div>
@@ -415,7 +415,7 @@ export default async function PerfilPublicoPage({ params }: Props) {
         {(cvDoc || certificates.length > 0 || criminalRecord) && (
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
             <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="w-1 h-5 bg-violet-500 rounded-full block" />
+              <span className="w-1 h-5 bg-orange-500 rounded-full block" />
               Documentos presentados
             </h2>
             <div className="space-y-2">
@@ -447,10 +447,10 @@ export default async function PerfilPublicoPage({ params }: Props) {
 
         {/* ── SOLICITAR ANTECEDENTES ────────────────── */}
         {!criminalRecord && (
-          <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5">
+          <div className="bg-orange-50 border border-orange-100 rounded-2xl p-5">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <ShieldCheck className="w-5 h-5 text-violet-500" />
+              <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <ShieldCheck className="w-5 h-5 text-orange-500" />
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-gray-900 text-sm">¿Necesitas ver sus antecedentes?</p>
@@ -473,7 +473,7 @@ export default async function PerfilPublicoPage({ params }: Props) {
                 ) : (
                   <Link
                     href={`/solicitudes/nueva?proId=${id}`}
-                    className="inline-flex items-center gap-2 bg-violet-500 hover:bg-violet-600 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors shadow-sm"
+                    className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors shadow-sm"
                   >
                     <MessageCircle className="w-4 h-4" />
                     Publicar solicitud para contactar

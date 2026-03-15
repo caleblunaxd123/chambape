@@ -355,7 +355,7 @@ export default async function DashboardProfesionalPage() {
                   },
                   {
                     href: "/profesional/perfil/editar",
-                    icon: <UserCircle className="w-4 h-4 text-purple-500" />,
+                    icon: <UserCircle className="w-4 h-4 text-orange-500" />,
                     label: "Editar mi perfil",
                     badge: null,
                   },

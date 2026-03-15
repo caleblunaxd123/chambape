@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils"
 export const metadata = { title: "Mi perfil — ChambaPe" }
 
 const HERO_GRADIENTS: Record<string, string> = {
-  elite:  "from-violet-600 via-purple-600 to-indigo-700",
+  elite:  "from-gray-900 via-gray-800 to-gray-900",
   oro:    "from-yellow-500 via-amber-500 to-orange-500",
   plata:  "from-slate-500 via-slate-400 to-gray-500",
   bronce: "from-amber-700 via-amber-600 to-yellow-600",

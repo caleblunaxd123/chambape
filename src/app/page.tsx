@@ -50,7 +50,7 @@ const TESTIMONIOS = [
     texto: "Como electricista, ChambaPe me ha conseguido más clientes en 2 meses de lo que conseguía en 6 meses por recomendación.",
     servicio: "Electricista",
     iniciales: "RV",
-    color: "from-blue-400 to-indigo-500",
+    color: "from-blue-400 to-blue-600",
   },
   {
     nombre: "Ana L.",
@@ -58,7 +58,7 @@ const TESTIMONIOS = [
     texto: "Muy fácil de usar. Describí lo que necesitaba, el pintor llegó puntual y el resultado fue excelente. ¡Lo recomiendo totalmente!",
     servicio: "Pintura",
     iniciales: "AL",
-    color: "from-violet-400 to-purple-500",
+    color: "from-orange-400 to-amber-500",
   },
 ]
 
@@ -89,9 +89,9 @@ export default function LandingPage() {
       <section className="relative pt-24 pb-20 md:pt-36 md:pb-32 overflow-hidden bg-white noise-bg">
         {/* Background Mesh Gradients - Much more vibrant now */}
         <div className="absolute top-[-10%] right-[-10%] w-[800px] h-[800px] bg-orange-400/30 rounded-full blur-[130px] animate-pulse-glow mix-blend-soft-light pointer-events-none" />
-        <div className="absolute top-[20%] left-[-15%] w-[600px] h-[600px] bg-indigo-500/25 rounded-full blur-[110px] mix-blend-multiply pointer-events-none" />
+        <div className="absolute top-[20%] left-[-15%] w-[600px] h-[600px] bg-amber-300/20 rounded-full blur-[110px] mix-blend-multiply pointer-events-none" />
         <div className="absolute bottom-[-10%] right-[10%] w-[700px] h-[700px] bg-amber-200/40 rounded-full blur-[140px] mix-blend-soft-light pointer-events-none" />
-        <div className="absolute top-[10%] left-[30%] w-[400px] h-[400px] bg-purple-400/20 rounded-full blur-[100px] mix-blend-multiply pointer-events-none" />
+        <div className="absolute top-[10%] left-[30%] w-[400px] h-[400px] bg-orange-300/15 rounded-full blur-[100px] mix-blend-multiply pointer-events-none" />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center gap-12 md:gap-8 z-10">
           {/* Left: copy */}
@@ -169,7 +169,7 @@ export default function LandingPage() {
             {/* Card 1 — Proposal */}
             <div className="w-[340px] glass-panel bg-white/50 border-white p-6 relative z-20 animate-float translate-y-20 -translate-x-12 shadow-2xl hover:scale-[1.02] transition-transform duration-500">
               <div className="flex items-center gap-4 mb-5">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-xl shrink-0" style={{ background: "linear-gradient(135deg, #4f46e5, #9333ea)" }}>
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-xl shrink-0" style={{ background: "linear-gradient(135deg, #f97316, #f59e0b)" }}>
                   CM
                 </div>
                 <div>
@@ -274,7 +274,7 @@ export default function LandingPage() {
             <span className="text-gray-300 hidden sm:block">|</span>
             <Link
               href="/profesionales"
-              className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-semibold text-sm transition-all hover:gap-3"
+              className="inline-flex items-center gap-2 text-orange-500 hover:text-orange-600 font-semibold text-sm transition-all hover:gap-3"
             >
               Explorar profesionales verificados
               <ArrowRight className="w-4 h-4" />
@@ -288,7 +288,7 @@ export default function LandingPage() {
       ════════════════════════════════════════ */}
       <section className="py-16 md:py-24 relative overflow-hidden bg-[#0f172a]">
         {/* Animated Orbs */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/20 rounded-full blur-[100px] animate-pulse-glow pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-500/15 rounded-full blur-[100px] animate-pulse-glow pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-orange-500/20 rounded-full blur-[100px] animate-pulse-glow pointer-events-none delay-300" />
         
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
@@ -318,7 +318,7 @@ export default function LandingPage() {
             {[
               { name: "Carlos M.", cat: "Gasfitero", rating: "5.0", jobs: 87, emoji: "🥇", grad: "from-blue-400 to-blue-600", delay: "" },
               { name: "Ana R.", cat: "Pintora", rating: "4.9", jobs: 52, emoji: "🥈", grad: "from-rose-400 to-pink-500", delay: "delay-100" },
-              { name: "Juan V.", cat: "Electricista", rating: "5.0", jobs: 123, emoji: "💎", grad: "from-violet-400 to-indigo-500", delay: "delay-200" },
+              { name: "Juan V.", cat: "Electricista", rating: "5.0", jobs: 123, emoji: "💎", grad: "from-orange-400 to-amber-500", delay: "delay-200" },
             ].map((p, i) => (
               <div key={p.name} className={`glass-panel-dark w-72 rounded-2xl px-5 py-4 flex items-center gap-4 animate-slide-in ${p.delay}`} style={{ transform: `translateX(${-i * 15}px)` }}>
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${p.grad} flex items-center justify-center text-white font-bold text-base shadow-lg shrink-0`}>
@@ -406,7 +406,7 @@ export default function LandingPage() {
           TESTIMONIOS
       ════════════════════════════════════════ */}
       <section className="py-16 md:py-24 bg-white relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-50/50 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-orange-50/60 rounded-full blur-[100px] pointer-events-none" />
         <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
           <div className="text-center mb-16">
             <span className="section-label mb-3">Testimonios reales</span>

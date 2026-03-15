@@ -126,7 +126,7 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
     <div className="min-h-screen bg-gray-50">
 
       {/* Hero */}
-      <div className="bg-gradient-to-br from-[#1a1740] via-[#1e1b4b] to-[#2d2a6e] py-10 px-4">
+      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-10 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
             <div>
@@ -138,7 +138,7 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
                   ? <>{categoriaActual.icon} {categoriaActual.name}</>
                   : "Profesionales verificados"}
               </h1>
-              <p className="text-indigo-200 text-base">
+              <p className="text-orange-200 text-base">
                 <span className="font-bold text-white">{total}</span>{" "}
                 profesional{total !== 1 ? "es" : ""} disponible{total !== 1 ? "s" : ""} en Lima
               </p>

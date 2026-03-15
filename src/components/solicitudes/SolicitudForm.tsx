@@ -264,18 +264,18 @@ export function SolicitudForm({ defaultCategoria, targetProfessionalId }: Props)
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
       {/* Header con progreso */}
-      <div className="bg-[#1e1b4b] relative overflow-hidden px-6 pt-8 pb-6">
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-orange-500 rounded-full blur-[60px] opacity-20 pointer-events-none" />
+      <div className="relative overflow-hidden px-6 pt-8 pb-6" style={{ background: "var(--brand-gradient)" }}>
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white rounded-full blur-[60px] opacity-10 pointer-events-none" />
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-5">
             <h1 className="text-white font-black text-2xl tracking-wide" style={{ fontFamily: "Outfit, sans-serif" }}>Nueva solicitud</h1>
-            <span className="text-indigo-200 font-bold text-sm bg-indigo-900/50 px-3 py-1 rounded-full">
+            <span className="text-orange-100 font-bold text-sm bg-white/20 px-3 py-1 rounded-full">
               Paso {step} de {PASOS.length}
             </span>
           </div>
-          <div className="w-full bg-indigo-950 rounded-full h-2 mb-4 overflow-hidden shadow-inner">
+          <div className="w-full bg-white/20 rounded-full h-2 mb-4 overflow-hidden shadow-inner">
             <div
-              className="bg-gradient-to-r from-orange-500 to-amber-400 rounded-full h-2 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(249,115,22,0.5)]"
+              className="bg-white rounded-full h-2 transition-all duration-700 ease-out shadow-[0_0_10px_rgba(255,255,255,0.4)]"
               style={{ width: `${(step / PASOS.length) * 100}%` }}
             />
           </div>
@@ -285,7 +285,7 @@ export function SolicitudForm({ defaultCategoria, targetProfessionalId }: Props)
                 key={p.numero}
                 className={cn(
                   "text-[10px] font-bold uppercase tracking-wider transition-colors duration-300",
-                  p.numero === step ? "text-amber-400" : p.numero < step ? "text-indigo-200" : "text-indigo-800"
+                  p.numero === step ? "text-white" : p.numero < step ? "text-orange-100" : "text-white/40"
                 )}
               >
                 {p.label}

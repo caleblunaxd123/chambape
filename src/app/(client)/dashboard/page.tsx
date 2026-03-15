@@ -136,8 +136,8 @@ export default async function DashboardClientePage() {
               href="/profesionales"
               className="flex items-center gap-4 bg-white border border-gray-100 rounded-2xl p-4 hover:border-orange-200 hover:shadow-sm transition-all group"
             >
-              <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
-                <Search className="w-5 h-5 text-blue-500" />
+              <div className="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-orange-100 transition-colors">
+                <Search className="w-5 h-5 text-orange-500" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-gray-900 text-sm">Buscar profesional directamente</p>
@@ -244,10 +244,10 @@ export default async function DashboardClientePage() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500 flex items-center gap-1.5">
-                      <span className="w-2 h-2 bg-blue-400 rounded-full inline-block" />
+                      <span className="w-2 h-2 bg-orange-400 rounded-full inline-block" />
                       En progreso
                     </span>
-                    <span className="text-sm font-bold text-blue-600">{totalActivas}</span>
+                    <span className="text-sm font-bold text-orange-600">{totalActivas}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500 flex items-center gap-1.5">
@@ -318,17 +318,17 @@ export default async function DashboardClientePage() {
             )}
 
             {/* ── Consejo del día ──────────────────── */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-5">
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-100 rounded-2xl p-5">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center shrink-0 text-base">
+                <div className="w-8 h-8 bg-orange-100 rounded-xl flex items-center justify-center shrink-0 text-base">
                   {randomTip.icon}
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-blue-700 mb-1 flex items-center gap-1.5">
+                  <p className="text-xs font-bold text-orange-700 mb-1 flex items-center gap-1.5">
                     <Lightbulb className="w-3 h-3" />
                     Consejo
                   </p>
-                  <p className="text-sm text-blue-800 leading-relaxed">{randomTip.text}</p>
+                  <p className="text-sm text-orange-800 leading-relaxed">{randomTip.text}</p>
                 </div>
               </div>
             </div>
