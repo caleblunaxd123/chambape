@@ -58,7 +58,9 @@ export async function POST(req: Request) {
   }
   const maxFileSize = MAX_FILE_SIZES[parsed.data.folder] ?? 5 * 1024 * 1024
 
-  const params: Record<string, unknown> = { timestamp, folder, max_file_size: maxFileSize }
+  // Nota: max_file_size NO va en la firma — solo es válido en upload presets (unsigned).
+  // Para signed uploads se valida solo del lado cliente antes de subir.
+  const params: Record<string, string | number> = { timestamp, folder }
 
   // Si es el frente del DNI, solicitamos OCR de Google
   if (parsed.data.folder === "dniFrente") {

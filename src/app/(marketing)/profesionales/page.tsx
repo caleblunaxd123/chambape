@@ -53,22 +53,40 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
     ...(q ? { user: { name: { contains: q, mode: "insensitive" } } } : {}),
   }
 
-  const [profesionalesRaw, total] = await Promise.all([
-    db.professionalProfile.findMany({
-      where,
-      include: {
-        user: { select: { name: true } },
-        categories: {
-          include: { category: { select: { name: true, icon: true, slug: true } } },
-          take: 4,
+  let profesionalesRaw: Awaited<ReturnType<typeof db.professionalProfile.findMany>> = []
+  let total = 0
+  try {
+    ;[profesionalesRaw, total] = await Promise.all([
+      db.professionalProfile.findMany({
+        where,
+        include: {
+          user: { select: { name: true } },
+          categories: {
+            include: { category: { select: { name: true, icon: true, slug: true } } },
+            take: 4,
+          },
         },
-      },
-      orderBy: [{ avgRating: "desc" }, { totalJobs: "desc" }],
-      skip: (page - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
-    }),
-    db.professionalProfile.count({ where }),
-  ])
+        orderBy: [{ avgRating: "desc" }, { totalJobs: "desc" }],
+        skip: (page - 1) * PAGE_SIZE,
+        take: PAGE_SIZE,
+      }),
+      db.professionalProfile.count({ where }),
+    ])
+  } catch (err) {
+    console.error("[/profesionales] Error al consultar DB:", err)
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4 p-8">
+        <div className="text-4xl">⚠️</div>
+        <h2 className="text-lg font-bold text-gray-800">No se pudo cargar el directorio</h2>
+        <p className="text-sm text-gray-500 text-center max-w-sm">
+          Hubo un error al conectar con la base de datos. Por favor intenta de nuevo en unos segundos.
+        </p>
+        <a href="/profesionales" className="px-5 py-2.5 bg-orange-500 text-white font-bold rounded-xl text-sm hover:bg-orange-600 transition-colors">
+          Reintentar
+        </a>
+      </div>
+    )
+  }
 
   // Cast para incluir relaciones
   const profesionales = profesionalesRaw as unknown as Array<{

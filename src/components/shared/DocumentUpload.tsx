@@ -48,7 +48,6 @@ export function DocumentUpload({ folder, onUploaded, accept = "application/pdf,i
       formData.append("timestamp", String(timestamp))
       formData.append("folder", folderPath)
       formData.append("api_key", apiKey)
-      formData.append("max_file_size", String(maxFileSize))
 
       const uploadRes = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType ?? "auto"}/upload`,
