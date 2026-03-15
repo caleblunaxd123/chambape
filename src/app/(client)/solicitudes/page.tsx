@@ -51,10 +51,10 @@ export default async function MisSolicitudesPage({ searchParams }: Props) {
   const totalPages = Math.ceil(total / pageSize)
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div>
       {/* ── Page Header ─────────────────────── */}
       <div className="cp-page-header">
-        <div className="flex items-center justify-between">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-xl font-black text-gray-900" style={{ fontFamily: "Outfit, sans-serif" }}>
               Mis solicitudes
@@ -70,7 +70,7 @@ export default async function MisSolicitudesPage({ searchParams }: Props) {
         </div>
       </div>
 
-      <div className="p-4 sm:p-6">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6">
         {/* ── Tabs filtro ──────────────────────── */}
         <div className="flex gap-1.5 mb-6 overflow-x-auto pb-1 scrollbar-hidden">
           {STATUS_TABS.map((tab) => (
@@ -110,7 +110,7 @@ export default async function MisSolicitudesPage({ searchParams }: Props) {
             )}
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {solicitudes.map((s) => (
               <SolicitudCard key={s.id} solicitud={s} />
             ))}

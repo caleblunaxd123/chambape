@@ -136,18 +136,20 @@ export default async function MisAplicacionesPage({ searchParams }: Props) {
   const statsMap = Object.fromEntries(stats.map((s) => [s.status, s._count]))
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div>
       {/* Header */}
       <div className="cp-page-header">
-        <h1 className="text-xl font-black text-gray-900" style={{ fontFamily: "Outfit, sans-serif" }}>
-          Mis aplicaciones
-        </h1>
-        <p className="text-sm text-gray-500 mt-0.5">
-          {total} aplicación{total !== 1 ? "es" : ""} enviada{total !== 1 ? "s" : ""}
-        </p>
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-xl font-black text-gray-900" style={{ fontFamily: "Outfit, sans-serif" }}>
+            Mis aplicaciones
+          </h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {total} aplicación{total !== 1 ? "es" : ""} enviada{total !== 1 ? "s" : ""}
+          </p>
+        </div>
       </div>
 
-      <div className="px-4 sm:px-6 space-y-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Stats rápidas */}
         <div className="grid grid-cols-3 gap-3">
           {[
