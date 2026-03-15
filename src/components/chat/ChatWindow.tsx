@@ -32,15 +32,9 @@ function getFileKind(fileName: string | null, fileUrl: string | null): FileKind 
   return "other"
 }
 
-// fl_attachment en Cloudinary fuerza Content-Disposition: attachment.
-// Funciona en /image/upload/ (PDFs stored as image) y /raw/upload/ (archivos raw).
+// fl_attachment causa ERR_INVALID_RESPONSE para PDFs en Cloudinary image type.
+// Usar la URL directa: Cloudinary sirve el PDF con Content-Type: application/pdf.
 function getDownloadUrl(fileUrl: string): string {
-  if (fileUrl.includes("/image/upload/") && !fileUrl.includes("fl_attachment")) {
-    return fileUrl.replace("/image/upload/", "/image/upload/fl_attachment/")
-  }
-  if (fileUrl.includes("/raw/upload/") && !fileUrl.includes("fl_attachment")) {
-    return fileUrl.replace("/raw/upload/", "/raw/upload/fl_attachment/")
-  }
   return fileUrl
 }
 
