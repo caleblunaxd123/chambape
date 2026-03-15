@@ -13,6 +13,8 @@ const schema = z.object({
     "selfieDni",
     "portfolio",
     "solicitudes",
+    "documentos",
+    "certificados",
   ]),
 })
 
@@ -54,6 +56,9 @@ export async function POST(req: Request) {
     apiSecret
   )
 
+  // documentos y certificados usan resource_type "auto" para soportar PDFs
+  const isDocument = ["documentos", "certificados"].includes(parsed.data.folder)
+
   return NextResponse.json({
     signature,
     timestamp,
@@ -61,5 +66,6 @@ export async function POST(req: Request) {
     cloudName,
     apiKey,
     ocr: params.ocr,
+    resourceType: isDocument ? "auto" : "image",
   })
 }

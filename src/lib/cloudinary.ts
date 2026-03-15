@@ -31,4 +31,6 @@ export const CLOUDINARY_FOLDERS = {
   selfieDni: "chambape/verificacion/selfie-dni",
   portfolio: "chambape/portfolio",
   solicitudes: "chambape/solicitudes",
+  documentos: "chambape/documentos",
+  certificados: "chambape/certificados",
 }

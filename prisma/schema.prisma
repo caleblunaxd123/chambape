@@ -70,6 +70,12 @@ enum NotificationType {
   REQUEST_EXPIRED
 }
 
+enum DocumentType {
+  CV
+  CERTIFICATE
+  CRIMINAL_RECORD
+}
+
 enum Urgency {
   TODAY
   THIS_WEEK
@@ -148,6 +154,8 @@ model ProfessionalProfile {
   badges             ProfessionalBadge[]
   favoritedBy        Favorite[]
   subscription       ProfessionalSubscription?
+  workExperiences    WorkExperience[]
+  documents          ProfessionalDocument[]
 
   @@map("professional_profiles")
 }
@@ -439,6 +447,41 @@ model Notification {
   createdAt DateTime @default(now())
 
   @@map("notifications")
+}
+
+// ─────────────────────────────────────────
+// EXPERIENCIA Y DOCUMENTOS
+// ─────────────────────────────────────────
+
+model WorkExperience {
+  id             String              @id @default(cuid())
+  professionalId String
+  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  company     String
+  role        String
+  startYear   Int
+  endYear     Int?        // null = trabajo actual
+  description String?
+
+  createdAt DateTime @default(now())
+
+  @@map("work_experiences")
+}
+
+model ProfessionalDocument {
+  id             String              @id @default(cuid())
+  professionalId String
+  professional   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  type     DocumentType
+  title    String
+  fileUrl  String
+  isPublic Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  @@map("professional_documents")
 }
 
 // ─────────────────────────────────────────

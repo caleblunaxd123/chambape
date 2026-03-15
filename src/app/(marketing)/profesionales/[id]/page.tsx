@@ -2,8 +2,8 @@ import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { db } from "@/lib/db"
-import { Star, MapPin, ShieldCheck, Briefcase, Calendar, MessageCircle, Zap } from "lucide-react"
-import { formatFechaCompleta, getBadge } from "@/lib/utils"
+import { Star, MapPin, ShieldCheck, Briefcase, Calendar, MessageCircle, Zap, ChevronRight, FileText, FileUser, Award, ExternalLink, MessageCircleMore } from "lucide-react"
+import { getBadge, getWhatsAppUrl } from "@/lib/utils"
 import { ReviewCard } from "@/components/resenas/ReviewCard"
 import { cn } from "@/lib/utils"
 import { getInitials } from "@/lib/utils"
@@ -60,7 +60,7 @@ export default async function PerfilPublicoPage({ params }: Props) {
   const profile = await db.professionalProfile.findUnique({
     where: { id },
     include: {
-      user: { select: { name: true, createdAt: true } },
+      user: { select: { name: true, createdAt: true, phone: true } },
       categories: { include: { category: true } },
       portfolioImages: { orderBy: { order: "asc" } },
       badges: { include: { badge: true } },
@@ -71,6 +71,8 @@ export default async function PerfilPublicoPage({ params }: Props) {
         orderBy: { createdAt: "desc" },
         take: 10,
       },
+      workExperiences: { orderBy: { startYear: "desc" } },
+      documents: { where: { isPublic: true }, orderBy: { createdAt: "desc" } },
       _count: { select: { reviewsReceived: true } },
     },
   })
@@ -84,6 +86,16 @@ export default async function PerfilPublicoPage({ params }: Props) {
   const heroGradient = HERO_GRADIENTS[badge.nivel] ?? HERO_GRADIENTS.nuevo
   const hasPro = profile.subscription?.status === "ACTIVE"
   const firstName = profile.user.name.split(" ")[0]
+
+  const criminalRecord = profile.documents.find((d) => d.type === "CRIMINAL_RECORD")
+  const cvDoc = profile.documents.find((d) => d.type === "CV")
+  const certificates = profile.documents.filter((d) => d.type === "CERTIFICATE")
+
+  const DOC_TYPE_CONFIG = {
+    CV: { label: "Currículum Vitae", icon: FileUser, color: "text-blue-500", bg: "bg-blue-50", border: "border-blue-100" },
+    CERTIFICATE: { label: "Certificado", icon: Award, color: "text-emerald-500", bg: "bg-emerald-50", border: "border-emerald-100" },
+    CRIMINAL_RECORD: { label: "Antecedentes penales", icon: ShieldCheck, color: "text-violet-500", bg: "bg-violet-50", border: "border-violet-100" },
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -317,6 +329,119 @@ export default async function PerfilPublicoPage({ params }: Props) {
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── EXPERIENCIA LABORAL ───────────────────── */}
+        {profile.workExperiences.length > 0 && (
+          <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+            <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="w-1 h-5 bg-orange-500 rounded-full block" />
+              Experiencia laboral
+            </h2>
+            <div className="space-y-0">
+              {profile.workExperiences.map((exp, i) => (
+                <div key={exp.id} className="flex gap-4">
+                  {/* Timeline */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Briefcase className="w-4 h-4 text-orange-500" />
+                    </div>
+                    {i < profile.workExperiences.length - 1 && (
+                      <div className="w-0.5 flex-1 bg-gray-100 my-1" />
+                    )}
+                  </div>
+                  {/* Content */}
+                  <div className={cn("flex-1 pb-4", i === profile.workExperiences.length - 1 && "pb-0")}>
+                    <p className="font-semibold text-gray-900 text-sm">{exp.role}</p>
+                    <p className="text-sm text-orange-600 font-medium">{exp.company}</p>
+                    <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                      {exp.startYear}
+                      <ChevronRight className="w-3 h-3" />
+                      {exp.endYear ?? (
+                        <span className="bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full text-[10px] font-bold">Actualidad</span>
+                      )}
+                    </p>
+                    {exp.description && (
+                      <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── DOCUMENTOS ────────────────────────────── */}
+        {(cvDoc || certificates.length > 0 || criminalRecord) && (
+          <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+            <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <span className="w-1 h-5 bg-violet-500 rounded-full block" />
+              Documentos presentados
+            </h2>
+            <div className="space-y-2">
+              {[...(cvDoc ? [cvDoc] : []), ...certificates, ...(criminalRecord ? [criminalRecord] : [])].map((doc) => {
+                const conf = DOC_TYPE_CONFIG[doc.type as keyof typeof DOC_TYPE_CONFIG]
+                const Icon = conf.icon
+                return (
+                  <a
+                    key={doc.id}
+                    href={doc.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn("flex items-center gap-3 p-3 rounded-xl border transition-all hover:shadow-sm group", conf.bg, conf.border)}
+                  >
+                    <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center bg-white/70")}>
+                      <Icon className={cn("w-4.5 h-4.5", conf.color)} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 truncate">{doc.title}</p>
+                      <p className={cn("text-xs font-medium", conf.color)}>{conf.label}</p>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors flex-shrink-0" />
+                  </a>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ── SOLICITAR ANTECEDENTES ────────────────── */}
+        {!criminalRecord && (
+          <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <ShieldCheck className="w-5 h-5 text-violet-500" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-gray-900 text-sm">¿Necesitas ver sus antecedentes?</p>
+                <p className="text-xs text-gray-500 mt-0.5 mb-3">
+                  Para contratos largos (limpieza mensual, clases, cuidado de personas) puedes solicitarle directamente su certificado de antecedentes penales.
+                </p>
+                {profile.user.phone ? (
+                  <a
+                    href={getWhatsAppUrl(
+                      profile.user.phone,
+                      `Hola ${firstName}, vi tu perfil en ChambaPe y me interesa contratarte. ¿Podrías compartirme tu certificado de antecedentes penales (CJDZ o PNP)? Gracias.`
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors shadow-sm"
+                  >
+                    <MessageCircleMore className="w-4 h-4" />
+                    Solicitar por WhatsApp
+                  </a>
+                ) : (
+                  <Link
+                    href="/solicitudes/nueva"
+                    className="inline-flex items-center gap-2 bg-violet-500 hover:bg-violet-600 text-white font-semibold text-sm px-4 py-2.5 rounded-xl transition-colors shadow-sm"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Publicar solicitud para contactar
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         )}
