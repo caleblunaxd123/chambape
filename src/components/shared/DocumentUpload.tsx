@@ -13,20 +13,15 @@ interface Props {
   accept?: string
   hint?: string
   className?: string
+  maxMB?: number
 }
 
-export function DocumentUpload({ folder, onUploaded, accept = "application/pdf,image/*", hint, className }: Props) {
+export function DocumentUpload({ folder, onUploaded, accept = "application/pdf,image/*", hint, className, maxMB: maxMBProp }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
   const [uploaded, setUploaded] = useState<string | null>(null)
 
   async function handleFile(file: File) {
-    const maxMB = 10
-    if (file.size > maxMB * 1024 * 1024) {
-      toast.error(`El archivo no debe superar ${maxMB}MB`)
-      return
-    }
-
     setLoading(true)
     try {
       const sigRes = await fetch("/api/upload", {
@@ -36,7 +31,16 @@ export function DocumentUpload({ folder, onUploaded, accept = "application/pdf,i
       })
       if (!sigRes.ok) throw new Error(await sigRes.text())
 
-      const { signature, timestamp, folder: folderPath, cloudName, apiKey, resourceType } = await sigRes.json()
+      const { signature, timestamp, folder: folderPath, cloudName, apiKey, resourceType, maxFileSize } = await sigRes.json()
+
+      // Límite del servidor (maxFileSize en bytes), con fallback al prop
+      const effectiveMaxBytes = maxFileSize ?? (maxMBProp ? maxMBProp * 1024 * 1024 : 10 * 1024 * 1024)
+      const effectiveMaxMB = Math.round(effectiveMaxBytes / (1024 * 1024))
+      if (file.size > effectiveMaxBytes) {
+        toast.error(`El archivo no debe superar ${effectiveMaxMB}MB`)
+        setLoading(false)
+        return
+      }
 
       const formData = new FormData()
       formData.append("file", file)
@@ -44,6 +48,7 @@ export function DocumentUpload({ folder, onUploaded, accept = "application/pdf,i
       formData.append("timestamp", String(timestamp))
       formData.append("folder", folderPath)
       formData.append("api_key", apiKey)
+      formData.append("max_file_size", String(maxFileSize))
 
       const uploadRes = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType ?? "auto"}/upload`,
@@ -91,7 +96,7 @@ export function DocumentUpload({ folder, onUploaded, accept = "application/pdf,i
                 <Upload className="w-3.5 h-3.5" />
                 Haz clic para subir
               </p>
-              <p className="text-xs text-gray-400 mt-0.5">PDF, JPG, PNG · Máx 10MB</p>
+              <p className="text-xs text-gray-400 mt-0.5">PDF, JPG, PNG · Máx {maxMBProp ?? (folder === "documentos" || folder === "certificados" ? 10 : 5)}MB</p>
             </div>
           </>
         )}

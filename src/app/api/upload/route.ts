@@ -44,15 +44,29 @@ export async function POST(req: Request) {
 
   const folder = CLOUDINARY_FOLDERS[parsed.data.folder]
   const timestamp = Math.round(Date.now() / 1000)
-  const params: any = { timestamp, folder }
-  
+
+  // Límites por carpeta (en bytes)
+  const MAX_FILE_SIZES: Record<string, number> = {
+    avatares:       5 * 1024 * 1024,   // 5 MB
+    dniFrente:      5 * 1024 * 1024,
+    dniReverso:     5 * 1024 * 1024,
+    selfieDni:      5 * 1024 * 1024,
+    portfolio:      8 * 1024 * 1024,   // 8 MB
+    solicitudes:    8 * 1024 * 1024,
+    documentos:    10 * 1024 * 1024,   // 10 MB
+    certificados:  10 * 1024 * 1024,
+  }
+  const maxFileSize = MAX_FILE_SIZES[parsed.data.folder] ?? 5 * 1024 * 1024
+
+  const params: Record<string, unknown> = { timestamp, folder, max_file_size: maxFileSize }
+
   // Si es el frente del DNI, solicitamos OCR de Google
   if (parsed.data.folder === "dniFrente") {
     params.ocr = "adv_ocr"
   }
 
   const signature = cloudinary.utils.api_sign_request(
-    params,
+    params as Record<string, string>,
     apiSecret
   )
 
@@ -65,6 +79,7 @@ export async function POST(req: Request) {
     folder,
     cloudName,
     apiKey,
+    maxFileSize,
     ocr: params.ocr,
     resourceType: isDocument ? "auto" : "image",
   })

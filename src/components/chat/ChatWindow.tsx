@@ -340,6 +340,7 @@ export function ChatWindow({ conversationId, currentUserId, otherUser, initialMe
               setShowAttach(false)
             }}
             hint="Antecedentes, CV, foto de trabajo, contrato, etc."
+            maxMB={5}
           />
         </div>
       )}
