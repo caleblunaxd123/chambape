@@ -22,6 +22,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
+import { PhotoGallery } from "@/components/ui/PhotoGallery"
 
 const STATUS_COLORS: Record<string, string> = {
   OPEN: "bg-green-100 text-green-700",
@@ -203,18 +204,8 @@ export default async function SolicitudProfesionalPage({ params }: Props) {
 
       {/* Photos */}
       {solicitud.photos.length > 0 && (
-        <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-700 mb-2">Fotos adjuntas</h2>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {solicitud.photos.map((url, i) => (
-              <div
-                key={i}
-                className="relative w-28 h-28 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100"
-              >
-                <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover" />
-              </div>
-            ))}
-          </div>
+        <div className="mb-6">
+          <PhotoGallery photos={solicitud.photos} label="Fotos adjuntas" />
         </div>
       )}
 
