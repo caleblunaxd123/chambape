@@ -7,6 +7,7 @@ import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { PAQUETES_CREDITOS } from "@/constants/paquetes"
 import { MercadoPagoConfig, Payment } from "mercadopago"
+import { notifyCreditosRecargados } from "@/lib/notifications"
 
 export async function GET(req: Request) {
   try {
@@ -90,6 +91,9 @@ export async function GET(req: Request) {
         },
       }),
     ])
+
+    // Notificar al profesional
+    notifyCreditosRecargados(user.id, pkg.credits, updatedProfile.credits, pkg.name).catch(() => {})
 
     return NextResponse.json({ ok: true, credits: pkg.credits, newBalance: updatedProfile.credits })
   } catch (error) {

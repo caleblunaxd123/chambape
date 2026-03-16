@@ -131,6 +131,22 @@ export async function notifyVerificacionRechazada(professionalId: string, motivo
   })
 }
 
+export async function notifyCreditosRecargados(
+  userId: string,
+  credits: number,
+  newBalance: number,
+  paqueteName: string,
+) {
+  return createNotification({
+    userId,
+    type: "CREDITS_PURCHASED",
+    title: "¡Créditos añadidos! 🎉",
+    message: `Se acreditaron ${credits} créditos (${paqueteName}). Saldo actual: ${newBalance} créditos.`,
+    link: "/profesional/creditos",
+    metadata: { credits, newBalance },
+  })
+}
+
 export async function notifyNuevaReseña(professionalId: string, nombreCliente: string, rating: number) {
   return createNotification({
     userId: professionalId,

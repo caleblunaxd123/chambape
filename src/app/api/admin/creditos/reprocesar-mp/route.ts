@@ -12,6 +12,7 @@ import { db } from "@/lib/db"
 import { PAQUETES_CREDITOS } from "@/constants/paquetes"
 import { MercadoPagoConfig, Payment } from "mercadopago"
 import { z } from "zod"
+import { notifyCreditosRecargados } from "@/lib/notifications"
 
 const schema = z.object({
   paymentId: z.string().min(1, "Ingresa el payment_id de MercadoPago"),
@@ -120,6 +121,11 @@ export async function POST(req: Request) {
         },
       }),
     ])
+
+    // Notificar al profesional
+    if (profile.userId) {
+      notifyCreditosRecargados(profile.userId, pkg.credits, updatedProfile.credits, pkg.name).catch(() => {})
+    }
 
     console.log(`[ADMIN REPROCESAR] ${pkg.credits} créditos acreditados a ${profile.user?.name ?? professionalId} por pago ${paymentId}`)
 

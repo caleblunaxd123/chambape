@@ -241,7 +241,7 @@ export default function LandingPage() {
               ¿Qué servicio necesitas?
             </h2>
             <p className="text-slate-500 text-lg max-w-lg mx-auto">
-              Encuentra el profesional ideal para cualquier trabajo en tu hogar
+              Encuentra al experto ideal para cualquier trabajo en tu hogar
             </p>
           </div>
 
@@ -276,7 +276,7 @@ export default function LandingPage() {
               href="/profesionales"
               className="inline-flex items-center gap-2 text-orange-500 hover:text-orange-600 font-semibold text-sm transition-all hover:gap-3"
             >
-              Explorar profesionales verificados
+              Explorar expertos verificados
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -303,13 +303,13 @@ export default function LandingPage() {
               <span className="text-orange-400">profesionales directamente</span>
             </h2>
             <p className="text-slate-300 text-lg mb-8 max-w-md mx-auto md:mx-0 leading-relaxed">
-              Explora perfiles, lee reseñas reales, compara especialidades y elige el profesional que más te convenza — sin intermediarios.
+              Explora perfiles, lee reseñas reales, compara especialidades y elige al experto que más te convenza — sin intermediarios.
             </p>
             <Link
               href="/profesionales"
               className="inline-flex items-center gap-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 rounded-2xl transition-all shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_30px_rgba(249,115,22,0.5)] hover:-translate-y-1"
             >
-              Ver todos los profesionales
+              Ver todos los expertos
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -413,7 +413,7 @@ export default function LandingPage() {
             <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
               Lo que dicen nuestros usuarios
             </h2>
-            <p className="text-slate-500 text-lg">Miles de limeños ya encontraron su profesional en ChambaPe</p>
+            <p className="text-slate-500 text-lg">Miles de limeños ya encontraron su experto en ChambaPe</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -457,7 +457,7 @@ export default function LandingPage() {
                 <div className="text-4xl mb-4">🏠</div>
                 <h3 className="text-2xl font-black mb-2" style={{ fontFamily: "Outfit, sans-serif" }}>¿Necesitas un servicio?</h3>
                 <p className="text-orange-100 text-sm leading-relaxed mb-6">
-                  Publica tu solicitud en 2 minutos y recibe presupuestos de profesionales verificados en tu zona. Completamente gratis.
+                  Publica tu solicitud en 2 minutos y recibe presupuestos de expertos verificados en tu zona. Completamente gratis.
                 </p>
                 <Link
                   href="/solicitudes/nueva"
@@ -492,7 +492,7 @@ export default function LandingPage() {
                   className="inline-flex items-center gap-2 font-bold px-6 py-3 rounded-xl text-sm transition-all shadow-lg shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/30 hover:-translate-y-0.5 text-white"
                   style={{ background: "var(--brand-gradient)" }}
                 >
-                  Registrarme como profesional
+                  Registrarme como experto
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <div className="flex flex-wrap gap-3 mt-5">
@@ -526,7 +526,7 @@ export default function LandingPage() {
                 </span>
               </Link>
               <p className="text-sm text-gray-500 leading-relaxed mb-4">
-                Conectamos a limeños con profesionales del hogar verificados y de confianza.
+                Conectamos a limeños con expertos del hogar verificados y de confianza.
               </p>
               <p className="text-xs text-gray-600 flex items-center gap-1.5">
                 🇵🇪 <span>Lima, Perú</span>

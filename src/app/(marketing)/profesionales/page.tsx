@@ -1,12 +1,14 @@
 import { db } from "@/lib/db"
 import { Prisma } from "@prisma/client"
 import Link from "next/link"
+import { Suspense } from "react"
 import { Users, SlidersHorizontal } from "lucide-react"
 import { CATEGORIAS } from "@/constants/categorias"
 import { DISTRITOS } from "@/constants/distritos"
 import { ProfessionalCard } from "@/components/profesionales/ProfessionalCard"
 import { DistrictFilter } from "@/components/profesionales/DistrictFilter"
 import { SearchBar } from "@/components/profesionales/SearchBar"
+import GpsLocationBannerCliente from "@/components/profesionales/GpsLocationBannerCliente"
 
 export const metadata = {
   title: "Expertos para tu hogar en Lima — ChambaPe",
@@ -200,7 +202,7 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
             <SlidersHorizontal className="w-4 h-4 text-gray-400" />
             <span className="text-sm text-gray-600 font-medium">
               <span className="font-bold text-gray-900">{total}</span>{" "}
-              profesionale{total !== 1 ? "s" : ""}
+              experto{total !== 1 ? "s" : ""}
               {categoriaActual && <> de <span className="text-orange-600">{categoriaActual.name}</span></>}
               {distrito && ` en ${DISTRITOS.find((d) => d.slug === distrito)?.name ?? distrito}`}
             </span>
@@ -211,6 +213,11 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
             currentQ={q}
           />
         </div>
+
+        {/* Banner GPS para clientes mobile/PWA */}
+        <Suspense fallback={null}>
+          <GpsLocationBannerCliente />
+        </Suspense>
 
         {/* Grid de profesionales */}
         {profesionales.length === 0 ? (

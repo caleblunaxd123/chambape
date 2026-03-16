@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { PAQUETES_CREDITOS } from "@/constants/paquetes"
 import { MercadoPagoConfig, Payment, PreApproval } from "mercadopago"
 import crypto from "crypto"
+import { notifyCreditosRecargados } from "@/lib/notifications"
 
 // ─── Valida la firma HMAC-SHA256 según docs oficiales de MercadoPago ───────────
 // Docs: https://www.mercadopago.com.pe/developers/es/docs/your-integrations/notifications/webhooks
@@ -152,6 +153,9 @@ export async function POST(req: Request) {
         }),
       ])
 
+      // Notificar al profesional (async, no bloquea la respuesta al webhook)
+      notifyCreditosRecargados(profile.userId, pkg.credits, profile.credits + pkg.credits, pkg.name).catch(() => {})
+
       console.log(`[MP Webhook] Pago único procesado: ${pkg.credits} créditos → profesional ${professionalId}`)
       return NextResponse.json({ ok: true })
     }
@@ -251,6 +255,13 @@ export async function POST(req: Request) {
               },
             }),
           ])
+          notifyCreditosRecargados(
+            user.id,
+            (plan as any).creditsPerMonth,
+            profile.credits + (plan as any).creditsPerMonth,
+            `Plan ${(plan as any).name}`,
+          ).catch(() => {})
+
           console.log(
             `[MP Webhook] ${(plan as any).creditsPerMonth} créditos acreditados a ${payerEmail} por suscripción ${id}`,
           )
