@@ -24,9 +24,9 @@ export default async function RegistrarseProfesionalPage() {
   // Si no existe en la BD aún (webhook demorado), redirigir a tipo
   if (!user) redirect("/registrarse/tipo")
 
-  // Si ya completó el onboarding, ir al dashboard
-  if (user.professionalProfile?.onboardingStep === 6 &&
-      user.professionalProfile?.status !== "PENDING_VERIFICATION") {
+  // Si ya completó el onboarding (paso 6 guardado), ir al dashboard
+  // Incluye PENDING_VERIFICATION, ACTIVE y VERIFIED — cualquier estado post-onboarding
+  if (user.professionalProfile && user.professionalProfile.onboardingStep >= 6) {
     redirect("/profesional/dashboard")
   }
 
