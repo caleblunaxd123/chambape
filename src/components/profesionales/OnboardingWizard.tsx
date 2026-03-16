@@ -22,7 +22,7 @@ const PASOS = [
 ]
 
 interface InitialData {
-  step1?: { dni: string; phone: string }
+  step1?: { fullName: string; dni: string; phone: string }
   step2?: { selectedCategoryIds: string[] }
   step3?: { districts: string[] }
   step4?: { dniFrontUrl?: string; dniBackUrl?: string; selfieDniUrl?: string }

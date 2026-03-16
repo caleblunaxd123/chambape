@@ -9,8 +9,8 @@ import { DistrictFilter } from "@/components/profesionales/DistrictFilter"
 import { SearchBar } from "@/components/profesionales/SearchBar"
 
 export const metadata = {
-  title: "Profesionales verificados en Lima — ChambaPe",
-  description: "Encuentra gasfiteros, electricistas, pintores y más profesionales verificados en Lima. Contáctalos directamente o solicita presupuesto gratis.",
+  title: "Expertos para tu hogar en Lima — ChambaPe",
+  description: "Encuentra gasfiteros, electricistas, pintores y más expertos verificados en Lima. Contáctalos directamente o solicita presupuesto gratis.",
 }
 
 // Colores por categoría para los filtros
@@ -136,11 +136,11 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
               >
                 {categoriaActual
                   ? <>{categoriaActual.icon} {categoriaActual.name}</>
-                  : "Profesionales verificados"}
+                  : "Expertos para tu hogar"}
               </h1>
               <p className="text-orange-200 text-base">
                 <span className="font-bold text-white">{total}</span>{" "}
-                profesional{total !== 1 ? "es" : ""} disponible{total !== 1 ? "s" : ""} en Lima
+                experto{total !== 1 ? "s" : ""} disponible{total !== 1 ? "s" : ""} en Lima
               </p>
             </div>
             <Link
@@ -219,10 +219,10 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
               <Users className="w-10 h-10 text-gray-300" />
             </div>
             <h3 className="text-xl font-black text-gray-900 mb-2" style={{ fontFamily: "Outfit, sans-serif" }}>
-              No encontramos profesionales
+              No encontramos expertos
             </h3>
             <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
-              Intenta con otra categoría o distrito, o publica tu solicitud y los profesionales te encontrarán.
+              Intenta con otra categoría o distrito, o publica tu solicitud y los expertos te encontrarán.
             </p>
             <Link
               href="/solicitudes/nueva"
@@ -277,7 +277,7 @@ export default async function DirectorioProfesionalesPage({ searchParams }: Prop
               ¿No encontraste lo que buscas?
             </h3>
             <p className="text-orange-100 text-sm mb-5 max-w-md mx-auto">
-              Publica tu solicitud gratis y recibe hasta 5 presupuestos de profesionales verificados en tu zona.
+              Publica tu solicitud gratis y recibe hasta 5 presupuestos de expertos verificados en tu zona.
             </p>
             <Link
               href="/solicitudes/nueva"

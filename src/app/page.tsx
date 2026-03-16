@@ -5,7 +5,7 @@ import { LandingHeader } from "@/components/landing/LandingHeader"
 import { HowItWorks } from "@/components/landing/HowItWorks"
 
 const STATS = [
-  { value: "500+", label: "Profesionales verificados", icon: Shield },
+  { value: "500+", label: "Expertos verificados", icon: Shield },
   { value: "2,000+", label: "Servicios completados", icon: TrendingUp },
   { value: "44", label: "Distritos de Lima", icon: MapPin },
   { value: "4.8★", label: "Valoración promedio", icon: Star },
@@ -16,22 +16,22 @@ const BENEFITS = [
     icon: "🛡️",
     color: "from-blue-500 to-blue-600",
     bg: "bg-blue-50",
-    title: "Profesionales verificados",
-    desc: "Revisamos el DNI y antecedentes de cada profesional antes de que pueda atender solicitudes. Tu seguridad primero.",
+    title: "Expertos verificados",
+    desc: "Revisamos el DNI y antecedentes de cada experto antes de que pueda atender solicitudes. Tu seguridad primero.",
   },
   {
     icon: "⚡",
     color: "from-orange-500 to-amber-500",
     bg: "bg-orange-50",
     title: "Propuestas en minutos",
-    desc: "Publica tu solicitud y recibe cotizaciones de profesionales de tu zona en minutos. No días, minutos.",
+    desc: "Publica tu solicitud y recibe cotizaciones de expertos de tu zona en minutos. No días, minutos.",
   },
   {
     icon: "💸",
     color: "from-emerald-500 to-emerald-600",
     bg: "bg-emerald-50",
     title: "Sin costos ocultos",
-    desc: "El cliente no paga comisiones. Coordinas directo con el profesional y pagas solo por el trabajo realizado.",
+    desc: "El cliente no paga comisiones. Coordinas directo con el experto y pagas solo por el trabajo realizado.",
   },
 ]
 
@@ -102,7 +102,7 @@ export default function LandingPage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
               </span>
-              <span className="text-orange-600 text-xs font-black uppercase tracking-wider">Más de 500 expertos listos</span>
+              <span className="text-orange-600 text-xs font-black uppercase tracking-wider">Más de 500 expertos para tu hogar</span>
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 leading-[0.9] mb-6 tracking-tight" style={{ fontFamily: "Outfit, sans-serif" }}>
@@ -118,7 +118,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="text-xl text-slate-600 leading-relaxed mb-10 max-w-md font-medium">
-              Conectamos a miles de limeños con profesionales <span className="text-slate-900 font-bold underline decoration-orange-300 decoration-4">verificados</span> para el hogar.
+              Encuentra a la persona indicada para cualquier trabajo en tu hogar. Expertos <span className="text-slate-900 font-bold underline decoration-orange-300 decoration-4">verificados</span>, rápido y sin complicaciones.
             </p>
 
             {/* CTAs */}
@@ -137,13 +137,13 @@ export default function LandingPage() {
                 href="/registrarse"
                 className="glass-panel bg-white/40 text-slate-700 hover:text-orange-600 font-bold px-8 py-4 rounded-2xl transition-all text-base hover:-translate-y-1 flex items-center justify-center gap-2 border border-white"
               >
-                Soy profesional →
+                Quiero ofrecer servicios →
               </Link>
             </div>
 
             {/* Trust chips */}
             <div className="flex flex-wrap gap-4 mt-8">
-              {["Gratis para clientes", "Sin tarjeta de crédito", "Profesionales verificados"].map((t) => (
+              {["Gratis para clientes", "Sin tarjeta de crédito", "Expertos verificados"].map((t) => (
                 <span key={t} className="flex items-center gap-2 text-sm text-slate-500 font-bold">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   {t}

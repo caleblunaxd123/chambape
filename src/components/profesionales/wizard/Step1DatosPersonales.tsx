@@ -9,6 +9,11 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, Info } from "lucide-react"
 
 const schema = z.object({
+  fullName: z
+    .string()
+    .min(3, "Ingresa tu nombre completo")
+    .max(100, "Nombre demasiado largo")
+    .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/, "Solo se permiten letras"),
   dni: z
     .string()
     .length(8, "El DNI debe tener exactamente 8 dígitos")
@@ -34,11 +39,31 @@ export function Step1DatosPersonales({ defaultValues, onNext, loading }: Props) 
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues ?? { dni: "", phone: "" },
+    defaultValues: defaultValues ?? { fullName: "", dni: "", phone: "" },
   })
 
   return (
     <form onSubmit={handleSubmit(onNext)} className="space-y-5">
+      {/* Nombre completo */}
+      <div className="space-y-1.5">
+        <Label htmlFor="fullName">
+          Nombre completo <span className="text-red-500">*</span>
+        </Label>
+        <Input
+          id="fullName"
+          {...register("fullName")}
+          placeholder="Ej: Juan Carlos García López"
+          autoCapitalize="words"
+          className={errors.fullName ? "border-red-400" : ""}
+        />
+        {errors.fullName && (
+          <p className="text-xs text-red-500">{errors.fullName.message}</p>
+        )}
+        <p className="text-xs text-gray-400">
+          Escribe tu nombre tal como aparece en tu DNI
+        </p>
+      </div>
+
       {/* DNI */}
       <div className="space-y-1.5">
         <Label htmlFor="dni">

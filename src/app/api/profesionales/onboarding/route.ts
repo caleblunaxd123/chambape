@@ -8,6 +8,10 @@ import { db } from "@/lib/db"
 
 const step1Schema = z.object({
   step: z.literal(1),
+  fullName: z
+    .string()
+    .min(3, "Ingresa tu nombre completo")
+    .max(100, "Nombre demasiado largo"),
   dni: z
     .string()
     .min(8, "El DNI debe tener 8 dígitos")
@@ -142,12 +146,13 @@ export async function POST(req: Request) {
           },
         })
 
-        // Actualizar teléfono del usuario (y nombre si RENIEC lo confirmó)
+        // Actualizar teléfono y nombre del usuario
+        // RENIEC tiene prioridad (nombre oficial verificado), si no usa el ingresado
         await db.user.update({
           where: { id: user.id },
           data: {
             phone: data.phone,
-            ...(nombreReniec ? { name: nombreReniec } : {}),
+            name: nombreReniec ?? data.fullName,
           },
         })
 
