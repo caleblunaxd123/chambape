@@ -83,7 +83,19 @@ export async function POST(req: Request) {
 
     // ─── TIPO 2: SUSCRIPCIÓN MENSUAL ───────────────────────
     if (type === "SUBSCRIPTION") {
-      // packageId actually corresponds to the SubscriptionPlan.id in the DB
+      // ── Seguridad: no permitir nueva suscripción si ya hay una activa ──────────
+      // Esto evita que el usuario cree suscripciones duplicadas en MP pulsando
+      // varias veces el botón o abriendo varias pestañas.
+      const existingSub = await (db as any).professionalSubscription.findFirst({
+        where: { professionalId: professionalAuth.id, status: "ACTIVE" },
+      })
+      if (existingSub) {
+        return NextResponse.json({
+          error: "Ya tienes una suscripción activa. Cancélala primero antes de cambiar de plan.",
+        }, { status: 400 })
+      }
+
+      // packageId corresponds to the SubscriptionPlan.id in the DB
       const plan = await (db as any).subscriptionPlan.findUnique({
         where: { id: packageId },
       })
@@ -91,7 +103,7 @@ export async function POST(req: Request) {
       if (!plan || !plan.active) {
         return NextResponse.json({ error: "Plan inválido o inactivo" }, { status: 400 })
       }
-      
+
       if (!plan.mpPlanId) {
         return NextResponse.json({ error: "El plan no está configurado en MercadoPago" }, { status: 500 })
       }

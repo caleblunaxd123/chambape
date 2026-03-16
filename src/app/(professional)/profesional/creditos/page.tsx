@@ -194,7 +194,15 @@ export default function CreditosPage() {
       if (!res.ok) {
         toast.error(json.error ?? "Error al cancelar la suscripción")
       } else {
-        toast.success("Suscripción cancelada. Tu plan sigue activo hasta fin del período.")
+        // Mostrar toast con la fecha hasta cuando estará activo el plan
+        if (json.activeUntil) {
+          const dateStr = new Date(json.activeUntil).toLocaleDateString("es-PE", {
+            day: "numeric", month: "long", year: "numeric",
+          })
+          toast.success(`Plan cancelado. Tus créditos mensuales siguen activos hasta el ${dateStr}.`)
+        } else {
+          toast.success("Plan cancelado. Los créditos que ya tienes no se pierden.")
+        }
         setShowCancelConfirm(false)
         // Recargar perfil actualizado
         const data = await fetch("/api/creditos/balance").then((r) => r.json())
@@ -208,6 +216,9 @@ export default function CreditosPage() {
   }
 
   const hasActiveSub = profile?.subscription?.status === "ACTIVE"
+  const hasCancelledSub = profile?.subscription?.status === "CANCELLED"
+  // El profesional puede suscribirse si no tiene plan activo
+  const canSubscribe = !profile?.subscription || hasCancelledSub || profile.subscription.status === "PAST_DUE"
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-8">
@@ -234,6 +245,7 @@ export default function CreditosPage() {
         </div>
       </div>
 
+      {/* ── Suscripción ACTIVA ─────────────────────────────────────────────── */}
       {hasActiveSub && (
         <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 space-y-4">
           <div className="flex items-center justify-between">
@@ -266,7 +278,8 @@ export default function CreditosPage() {
             <div className="bg-red-50 border border-red-200 rounded-xl p-4">
               <p className="text-sm font-semibold text-red-800 mb-1">¿Confirmas la cancelación?</p>
               <p className="text-xs text-red-600 mb-4">
-                Tu suscripción se cancelará de inmediato en MercadoPago. Los créditos que ya tienes no se pierden.
+                Tu suscripción se cancelará en MercadoPago. Los créditos que ya tienes{" "}
+                <strong>no se pierden</strong> y seguirán activos hasta el siguiente período de cobro.
               </p>
               <div className="flex gap-2">
                 <button
@@ -289,6 +302,36 @@ export default function CreditosPage() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── Suscripción CANCELADA — mostrar hasta cuándo está activa ─────────── */}
+      {hasCancelledSub && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-6 h-6 text-amber-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base font-bold text-amber-900 mb-1">Plan cancelado</h3>
+              <p className="text-sm text-amber-700">
+                {profile?.subscription?.nextBillingDate
+                  ? <>
+                      Tus créditos y acceso siguen activos hasta el{" "}
+                      <strong>
+                        {new Date(profile.subscription.nextBillingDate).toLocaleDateString("es-PE", {
+                          day: "numeric", month: "long", year: "numeric",
+                        })}
+                      </strong>.
+                      Después de esa fecha no se hará ningún cobro.
+                    </>
+                  : "Los créditos que ya tienes no se pierden. No se realizarán más cobros."}
+              </p>
+              <p className="text-xs text-amber-600 mt-2">
+                ¿Cambias de idea? Puedes suscribirte de nuevo cuando quieras.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -365,10 +408,10 @@ export default function CreditosPage() {
 
                 <button
                   onClick={() => handleBuy(pkg.id, activeTab === "SUBS" ? "SUBSCRIPTION" : "ONE_TIME")}
-                  disabled={(purchasing !== null) || (activeTab === "SUBS" && hasActiveSub)}
+                  disabled={(purchasing !== null) || (activeTab === "SUBS" && !canSubscribe)}
                   className={cn(
                     "w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm transition-all text-white mt-4 disabled:opacity-50 disabled:cursor-not-allowed",
-                    isCurrentPlan ? "bg-emerald-600 hover:bg-emerald-700" : pkg.btn
+                    isCurrentPlan && hasActiveSub ? "bg-emerald-600 hover:bg-emerald-700" : pkg.btn
                   )}
                 >
                   {purchasing === pkg.id ? (
@@ -376,10 +419,12 @@ export default function CreditosPage() {
                       <Loader2 className="w-5 h-5 animate-spin" />
                       Procesando...
                     </>
-                  ) : isCurrentPlan ? (
-                    "Suscripción Activa"
-                  ) : activeTab === "SUBS" && hasActiveSub ? (
-                    "No disponible"
+                  ) : isCurrentPlan && hasActiveSub ? (
+                    "Plan actual"
+                  ) : activeTab === "SUBS" && !canSubscribe ? (
+                    "Plan activo"
+                  ) : activeTab === "SUBS" && hasCancelledSub ? (
+                    <>Reactivar {pkg.name} <ArrowRight className="w-4 h-4 ml-1" /></>
                   ) : (
                     <>
                       Elegir {pkg.name} <ArrowRight className="w-4 h-4 ml-1" />
