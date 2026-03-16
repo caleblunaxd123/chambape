@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Inter, Outfit } from "next/font/google"
 import { ClerkProvider } from "@clerk/nextjs"
+import { esES } from "@clerk/localizations"
 import { Toaster } from "@/components/ui/sonner"
 import { RealtimeNotifications } from "@/components/notifications/RealtimeNotifications"
 import { PusherBeamsClient } from "@/components/notifications/PusherBeamsClient"
@@ -63,6 +64,7 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider
+      localization={esES}
       signInUrl="/iniciar-sesion"
       signUpUrl="/registrarse"
       signInFallbackRedirectUrl="/dashboard"

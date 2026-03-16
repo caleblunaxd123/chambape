@@ -19,6 +19,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
     "@base-ui/react": "^1.2.0",
+    "@clerk/localizations": "^4.2.1",
     "@clerk/nextjs": "^7.0.1",
     "@ducanh2912/next-pwa": "^10.2.9",
     "@hookform/resolvers": "^5.2.2",
