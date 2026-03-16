@@ -1,3 +1,5 @@
+import { requireAuth } from "@/lib/auth"
+import { redirect } from "next/navigation"
 import { SolicitudForm } from "@/components/solicitudes/SolicitudForm"
 import { db } from "@/lib/db"
 import { getInitials } from "@/lib/utils"
@@ -11,6 +13,11 @@ export default async function NuevaSolicitudPage({
 }: {
   searchParams: Promise<{ categoria?: string; proId?: string }>
 }) {
+  const user = await requireAuth()
+  // Los profesionales no publican solicitudes, van a su panel
+  if (user.role === "PROFESSIONAL") redirect("/profesional/oportunidades")
+  if (user.role === "ADMIN") redirect("/admin/dashboard")
+
   const { categoria, proId } = await searchParams
 
   // Si hay proId, cargar datos del profesional destino

@@ -28,7 +28,7 @@ export default async function OportunidadesPage({ searchParams }: Props) {
     },
   })
 
-  if (!profile) redirect("/profesional/onboarding")
+  if (!profile) redirect("/registrarse/profesional")
 
   const hasCategories = profile.categories.length > 0
   const hasDistricts = profile.districts.length > 0
