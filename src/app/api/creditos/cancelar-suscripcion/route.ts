@@ -34,18 +34,20 @@ export async function POST() {
     }
 
     const mpSubscriptionId = subscription.mpSubscriptionId
-    if (!mpSubscriptionId) {
-      return NextResponse.json({ error: "No se encontró el ID de suscripción en MercadoPago" }, { status: 400 })
+
+    if (mpSubscriptionId) {
+      // Cancelar en MercadoPago (solo si tenemos el ID)
+      const client = new MercadoPagoConfig({ accessToken: MP_ACCESS_TOKEN })
+      const preApprovalApi = new PreApproval(client)
+      await preApprovalApi.update({
+        id: mpSubscriptionId,
+        body: { status: "cancelled" },
+      })
+      console.log(`[CANCEL_SUB] Suscripción ${mpSubscriptionId} cancelada para profesional ${profile.id}`)
+    } else {
+      // Sin ID de MP: cancelamos solo en DB (admin debe verificar en dashboard de MP si aplica)
+      console.warn(`[CANCEL_SUB] Sin mpSubscriptionId para profesional ${profile.id} — cancelando solo en DB`)
     }
-
-    // Cancelar en MercadoPago
-    const client = new MercadoPagoConfig({ accessToken: MP_ACCESS_TOKEN })
-    const preApprovalApi = new PreApproval(client)
-
-    await preApprovalApi.update({
-      id: mpSubscriptionId,
-      body: { status: "cancelled" },
-    })
 
     // Actualizar en nuestra DB
     await (db as any).professionalSubscription.update({
@@ -55,8 +57,6 @@ export async function POST() {
         updatedAt: new Date(),
       },
     })
-
-    console.log(`[CANCEL_SUB] Suscripción ${mpSubscriptionId} cancelada para profesional ${profile.id}`)
 
     return NextResponse.json({ ok: true, message: "Suscripción cancelada exitosamente" })
   } catch (error) {

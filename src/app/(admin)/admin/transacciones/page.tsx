@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { formatFechaRelativa, formatSoles } from "@/lib/utils"
 import { TrendingUp, TrendingDown, RefreshCw, Gift, CreditCard } from "lucide-react"
+import ReprocesarPagoMP from "@/components/admin/ReprocesarPagoMP"
 
 export const metadata = { title: "Transacciones — Admin ChambaPe" }
 
@@ -84,6 +85,9 @@ export default async function AdminTransaccionesPage({ searchParams }: Props) {
         <h1 className="text-2xl font-bold text-gray-900">Transacciones de créditos</h1>
         <p className="text-sm text-gray-500 mt-0.5">{total} transacciones{type ? ` de tipo ${TYPE_CONFIG[type]?.label}` : ""}</p>
       </div>
+
+      {/* Herramienta para reprocesar pagos fallidos */}
+      <ReprocesarPagoMP />
 
       {/* Resumen por tipo */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

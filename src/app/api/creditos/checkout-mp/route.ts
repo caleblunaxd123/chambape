@@ -31,8 +31,15 @@ export async function POST(req: Request) {
     }
     
     const client = new MercadoPagoConfig({ accessToken: MP_ACCESS_TOKEN })
-    
-    const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+
+    // Detectar la URL real de la app desde el host de la request
+    // Esto garantiza que back_urls y notification_url siempre apunten al dominio correcto
+    // sin depender de que NEXT_PUBLIC_APP_URL esté actualizado en cada deploy.
+    const reqHost = req.headers.get("host") ?? ""
+    const reqProto = req.headers.get("x-forwarded-proto") ?? (reqHost.startsWith("localhost") ? "http" : "https")
+    const APP_URL = process.env.NEXT_PUBLIC_APP_URL?.startsWith("https")
+      ? process.env.NEXT_PUBLIC_APP_URL
+      : `${reqProto}://${reqHost}`
 
     // ─── TIPO 1: PAGO ÚNICO (RECARGA DE CRÉDITOS) ─────────
     if (type === "ONE_TIME") {
