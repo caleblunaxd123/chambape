@@ -77,6 +77,7 @@ export default async function DashboardProfesionalPage() {
   const creditsColor = profile.credits <= 3 ? "bg-red-400" : profile.credits <= 8 ? "bg-amber-400" : "bg-emerald-400"
 
   return (
+    <>
     <div>
       {/* ── Page Header — full width ─────────────────────────── */}
       <div className="cp-page-header">
@@ -396,5 +397,6 @@ export default async function DashboardProfesionalPage() {
 
     {/* Tutorial de bienvenida — se abre automáticamente la primera vez */}
     <TutorialModal rol="PROFESSIONAL" userId={user.id} />
+    </>
   )
 }

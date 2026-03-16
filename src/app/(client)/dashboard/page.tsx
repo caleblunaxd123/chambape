@@ -69,6 +69,7 @@ export default async function DashboardClientePage() {
   const randomTip       = TIPS[Math.floor(Date.now() / 86400000) % TIPS.length]
 
   return (
+    <>
     <div>
       {/* ── Page Header — full width ─────────────────────────── */}
       <div className="cp-page-header">
@@ -401,5 +402,7 @@ export default async function DashboardClientePage() {
 
     {/* Tutorial de bienvenida — se abre automáticamente la primera vez */}
     <TutorialModal rol="CLIENT" userId={user.id} />
+    </>
   )
 }
+
