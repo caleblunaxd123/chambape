@@ -6,9 +6,12 @@ import { OportunidadCard } from "@/components/profesionales/OportunidadCard"
 import Link from "next/link"
 import { CATEGORIAS_MAP } from "@/constants/categorias"
 import { expireSolicitudesVencidas } from "@/lib/expiracion"
+import { GpsLocationBanner } from "@/components/profesionales/GpsLocationBanner"
+import { DISTRITOS_MAP } from "@/constants/distritos"
+import { Suspense } from "react"
 
 interface Props {
-  searchParams: Promise<{ categoria?: string; urgencia?: string }>
+  searchParams: Promise<{ categoria?: string; urgencia?: string; distrito?: string }>
 }
 
 export const metadata = { title: "Oportunidades — ChambaPe" }
@@ -16,7 +19,7 @@ export const metadata = { title: "Oportunidades — ChambaPe" }
 export default async function OportunidadesPage({ searchParams }: Props) {
   const user = await requireRole("PROFESSIONAL")
   await expireSolicitudesVencidas()
-  const { categoria: categoriaParam, urgencia: urgenciaParam } = await searchParams
+  const { categoria: categoriaParam, urgencia: urgenciaParam, distrito: distritoParam } = await searchParams
 
   const profile = await db.professionalProfile.findUnique({
     where: { userId: user.id },
@@ -58,12 +61,17 @@ export default async function OportunidadesPage({ searchParams }: Props) {
     ? profile.categories.find((c) => c.category.slug === categoriaParam)?.categoryId
     : undefined
 
+  // Si hay un distrito GPS activo y es válido, filtrar por ese único distrito
+  // (puede ser fuera del perfil del profesional — está ahí físicamente ahora)
+  const gpsDistrito = distritoParam && DISTRITOS_MAP[distritoParam] ? distritoParam : null
+  const districtFilter = gpsDistrito ? [gpsDistrito] : profile.districts
+
   const solicitudes = await db.serviceRequest.findMany({
     where: {
       status: "OPEN",
       expiresAt: { gt: new Date() },
       categoryId: filterCategoryId ?? { in: categoryIds },
-      district: { in: profile.districts },
+      district: { in: districtFilter },
       ...(urgenciaParam ? { urgency: urgenciaParam as never } : {}),
       // Excluir solicitudes directas destinadas a OTRO profesional
       OR: [
@@ -106,7 +114,8 @@ export default async function OportunidadesPage({ searchParams }: Props) {
               Oportunidades
             </h1>
             <p className="text-sm text-gray-500 mt-0.5">
-              {solicitudes.length} solicitud{solicitudes.length !== 1 ? "es" : ""} en tu zona
+              {solicitudes.length} solicitud{solicitudes.length !== 1 ? "es" : ""}{" "}
+              {gpsDistrito ? `en ${DISTRITOS_MAP[gpsDistrito].name}` : "en tu zona"}
             </p>
           </div>
 
@@ -121,6 +130,11 @@ export default async function OportunidadesPage({ searchParams }: Props) {
       </div>
 
       <div className="max-w-5xl mx-auto p-4 sm:p-6">
+        {/* GPS Banner — solo mobile/PWA */}
+        <Suspense fallback={null}>
+          <GpsLocationBanner profileDistricts={profile.districts} />
+        </Suspense>
+
         {/* Filtro urgencia */}
         <div className="flex gap-1.5 overflow-x-auto pb-1 mb-3 scrollbar-hidden">
           {URGENCY_FILTER.map((f) => {
@@ -188,11 +202,11 @@ export default async function OportunidadesPage({ searchParams }: Props) {
               No hay oportunidades disponibles
             </h3>
             <p className="text-sm text-gray-500 max-w-sm mx-auto leading-relaxed mb-6">
-              {activeCategoria || activeUrgency
+              {activeCategoria || activeUrgency || gpsDistrito
                 ? "Prueba quitando los filtros para ver más solicitudes en tu zona."
                 : "Aún no hay solicitudes de clientes en tu zona. Te notificaremos por correo cuando envíen una."}
             </p>
-            {(activeCategoria || activeUrgency) && (
+            {(activeCategoria || activeUrgency || gpsDistrito) && (
               <Link
                 href="?"
                 className="btn-secondary text-sm"
