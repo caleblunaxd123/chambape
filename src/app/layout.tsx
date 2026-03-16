@@ -6,6 +6,7 @@ import { RealtimeNotifications } from "@/components/notifications/RealtimeNotifi
 import { PusherBeamsClient } from "@/components/notifications/PusherBeamsClient"
 import { SWRegistration } from "@/components/shared/SWRegistration"
 import { InstallPWA } from "@/components/shared/InstallPWA"
+import SoporteChat from "@/components/soporte/SoporteChat"
 import "./globals.css"
 
 const inter = Inter({
@@ -74,6 +75,7 @@ export default function RootLayout({
           <PusherBeamsClient />
           <SWRegistration />
           <InstallPWA />
+          <SoporteChat />
           <Toaster richColors position="top-right" />
         </body>
       </html>

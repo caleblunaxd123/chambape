@@ -8,6 +8,7 @@ import {
   UserCircle, MessageSquare, Wallet, BarChart3,
 } from "lucide-react"
 import Link from "next/link"
+import TutorialModal from "@/components/tutorial/TutorialModal"
 
 export const metadata = { title: "Mi panel — ChambaPe" }
 
@@ -392,5 +393,8 @@ export default async function DashboardProfesionalPage() {
         </div>
       </div>
     </div> /* max-w-7xl */
+
+    {/* Tutorial de bienvenida — se abre automáticamente la primera vez */}
+    <TutorialModal rol="PROFESSIONAL" userId={user.id} />
   )
 }

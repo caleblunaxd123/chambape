@@ -9,6 +9,7 @@ import {
 } from "lucide-react"
 import { URGENCIA_LABELS, REQUEST_STATUS_LABELS, formatFechaRelativa } from "@/lib/utils"
 import { CATEGORIAS_MAP } from "@/constants/categorias"
+import TutorialModal from "@/components/tutorial/TutorialModal"
 
 export const metadata = { title: "Mi panel — ChambaPe" }
 
@@ -397,5 +398,8 @@ export default async function DashboardClientePage() {
         </div>
       </div>
     </div> /* max-w-7xl */
+
+    {/* Tutorial de bienvenida — se abre automáticamente la primera vez */}
+    <TutorialModal rol="CLIENT" userId={user.id} />
   )
 }

@@ -48,7 +48,7 @@ export default async function AdminDashboardPage() {
     }),
   ])
 
-  const ingresosSoles = Math.round((ingresosTotal._sum.amountPen ?? 0) / 100)
+  const ingresosSoles = ingresosTotal._sum.amountPen ?? 0
 
   // Últimas solicitudes
   const ultimasSolicitudes = await db.serviceRequest.findMany({

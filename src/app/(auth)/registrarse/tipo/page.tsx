@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { toast } from "sonner"
-import { Wrench, User, ArrowRight, CheckCircle2, Home, Briefcase } from "lucide-react"
+import { Wrench, ArrowRight, CheckCircle2, Home, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type Tipo = "CLIENT" | "PROFESSIONAL"
@@ -45,8 +45,28 @@ export default function SeleccionarTipoPage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (isLoaded && !isSignedIn) router.replace("/iniciar-sesion")
+    // Solo redirigir si Clerk está completamente cargado Y el usuario definitivamente
+    // no está autenticado. Usamos un pequeño delay para dar tiempo a que la sesión
+    // recién creada (después del OTP) se propague al hook de Clerk antes de redirigir.
+    if (!isLoaded) return
+    if (isSignedIn) return
+
+    const timer = setTimeout(() => {
+      router.replace("/iniciar-sesion")
+    }, 1500)
+
+    return () => clearTimeout(timer)
   }, [isLoaded, isSignedIn, router])
+
+  // Mostrar spinner mientras Clerk inicializa (evita el flash de pantalla vacía)
+  if (!isLoaded) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-20">
+        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+        <p className="text-sm text-gray-500">Cargando tu cuenta...</p>
+      </div>
+    )
+  }
 
   async function handleContinuar() {
     if (!selected) return

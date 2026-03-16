@@ -108,7 +108,7 @@ export default async function AdminTransaccionesPage({ searchParams }: Props) {
               </p>
               {t === "PURCHASE" && data?.sum?.amountPen && (
                 <p className="text-xs text-green-600 font-medium mt-0.5">
-                  {formatSoles(Math.round(data.sum.amountPen / 100))} recaudado
+                  {formatSoles(data.sum.amountPen)} recaudado
                 </p>
               )}
             </div>
@@ -196,7 +196,7 @@ export default async function AdminTransaccionesPage({ searchParams }: Props) {
                     </p>
                     {tx.amountPen && (
                       <p className="text-xs text-gray-500 font-medium">
-                        {formatSoles(Math.round(tx.amountPen / 100))}
+                        {formatSoles(tx.amountPen)}
                       </p>
                     )}
                     <p className="text-xs text-gray-400 mt-0.5">
