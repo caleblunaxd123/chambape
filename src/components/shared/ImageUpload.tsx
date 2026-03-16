@@ -150,13 +150,13 @@ export function ImageUpload({
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 400px"
             />
-            {/* Overlay de acciones */}
+            {/* Overlay de acciones — visible siempre en móvil, al hover en desktop */}
             <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-colors group flex items-center justify-center gap-2">
               <Button
                 type="button"
                 size="sm"
                 variant="secondary"
-                className="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap"
+                className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity whitespace-nowrap"
                 onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click() }}
               >
                 <Upload className="w-4 h-4 mr-1" /> Cambiar
@@ -166,7 +166,7 @@ export function ImageUpload({
                   type="button"
                   size="sm"
                   variant="destructive"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                   onClick={(e) => { e.stopPropagation(); handleRemove() }}
                 >
                   <X className="w-4 h-4" />

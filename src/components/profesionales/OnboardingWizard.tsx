@@ -226,7 +226,6 @@ export function OnboardingWizard({ currentStep: initialStep, categoryMap, userNa
         {step === 4 && (
           <Step4Verificacion
             dniEsperado={wizardData.step1?.dni}
-            userName={userName}
             defaultValues={wizardData.step4}
             onNext={(data) => handleNext(4, data)}
             loading={loading}

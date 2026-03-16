@@ -14,13 +14,12 @@ interface DocumentState {
 
 interface Props {
   dniEsperado?: string
-  userName?: string
   defaultValues?: Partial<DocumentState>
   onNext: (data: DocumentState) => Promise<void>
   loading: boolean
 }
 
-export function Step4Verificacion({ dniEsperado, userName, defaultValues, onNext, loading }: Props) {
+export function Step4Verificacion({ dniEsperado, defaultValues, onNext, loading }: Props) {
   const [docs, setDocs] = useState<Partial<DocumentState>>(defaultValues ?? {})
   const [errores, setErrores] = useState<Record<string, string | null>>({})
 
@@ -36,23 +35,12 @@ export function Step4Verificacion({ dniEsperado, userName, defaultValues, onNext
     }
 
     const newErrores = { ...errores }
-    
-    // 1. Validar Número de DNI (Coincidencia parcial o total)
+
+    // Validar solo el número de DNI (el admin verifica el nombre visualmente)
     const hasDni = fullText.includes(dniEsperado)
-    
-    // 2. Validar Nombre (si es el frente)
-    let nameMatch = true
-    if (type === "dniFrontUrl" && userName) {
-      const nameParts = userName.toUpperCase().split(" ").filter(p => p.length > 2)
-      // Buscamos que al menos 2 partes del nombre aparezcan en el OCR
-      const matches = nameParts.filter(part => fullText.includes(part))
-      nameMatch = matches.length >= 2
-    }
 
     if (!hasDni && type !== "dniBackUrl") {
-      newErrores[type] = `El DNI en la foto no coincide con ${dniEsperado}.`
-    } else if (type === "dniFrontUrl" && !nameMatch) {
-      newErrores[type] = `Los nombres en el DNI no parecen coincidir con "${userName}".`
+      newErrores[type] = `El número de DNI en la foto no coincide con ${dniEsperado}. Verifica que sea legible.`
     } else {
       newErrores[type] = null
     }
