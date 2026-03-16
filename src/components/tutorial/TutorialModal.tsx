@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { X, ChevronRight, ChevronLeft, HelpCircle } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { X, ChevronRight, ChevronLeft, HelpCircle, BookOpen, Map } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // ─── Slides por rol ───────────────────────────────────────────────────────────
@@ -120,6 +120,8 @@ export default function TutorialModal({ rol, userId }: Props) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(0)
   const [closing, setClosing] = useState(false)
+  const [menuAbierto, setMenuAbierto] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   // Auto-abrir la primera vez
   useEffect(() => {
@@ -130,6 +132,17 @@ export default function TutorialModal({ rol, userId }: Props) {
       return () => clearTimeout(t)
     }
   }, [storageKey])
+
+  // Cerrar menú al hacer clic fuera
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuAbierto(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   function cerrar() {
     setClosing(true)
@@ -146,6 +159,15 @@ export default function TutorialModal({ rol, userId }: Props) {
     else cerrar()
   }
 
+  function iniciarTourGuiado() {
+    cerrar()
+    setMenuAbierto(false)
+    // Dar tiempo al modal para cerrarse antes de que driver.js destaque elementos
+    setTimeout(() => {
+      window.dispatchEvent(new Event("chambape:start-tour"))
+    }, 350)
+  }
+
   function anterior() {
     if (step > 0) setStep(step - 1)
   }
@@ -153,6 +175,7 @@ export default function TutorialModal({ rol, userId }: Props) {
   function abrirManual() {
     setStep(0)
     setOpen(true)
+    setMenuAbierto(false)
   }
 
   const slide = slides[step]
@@ -161,14 +184,42 @@ export default function TutorialModal({ rol, userId }: Props) {
 
   return (
     <>
-      {/* ── Botón flotante de ayuda ── */}
-      <button
-        onClick={abrirManual}
-        title="Ver tutorial"
-        className="fixed bottom-36 right-4 z-40 w-11 h-11 rounded-full bg-white border border-gray-200 shadow-lg flex items-center justify-center text-gray-500 hover:text-orange-500 hover:border-orange-300 hover:shadow-xl transition-all duration-200 sm:bottom-20"
-      >
-        <HelpCircle className="w-5 h-5" />
-      </button>
+      {/* ── Botón flotante de ayuda con mini-menú ── */}
+      <div ref={menuRef} className="fixed bottom-36 right-4 z-40 flex flex-col items-end gap-2 sm:bottom-20">
+        {/* Mini-menú emergente */}
+        {menuAbierto && (
+          <div className="flex flex-col gap-1.5 mb-1 animate-fade-up">
+            <button
+              onClick={abrirManual}
+              className="flex items-center gap-2 bg-white border border-gray-200 shadow-lg rounded-2xl px-4 py-2.5 text-sm font-semibold text-gray-700 hover:border-orange-300 hover:text-orange-600 transition-all whitespace-nowrap"
+            >
+              <BookOpen className="w-4 h-4" />
+              Ver tutorial en diapositivas
+            </button>
+            <button
+              onClick={iniciarTourGuiado}
+              className="flex items-center gap-2 bg-white border border-gray-200 shadow-lg rounded-2xl px-4 py-2.5 text-sm font-semibold text-gray-700 hover:border-orange-300 hover:text-orange-600 transition-all whitespace-nowrap"
+            >
+              <Map className="w-4 h-4" />
+              Tour interactivo en la app
+            </button>
+          </div>
+        )}
+
+        {/* Botón ? */}
+        <button
+          onClick={() => setMenuAbierto((v) => !v)}
+          title="Ayuda y tutorial"
+          className={cn(
+            "w-11 h-11 rounded-full bg-white border shadow-lg flex items-center justify-center transition-all duration-200 hover:shadow-xl",
+            menuAbierto
+              ? "border-orange-300 text-orange-500"
+              : "border-gray-200 text-gray-500 hover:text-orange-500 hover:border-orange-300"
+          )}
+        >
+          <HelpCircle className="w-5 h-5" />
+        </button>
+      </div>
 
       {/* ── Modal overlay ── */}
       {open && (
@@ -282,8 +333,15 @@ export default function TutorialModal({ rol, userId }: Props) {
               </button>
             </div>
 
-            {/* Skip */}
-            {!esUltimoPaso && (
+            {/* Tour guiado (solo en último paso) / Skip (en pasos anteriores) */}
+            {esUltimoPaso ? (
+              <button
+                onClick={iniciarTourGuiado}
+                className="w-full pb-5 text-xs text-orange-500 hover:text-orange-600 font-semibold transition-colors flex items-center justify-center gap-1"
+              >
+                🗺️ Prefiero el tour interactivo
+              </button>
+            ) : (
               <button
                 onClick={cerrar}
                 className="w-full pb-4 text-xs text-gray-400 hover:text-gray-600 transition-colors"

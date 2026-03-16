@@ -9,6 +9,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import TutorialModal from "@/components/tutorial/TutorialModal"
+import ProductTour from "@/components/tutorial/ProductTour"
 
 export const metadata = { title: "Mi panel — ChambaPe" }
 
@@ -88,7 +89,7 @@ export default async function DashboardProfesionalPage() {
             </h1>
             <p className="text-gray-500 text-sm mt-0.5">{PROFESSIONAL_STATUS_LABELS[profile.status]}</p>
           </div>
-          <Link href="/profesional/oportunidades" className="btn-primary text-sm hidden sm:inline-flex">
+          <Link href="/profesional/oportunidades" id="tour-ver-oportunidades" className="btn-primary text-sm hidden sm:inline-flex">
             <Search className="w-4 h-4" />
             Ver oportunidades
           </Link>
@@ -146,7 +147,7 @@ export default async function DashboardProfesionalPage() {
             )}
 
             {/* ── Oportunidades en tu zona ─────────────── */}
-            <div>
+            <div id="tour-oportunidades">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="font-bold text-gray-900 text-base flex items-center gap-2">
                   <Zap className="w-4 h-4 text-orange-400" />
@@ -199,7 +200,7 @@ export default async function DashboardProfesionalPage() {
 
             {/* ── Mis últimas aplicaciones ─────────────── */}
             {aplicaciones.length > 0 ? (
-              <div>
+              <div id="tour-mis-aplicaciones">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-bold text-gray-900 text-base">Mis últimas aplicaciones</h2>
                   <Link
@@ -254,7 +255,7 @@ export default async function DashboardProfesionalPage() {
           <div className="space-y-4 lg:sticky lg:top-24">
 
             {/* ── Créditos ───────────────────────── */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+            <div id="tour-creditos-widget" className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
                   <Coins className="w-4 h-4 text-amber-500" />
@@ -285,7 +286,7 @@ export default async function DashboardProfesionalPage() {
             </div>
 
             {/* ── Rendimiento ────────────────────── */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+            <div id="tour-rendimiento" className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
               <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-blue-500" />
                 Mi rendimiento
@@ -339,7 +340,7 @@ export default async function DashboardProfesionalPage() {
             </div>
 
             {/* ── Accesos rápidos ──────────────────── */}
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+            <div id="tour-accesos-rapidos" className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
               <h3 className="text-sm font-bold text-gray-700 mb-3">Accesos rápidos</h3>
               <div className="space-y-1">
                 {[
@@ -397,6 +398,8 @@ export default async function DashboardProfesionalPage() {
 
     {/* Tutorial de bienvenida — se abre automáticamente la primera vez */}
     <TutorialModal rol="PROFESSIONAL" userId={user.id} />
+    {/* Tour guiado con driver.js — se activa con el evento chambape:start-tour */}
+    <ProductTour rol="PROFESSIONAL" />
     </>
   )
 }

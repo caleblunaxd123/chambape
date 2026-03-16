@@ -341,3 +341,114 @@
   background-size: 400px 100%;
   animation: shimmer 1.5s infinite linear;
 }
+
+/* ─────────────────────────────────────────
+   DRIVER.JS — ChambaPe tour styles
+───────────────────────────────────────── */
+.chambape-tour-popover.driver-popover {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 4px 20px rgba(249, 115, 22, 0.1);
+  border: 1px solid rgba(249, 115, 22, 0.15);
+  padding: 0;
+  max-width: 320px;
+  font-family: Inter, sans-serif;
+}
+
+.chambape-tour-popover .driver-popover-title {
+  font-family: Outfit, sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #111827;
+  padding: 20px 20px 0;
+  margin: 0;
+}
+
+.chambape-tour-popover .driver-popover-description {
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.6;
+  padding: 8px 20px 0;
+  margin: 0;
+}
+
+.chambape-tour-popover .driver-popover-progress-text {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+.chambape-tour-popover .driver-popover-footer {
+  padding: 16px 20px 20px;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.chambape-tour-popover .driver-popover-prev-btn,
+.chambape-tour-popover .driver-popover-next-btn,
+.chambape-tour-popover .driver-popover-close-btn {
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chambape-tour-popover .driver-popover-prev-btn {
+  background: #f3f4f6;
+  color: #374151;
+}
+.chambape-tour-popover .driver-popover-prev-btn:hover {
+  background: #e5e7eb;
+}
+
+.chambape-tour-popover .driver-popover-next-btn {
+  background: linear-gradient(135deg, #f97316 0%, #f59e0b 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.35);
+}
+.chambape-tour-popover .driver-popover-next-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(249, 115, 22, 0.45);
+}
+
+.chambape-tour-popover .driver-popover-close-btn {
+  background: transparent;
+  color: #9ca3af;
+  padding: 4px 8px;
+  font-size: 18px;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+.chambape-tour-popover .driver-popover-close-btn:hover {
+  color: #374151;
+  background: #f3f4f6;
+}
+
+/* Arrow del popover */
+.chambape-tour-popover .driver-popover-arrow-side-left.driver-popover-arrow {
+  border-right-color: #f97316;
+}
+.chambape-tour-popover .driver-popover-arrow-side-right.driver-popover-arrow {
+  border-left-color: #f97316;
+}
+.chambape-tour-popover .driver-popover-arrow-side-top.driver-popover-arrow {
+  border-bottom-color: #f97316;
+}
+.chambape-tour-popover .driver-popover-arrow-side-bottom.driver-popover-arrow {
+  border-top-color: #f97316;
+}
+
+/* Highlight overlay — borde naranja en el elemento resaltado */
+.driver-active .driver-active-element {
+  border-radius: 12px !important;
+  outline: 3px solid #f97316 !important;
+  outline-offset: 4px !important;
+}

@@ -10,6 +10,7 @@ import {
 import { URGENCIA_LABELS, REQUEST_STATUS_LABELS, formatFechaRelativa } from "@/lib/utils"
 import { CATEGORIAS_MAP } from "@/constants/categorias"
 import TutorialModal from "@/components/tutorial/TutorialModal"
+import ProductTour from "@/components/tutorial/ProductTour"
 
 export const metadata = { title: "Mi panel — ChambaPe" }
 
@@ -80,7 +81,7 @@ export default async function DashboardClientePage() {
             </h1>
             <p className="text-gray-500 text-sm mt-0.5">¿Qué necesitas arreglar hoy?</p>
           </div>
-          <Link href="/solicitudes/nueva" className="btn-primary text-sm hidden sm:inline-flex">
+          <Link href="/solicitudes/nueva" id="tour-nueva-solicitud" className="btn-primary text-sm hidden sm:inline-flex">
             <PlusCircle className="w-4 h-4" />
             Nueva solicitud
           </Link>
@@ -160,7 +161,7 @@ export default async function DashboardClientePage() {
                 </h2>
                 <span className="text-xs text-gray-400">Tap para solicitar</span>
               </div>
-              <div className="grid grid-cols-4 sm:grid-cols-4 gap-2">
+              <div id="tour-categorias-rapidas" className="grid grid-cols-4 sm:grid-cols-4 gap-2">
                 {CATEGORIAS_RAPIDAS.map((slug) => {
                   const cat = CATEGORIAS_MAP[slug]
                   if (!cat) return null
@@ -180,7 +181,7 @@ export default async function DashboardClientePage() {
 
             {/* ── Mis solicitudes recientes ──────────── */}
             {solicitudes.length > 0 && (
-              <div>
+              <div id="tour-mis-solicitudes">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-bold text-gray-900 text-base">Mis solicitudes</h2>
                   <Link
@@ -231,7 +232,7 @@ export default async function DashboardClientePage() {
 
             {/* ── Stats ───────────────────────────── */}
             {!firstTime && (
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+              <div id="tour-mi-actividad" className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
                 <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-orange-400" />
                   Mi actividad
@@ -271,7 +272,7 @@ export default async function DashboardClientePage() {
 
             {/* ── Profesionales destacados ─────────── */}
             {featuredPros.length > 0 && (
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+              <div id="tour-pros-destacados" className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
                 <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
                   <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                   Profesionales top
@@ -402,6 +403,8 @@ export default async function DashboardClientePage() {
 
     {/* Tutorial de bienvenida — se abre automáticamente la primera vez */}
     <TutorialModal rol="CLIENT" userId={user.id} />
+    {/* Tour guiado con driver.js — se activa con el evento chambape:start-tour */}
+    <ProductTour rol="CLIENT" />
     </>
   )
 }
