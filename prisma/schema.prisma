@@ -369,6 +369,20 @@ model Favorite {
   @@map("favorites")
 }
 
+model SupportTicket {
+  id        String              @id @default(cuid())
+  nombre    String
+  email     String
+  asunto    String
+  mensaje   String
+  status    SupportTicketStatus @default(OPEN)
+  respuesta String?
+  repliedAt DateTime?
+  createdAt DateTime            @default(now())
+
+  @@map("support_tickets")
+}
+
 enum UserRole {
   CLIENT
   PROFESSIONAL
@@ -425,6 +439,13 @@ enum NotificationType {
   REVIEW_REPLY
   REQUEST_EXPIRED
   NEW_MESSAGE
+  SUPPORT_TICKET
+}
+
+enum SupportTicketStatus {
+  OPEN
+  REPLIED
+  CLOSED
 }
 
 enum DocumentType {
