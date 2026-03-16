@@ -326,7 +326,7 @@ export async function POST(req: Request) {
       async start(controller) {
         try {
           const anthropicStream = await client.messages.stream({
-            model:      "claude-haiku-4-5",
+            model:      "claude-3-5-haiku-20241022",
             max_tokens: 600,
             system:     SYSTEM_PROMPT,
             messages,
