@@ -105,15 +105,15 @@ export function LandingHeader() {
             <>
               <Link
                 href="/iniciar-sesion"
-                className="text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors text-white/80 hover:text-white hover:bg-white/15"
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors text-white/80 hover:text-white hover:bg-white/15"
               >
-                Entrar
+                Iniciar sesión
               </Link>
               <Link
                 href="/registrarse"
                 className="text-xs font-bold text-orange-600 bg-white px-3 py-1.5 rounded-xl hover:bg-orange-50 transition-colors"
               >
-                Gratis
+                Registrarse
               </Link>
             </>
           )}
