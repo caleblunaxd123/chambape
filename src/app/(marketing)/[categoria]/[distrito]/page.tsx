@@ -77,9 +77,9 @@ function LocalServiceJsonLd({
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: cat.name,
-      itemListElement: (cat.subcategorias ?? [cat.name]).map((sub) => ({
+      itemListElement: cat.subcategorias.map((sub) => ({
         "@type": "Offer",
-        itemOffered: { "@type": "Service", name: sub },
+        itemOffered: { "@type": "Service", name: sub.name },
       })),
     },
     aggregateRating: {
@@ -225,9 +225,9 @@ export default async function CategoriaDistritoPage({
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {cat.subcategorias.map((sub) => (
-                  <div key={sub} className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-slate-100">
+                  <div key={sub.slug} className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 border border-slate-100">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span className="text-slate-700 text-sm font-medium">{sub}</span>
+                    <span className="text-slate-700 text-sm font-medium">{sub.name}</span>
                   </div>
                 ))}
               </div>
