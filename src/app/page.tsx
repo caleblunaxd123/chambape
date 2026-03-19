@@ -109,105 +109,97 @@ export default function LandingPage() {
       <LandingHeader />
 
       {/* ══════════════════════════════════════════════
-          1. HERO
+          1. HERO — layout 2 columnas en TODAS las pantallas
       ══════════════════════════════════════════════ */}
-      <section className="relative pt-16 overflow-hidden flex items-center min-h-[92vh]">
+      <section className="relative pt-16 overflow-hidden flex items-center md:min-h-svh">
         {/* Fondo blanco base */}
         <div className="absolute inset-0 bg-white" />
 
-        {/* Gradiente oscuro derecha — desktop: absorbe el fondo negro de la imagen */}
+        {/* Gradiente oscuro — derecha en TODAS las pantallas */}
         <div
-          className="absolute top-0 right-0 bottom-0 w-[48%] hidden md:block pointer-events-none"
+          className="absolute top-0 right-0 bottom-0 w-[44%] pointer-events-none"
           style={{ background: "linear-gradient(to right, #fff7ed 0%, #7c2d12 40%, #0c0501 100%)" }}
         />
 
-        {/* Glow sutil en mobile */}
-        <div className="absolute top-1/3 right-0 w-72 h-72 bg-orange-400/20 rounded-full blur-[80px] md:hidden pointer-events-none" />
+        {/* Contenedor principal — siempre flex-row */}
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 w-full flex flex-row items-stretch z-10 md:min-h-[calc(100svh-64px)]">
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 w-full flex flex-col md:flex-row items-center z-10 py-10 md:py-0 gap-6 md:gap-0">
-
-          {/* ── LEFT: Contenido ── */}
-          <div className="w-full md:w-[54%] flex flex-col justify-center md:py-24 md:pr-10 animate-fade-up">
+          {/* ── LEFT: Texto ── */}
+          <div className="w-[56%] md:w-[54%] flex flex-col justify-center py-10 md:py-24 pr-2 md:pr-10">
 
             {/* Badge live */}
-            <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 py-2 px-4 rounded-full mb-6 w-fit shadow-sm">
-              <span className="flex h-2 w-2 relative">
+            <div className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 py-1.5 px-2.5 md:px-4 rounded-full mb-4 md:mb-6 w-fit shadow-sm">
+              <span className="flex h-1.5 w-1.5 md:h-2 md:w-2 relative shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
+                <span className="relative inline-flex rounded-full h-full w-full bg-orange-500" />
               </span>
-              <span className="text-orange-700 text-xs font-black tracking-wide">
-                +500 técnicos verificados en Lima
+              <span className="text-orange-700 text-[9px] sm:text-[11px] md:text-xs font-black tracking-wide leading-tight">
+                +500 técnicos en Lima
               </span>
             </div>
 
             {/* Headline */}
             <h1
-              className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 leading-tight mb-5 tracking-tight"
+              className="text-[1.3rem] sm:text-3xl md:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.15] mb-3 md:mb-5 tracking-tight"
               style={{ fontFamily: "Outfit, sans-serif" }}
             >
-              Encuentra técnicos{" "}
-              <span className="text-orange-500">confiables</span>{" "}
-              para tu hogar en minutos
+              Encuentra{" "}
+              <span className="text-orange-500">técnicos</span>{" "}
+              confiables para tu hogar
             </h1>
 
-            <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-[430px]">
+            <p className="hidden sm:block text-sm md:text-lg text-slate-600 leading-relaxed mb-5 md:mb-8">
               Gasfiteros, electricistas, cerrajeros y más. Cotizaciones gratis,
               técnicos verificados en tu zona.
             </p>
 
-            {/* CTAs — primario más pesado que secundario */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-7">
+            {/* CTAs */}
+            <div className="flex flex-col gap-2 md:gap-3 mb-4 md:mb-7">
               <Link
                 href="/solicitudes/nueva"
-                className="inline-flex items-center justify-center gap-2.5 text-white font-black px-7 py-4 rounded-2xl transition-all text-base shadow-xl shadow-orange-500/30 hover:shadow-orange-500/50 hover:-translate-y-0.5 w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-1.5 md:gap-2.5 text-white font-black px-3 md:px-7 py-2.5 md:py-4 rounded-xl md:rounded-2xl transition-all text-xs md:text-base shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:-translate-y-0.5"
                 style={{ background: "var(--brand-gradient)" }}
               >
-                <Wrench className="w-5 h-5 shrink-0" />
+                <Wrench className="w-3.5 h-3.5 md:w-5 md:h-5 shrink-0" />
                 Necesito un técnico
               </Link>
               <Link
                 href="/registrarse"
-                className="inline-flex items-center justify-center gap-2.5 bg-slate-900 text-white font-bold px-7 py-4 rounded-2xl transition-all text-base hover:-translate-y-0.5 hover:bg-slate-800 w-full sm:w-auto opacity-90 hover:opacity-100"
+                className="inline-flex items-center justify-center gap-1.5 md:gap-2.5 bg-slate-900 text-white font-bold px-3 md:px-7 py-2.5 md:py-4 rounded-xl md:rounded-2xl transition-all text-xs md:text-base hover:bg-slate-800"
               >
-                <Briefcase className="w-5 h-5 shrink-0" />
+                <Briefcase className="w-3.5 h-3.5 md:w-5 md:h-5 shrink-0" />
                 Quiero trabajar como técnico
               </Link>
             </div>
 
             {/* Trust chips */}
-            <div className="flex flex-wrap gap-5">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-1 sm:gap-4">
               {[
-                { icon: "🛡️", text: "Técnicos verificados" },
-                { icon: "⭐", text: "Reseñas de clientes" },
-                { icon: "📍", text: "Atención por zona" },
+                { icon: "🛡️", text: "Verificados" },
+                { icon: "⭐", text: "Reseñas reales" },
+                { icon: "📍", text: "Por zona" },
               ].map((t) => (
-                <span
-                  key={t.text}
-                  className="flex items-center gap-1.5 text-sm text-slate-500 font-semibold"
-                >
-                  <span>{t.icon}</span>
-                  {t.text}
+                <span key={t.text} className="flex items-center gap-1 text-[10px] md:text-sm text-slate-500 font-semibold">
+                  <span>{t.icon}</span>{t.text}
                 </span>
               ))}
             </div>
           </div>
 
-          {/* ── RIGHT: Imagen desktop ── */}
-          <div className="hidden md:flex flex-1 items-end justify-center self-stretch relative">
-            {/* Badge rating flotante */}
-            <div className="absolute top-[28%] left-2 bg-white shadow-xl px-4 py-3 rounded-2xl z-20 animate-float border border-slate-100">
+          {/* ── RIGHT: Imagen — visible SIEMPRE ── */}
+          <div className="flex-1 flex items-center md:items-end justify-center relative">
+            {/* Badges flotantes — solo desktop */}
+            <div className="hidden md:block absolute top-[28%] left-0 bg-white shadow-xl px-4 py-3 rounded-2xl z-20 animate-float border border-slate-100">
               <div className="flex items-center gap-1.5 mb-0.5">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
                 ))}
                 <span className="text-xs font-bold text-slate-800 ml-1">4.8</span>
               </div>
-              <p className="text-[11px] text-slate-500">+2,000 servicios completados</p>
+              <p className="text-[11px] text-slate-500">+2,000 servicios</p>
             </div>
-
-            {/* Badge propuesta nueva */}
             <div
-              className="absolute top-[14%] right-8 bg-white shadow-xl px-4 py-2.5 rounded-2xl z-20 animate-float border border-slate-100"
+              className="hidden md:block absolute top-[14%] right-4 bg-white shadow-xl px-3 py-2 rounded-2xl z-20 animate-float border border-slate-100"
               style={{ animationDelay: "0.4s" }}
             >
               <div className="flex items-center gap-2">
@@ -215,37 +207,19 @@ export default function LandingPage() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
-                <p className="text-[12px] font-bold text-slate-800">3 propuestas nuevas 🎉</p>
+                <p className="text-[11px] font-bold text-slate-800">3 propuestas nuevas 🎉</p>
               </div>
             </div>
 
+            {/* Imagen — ocupa toda la altura del hero, alineada abajo */}
             <Image
               src="/tecnico.png"
               alt="Técnico profesional ChambaPe"
               width={480}
               height={600}
-              className="object-contain object-bottom max-h-[600px] w-auto relative z-10"
+              className="object-contain object-bottom w-auto max-h-[260px] md:max-h-[90svh] relative z-10"
               priority
             />
-          </div>
-
-          {/* ── Imagen mobile: strip con gradiente ── */}
-          <div
-            className="block md:hidden w-full rounded-3xl overflow-hidden"
-            style={{
-              background: "linear-gradient(135deg, #fff7ed 0%, #9a3412 50%, #0c0501 100%)",
-            }}
-          >
-            <div className="flex justify-center py-2">
-              <Image
-                src="/tecnico.png"
-                alt="Técnico profesional ChambaPe"
-                width={280}
-                height={320}
-                className="object-contain max-h-[240px] w-auto"
-                priority
-              />
-            </div>
           </div>
         </div>
       </section>
