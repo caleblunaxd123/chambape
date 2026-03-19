@@ -67,10 +67,11 @@ export default function SeleccionarTipoForm() {
         body: JSON.stringify({ role: selected }),
       })
       if (!res.ok) throw new Error()
+      // Redirigir a la página de bienvenida según el rol
       if (selected === "PROFESSIONAL") {
-        router.push("/registrarse/profesional")
+        router.push("/bienvenida?tipo=profesional")
       } else {
-        router.push("/dashboard")
+        router.push("/bienvenida?tipo=cliente")
       }
     } catch {
       toast.error("Ocurrió un error. Intenta de nuevo.")

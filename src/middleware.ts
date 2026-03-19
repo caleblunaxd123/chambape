@@ -5,6 +5,7 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/iniciar-sesion(.*)",
   "/registrarse(.*)",
+  "/bienvenida(.*)",
   "/api/webhooks(.*)",
   // Directorio de profesionales (público)
   "/profesionales(.*)",
