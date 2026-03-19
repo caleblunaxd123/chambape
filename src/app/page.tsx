@@ -138,9 +138,8 @@ export default function LandingPage() {
   }))
 
   return (
-    <>
-      <HomeJsonLd />
     <div className="min-h-screen bg-white overflow-x-hidden">
+      <HomeJsonLd />
       <LandingHeader />
 
       {/* ══════════════════════════════════════════════
@@ -764,6 +763,5 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
-    </>
   )
 }
