@@ -91,6 +91,39 @@ const TESTIMONIOS = [
   },
 ]
 
+// ─── Schema.org JSON-LD ──────────────────────────────────────────────────────
+
+function HomeJsonLd() {
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: "ChambaPe",
+    description:
+      "Marketplace de servicios del hogar en Lima. Conecta con gasfiteros, electricistas, pintores y más técnicos verificados.",
+    url: "https://chambape.com",
+    logo: "https://chambape.com/logo.png",
+    areaServed: { "@type": "City", name: "Lima", containedInPlace: { "@type": "Country", name: "Peru" } },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.8",
+      reviewCount: "340",
+    },
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Servicios del hogar",
+      itemListElement: [
+        { "@type": "Offer", itemOffered: { "@type": "Service", name: "Gasfitería" } },
+        { "@type": "Offer", itemOffered: { "@type": "Service", name: "Electricidad" } },
+        { "@type": "Offer", itemOffered: { "@type": "Service", name: "Pintura" } },
+        { "@type": "Offer", itemOffered: { "@type": "Service", name: "Carpintería" } },
+        { "@type": "Offer", itemOffered: { "@type": "Service", name: "Cerrajería" } },
+        { "@type": "Offer", itemOffered: { "@type": "Service", name: "Limpieza del hogar" } },
+      ],
+    },
+  }
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+}
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
@@ -106,6 +139,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
+      <HomeJsonLd />
       <LandingHeader />
 
       {/* ══════════════════════════════════════════════

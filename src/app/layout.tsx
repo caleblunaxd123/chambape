@@ -24,23 +24,45 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: {
-    default: "ChambaPe — Encuentra técnicos y profesionales en Lima",
+    default: "ChambaPe — Técnicos y profesionales del hogar en Lima",
     template: "%s | ChambaPe",
   },
   description:
-    "Conecta con gasfiteros, electricistas, pintores, carpinteros y más profesionales verificados en Lima. Recibe presupuestos gratis en minutos.",
+    "Encuentra gasfiteros, electricistas, pintores, carpinteros y más técnicos verificados en Lima. Cotizaciones gratis, reseñas reales y atención rápida en todos los distritos.",
   keywords: [
     "gasfitero Lima",
     "electricista Lima",
     "pintor Lima",
+    "carpintero Lima",
+    "cerrajero Lima",
+    "limpieza hogar Lima",
     "técnicos hogar Lima",
     "servicios del hogar Peru",
+    "contratar técnico Lima",
+    "profesionales verificados Lima",
+    "ChambaPe",
   ],
+  authors: [{ name: "ChambaPe", url: "https://chambape.com" }],
+  creator: "ChambaPe",
+  publisher: "ChambaPe",
+  metadataBase: new URL("https://chambape.com"),
   openGraph: {
-    title: "ChambaPe — Servicios del hogar en Lima",
-    description: "Encuentra profesionales verificados para tu hogar",
+    title: "ChambaPe — Técnicos y profesionales del hogar en Lima",
+    description:
+      "Encuentra gasfiteros, electricistas, pintores y más técnicos verificados en Lima. Cotizaciones gratis en minutos.",
+    url: "https://chambape.com",
+    siteName: "ChambaPe",
     locale: "es_PE",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ChambaPe — Técnicos del hogar en Lima",
+    description: "Conecta con técnicos verificados en Lima. Cotizaciones gratis.",
+    site: "@chambape",
+  },
+  alternates: {
+    canonical: "https://chambape.com",
   },
   manifest: "/manifest.json",
   appleWebApp: {
