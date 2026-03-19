@@ -164,8 +164,8 @@ export default async function OportunidadDetailPage({ params }: Props) {
               solicitud.budgetMin && solicitud.budgetMax
                 ? `${formatSoles(solicitud.budgetMin)} – ${formatSoles(solicitud.budgetMax)}`
                 : solicitud.budgetMin
-                ? `> ${formatSoles(solicitud.budgetMin)}`
-                : `< ${formatSoles(solicitud.budgetMax!)}`
+                ? `Desde ${formatSoles(solicitud.budgetMin)}`
+                : `Hasta ${formatSoles(solicitud.budgetMax!)}`
             ) : "A convenir"}
           </p>
         </div>

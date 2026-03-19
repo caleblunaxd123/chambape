@@ -72,9 +72,8 @@ export default async function DashboardProfesionalPage() {
   const successRate  = totalApps > 0 ? Math.round((acceptedApps / totalApps) * 100) : 0
   // amountPen is stored in cents
   const totalEarned  = Math.round((earnings._sum.amountPen ?? 0) / 100)
-  // Credits bar: show relative to a reference of 20 credits
-  const creditsRef   = Math.max(profile.credits, 20)
-  const creditsPct   = Math.min(100, Math.round((profile.credits / creditsRef) * 100))
+  // Credits bar: siempre relativo a 20 créditos como referencia máxima
+  const creditsPct   = Math.min(100, Math.round((profile.credits / 20) * 100))
   const creditsColor = profile.credits <= 3 ? "bg-red-400" : profile.credits <= 8 ? "bg-amber-400" : "bg-emerald-400"
 
   return (
@@ -345,16 +344,16 @@ export default async function DashboardProfesionalPage() {
               <div className="space-y-1">
                 {[
                   {
-                    href: "/mensajes",
+                    href: "/notificaciones",
                     icon: <MessageSquare className="w-4 h-4 text-blue-500" />,
-                    label: "Mis mensajes",
+                    label: "Notificaciones",
                     badge: unreadCount > 0 ? unreadCount : null,
                   },
                   {
                     href: "/profesional/aplicaciones",
                     icon: <Briefcase className="w-4 h-4 text-orange-400" />,
                     label: "Mis aplicaciones",
-                    badge: totalApps > 0 ? null : null,
+                    badge: null,
                   },
                   {
                     href: "/profesional/perfil/editar",
@@ -394,7 +393,7 @@ export default async function DashboardProfesionalPage() {
 
         </div>
       </div>
-    </div> /* max-w-7xl */
+    </div>
 
     {/* Tutorial de bienvenida — se abre automáticamente la primera vez */}
     <TutorialModal rol="PROFESSIONAL" userId={user.id} />

@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { toast } from "sonner"
 import { Wrench, ArrowRight, CheckCircle2, Home, Loader2 } from "lucide-react"
@@ -40,31 +40,15 @@ const OPTIONS = [
 
 export default function SeleccionarTipoForm() {
   const router = useRouter()
-  const { isLoaded, isSignedIn } = useAuth()
+  // Solo necesitamos isLoaded — el servidor ya verificó que el usuario está autenticado.
+  // No usamos isSignedIn para evitar race conditions con la sincronización de Clerk
+  // justo después de la verificación OTP, que causaba blank page o redirect a login.
+  const { isLoaded } = useAuth()
   const [selected, setSelected] = useState<Tipo | null>(null)
   const [loading, setLoading] = useState(false)
-  // Evita que router.refresh() se llame más de una vez
-  const didRefresh = useRef(false)
 
-  useEffect(() => {
-    if (!isLoaded) return
-
-    // Primera vez que Clerk carga: refrescar el server component para
-    // sincronizar la sesión. Esto soluciona el "blank" tras validar OTP.
-    if (!didRefresh.current) {
-      didRefresh.current = true
-      router.refresh()
-      return
-    }
-
-    // Después del refresh: si no hay sesión activa → redirigir al login
-    if (!isSignedIn) {
-      const timer = setTimeout(() => router.replace("/iniciar-sesion"), 800)
-      return () => clearTimeout(timer)
-    }
-  }, [isLoaded, isSignedIn, router])
-
-  if (!isLoaded || !isSignedIn) {
+  // Mostrar spinner mientras Clerk hidrata el cliente
+  if (!isLoaded) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-20">
         <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
