@@ -8,6 +8,7 @@ import { PusherBeamsClient } from "@/components/notifications/PusherBeamsClient"
 import { SWRegistration } from "@/components/shared/SWRegistration"
 import { InstallPWA } from "@/components/shared/InstallPWA"
 import SoporteChat from "@/components/soporte/SoporteChat"
+import { SchemaOrgMarketplace } from "@/components/shared/SchemaOrg"
 import "./globals.css"
 
 const inter = Inter({
@@ -24,46 +25,38 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: {
-    default: "ChambaPe — Técnicos y profesionales del hogar en Lima",
-    template: "%s | ChambaPe",
+    default: "ChambaPe — Técnicos y Profesionales Verificados en Lima, Perú",
+    template: "%s | ChambaPe Lima",
   },
   description:
-    "Encuentra gasfiteros, electricistas, pintores, carpinteros y más técnicos verificados en Lima. Cotizaciones gratis, reseñas reales y atención rápida en todos los distritos.",
+    "Encuentra gasfiteros, electricistas, pintores, carpinteros y más en Lima. Técnicos verificados con DNI, reviews reales y presupuestos gratis en minutos. Miraflores, San Isidro, Surco, San Borja y más de 44 distritos.",
   keywords: [
-    "gasfitero Lima",
-    "electricista Lima",
-    "pintor Lima",
-    "carpintero Lima",
-    "cerrajero Lima",
-    "limpieza hogar Lima",
-    "técnicos hogar Lima",
-    "servicios del hogar Peru",
-    "contratar técnico Lima",
-    "profesionales verificados Lima",
-    "ChambaPe",
+    "gasfitero Lima", "electricista Lima", "pintor Lima", "técnicos hogar Lima",
+    "gasfitero Miraflores", "electricista San Isidro", "técnico Lima barato",
+    "servicio técnico Lima", "plomero Lima", "carpintero Lima", "cerrajero Lima",
+    "limpieza hogar Lima", "fumigación Lima", "mudanza Lima", "ChambaPe",
+    "técnicos verificados Peru", "servicios del hogar Peru",
   ],
   authors: [{ name: "ChambaPe", url: "https://chambape.com" }],
   creator: "ChambaPe",
   publisher: "ChambaPe",
   metadataBase: new URL("https://chambape.com"),
   openGraph: {
-    title: "ChambaPe — Técnicos y profesionales del hogar en Lima",
-    description:
-      "Encuentra gasfiteros, electricistas, pintores y más técnicos verificados en Lima. Cotizaciones gratis en minutos.",
-    url: "https://chambape.com",
+    title: "ChambaPe — Técnicos Verificados en Lima",
+    description: "Gasfiteros, electricistas y más profesionales verificados. Presupuestos gratis en minutos.",
+    url: "https://www.chambape.pe",
     siteName: "ChambaPe",
     locale: "es_PE",
     type: "website",
+    images: [{ url: "https://www.chambape.pe/og-image.jpg", width: 1200, height: 630, alt: "ChambaPe - Técnicos en Lima" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ChambaPe — Técnicos del hogar en Lima",
-    description: "Conecta con técnicos verificados en Lima. Cotizaciones gratis.",
-    site: "@chambape",
+    title: "ChambaPe — Técnicos Verificados en Lima",
+    description: "Encuentra gasfiteros, electricistas y más. Presupuestos gratis.",
   },
-  alternates: {
-    canonical: "https://chambape.com",
-  },
+  alternates: { canonical: "https://www.chambape.pe" },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -93,6 +86,9 @@ export default function RootLayout({
       signUpFallbackRedirectUrl="/registrarse/tipo"
     >
       <html lang="es" suppressHydrationWarning>
+        <head>
+          <SchemaOrgMarketplace />
+        </head>
         <body className={`${inter.variable} ${outfit.variable} font-sans antialiased bg-background`}>
           {children}
           <RealtimeNotifications />
