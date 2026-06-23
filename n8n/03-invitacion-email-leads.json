@@ -1,0 +1,124 @@
+{
+  "name": "ChambaPe - 03 Invitación por email a leads",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Invitación por email a leads descubiertos\n\nToma leads NUEVOS con email (de Google Places, importación manual, etc.)\ny les manda UNA invitación con link de baja. Tras enviar, los marca como\nCONTACTADO para que nunca se les vuelva a escribir desde este flujo.\n\nLote pequeño (15 cada 6h) a propósito: evita parecer spam masivo y\nmantiene buena reputación de envío en Resend.\n\n**Configurar:**\n- Variable de entorno en n8n: `AGENT_API_SECRET`.\n- Credencial HTTP Header Auth para Resend (`Authorization: Bearer ...`).\n- Cambia `https://chambape.pe` si usas otro dominio.",
+        "height": 300,
+        "width": 400
+      },
+      "id": "sticky-03",
+      "name": "Notas",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-260, -140]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 6 }]
+        }
+      },
+      "id": "trigger-03",
+      "name": "Cada 6 horas",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-260, 120]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://chambape.pe/api/agente/leads",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "tipo", "value": "PROFESIONAL" },
+            { "name": "conEmail", "value": "true" },
+            { "name": "limit", "value": "15" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-agent-secret", "value": "={{ $env.AGENT_API_SECRET }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-pendientes-03",
+      "name": "Obtener leads pendientes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, 120]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "leads",
+        "options": {}
+      },
+      "id": "split-03",
+      "name": "Dividir leads",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [240, 120]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"from\": \"ChambaPe <hola@chambape.pe>\",\n  \"to\": $json.email,\n  \"subject\": \"Clientes buscan \" + ($json.categoria || \"técnicos\") + \" en \" + ($json.distrito || \"tu zona\") + \" — únete gratis\",\n  \"html\": \"<h2>Hola\" + ($json.nombre ? (\" \" + $json.nombre) : \"\") + \",</h2><p>Te escribimos de <strong>ChambaPe</strong>, una plataforma donde clientes de \" + ($json.distrito || \"Lima\") + \" publican trabajos que necesitan y técnicos como tú reciben las solicitudes para cotizar.</p><p>Registrarte es gratis y tú decides qué trabajos tomar y a qué precio.</p><p><a href='https://chambape.pe/registrarse' style='background:#f97316;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block'>Registrarme gratis</a></p><p style='color:#9ca3af;font-size:12px;margin-top:24px'>Si no quieres recibir más correos de este tipo, <a href='https://chambape.pe/baja?lead=\" + $json.id + \"'>haz clic aquí para darte de baja</a>.</p>\"\n} }}",
+        "options": {}
+      },
+      "id": "resend-03",
+      "name": "Enviar invitación (Resend)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 120],
+      "credentials": {
+        "httpHeaderAuth": { "id": "REEMPLAZAR_CREDENCIAL_RESEND", "name": "Resend API Key" }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chambape.pe/api/agente/leads/{{ $('Dividir leads').item.json.id }}/contactado",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-agent-secret", "value": "={{ $env.AGENT_API_SECRET }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"canal\": \"email\" } }}",
+        "options": {}
+      },
+      "id": "http-marcar-03",
+      "name": "Marcar contactado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 120]
+    }
+  ],
+  "connections": {
+    "Cada 6 horas": {
+      "main": [[{ "node": "Obtener leads pendientes", "type": "main", "index": 0 }]]
+    },
+    "Obtener leads pendientes": {
+      "main": [[{ "node": "Dividir leads", "type": "main", "index": 0 }]]
+    },
+    "Dividir leads": {
+      "main": [[{ "node": "Enviar invitación (Resend)", "type": "main", "index": 0 }]]
+    },
+    "Enviar invitación (Resend)": {
+      "main": [[{ "node": "Marcar contactado", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

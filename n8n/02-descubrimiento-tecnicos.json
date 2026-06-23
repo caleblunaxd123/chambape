@@ -1,0 +1,145 @@
+{
+  "name": "ChambaPe - 02 Descubrimiento de técnicos (Google Places)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Descubrimiento de técnicos (Google Places API oficial)\n\nNO hace scraping: usa la API oficial de Google Places para encontrar\nnegocios públicos (gasfiteros, electricistas, etc.) por distrito.\nGuarda cada lead en ChambaPe vía /api/agente/leads (dedupe automático\npor place_id, nunca duplica).\n\nRota 1 categoría por día (5 distritos) para mantener el costo de la\nAPI casi gratuito (~150 búsquedas/mes, dentro del crédito gratis de\nGoogle Cloud).\n\n**Configurar:**\n- Variable de entorno en n8n: `GOOGLE_PLACES_API_KEY` (Google Cloud > Places API).\n- Variable de entorno en n8n: `AGENT_API_SECRET` (igual al de tu .env de ChambaPe).\n- Cambia la URL `https://chambape.pe` si usas otro dominio.",
+        "height": 320,
+        "width": 420
+      },
+      "id": "sticky-02",
+      "name": "Notas",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-260, -160]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "0 8 * * *" }
+          ]
+        }
+      },
+      "id": "trigger-02",
+      "name": "Cada día 8am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-260, 120]
+    },
+    {
+      "parameters": {
+        "jsCode": "const distritos = [\"Miraflores\", \"San Isidro\", \"Surco\", \"La Molina\", \"San Borja\"];\nconst categorias = [\n  { slug: \"gasfiteria\", termino: \"gasfitero\" },\n  { slug: \"electricidad\", termino: \"electricista\" },\n  { slug: \"pintura\", termino: \"pintor\" },\n  { slug: \"carpinteria\", termino: \"carpintero\" },\n  { slug: \"cerrajeria\", termino: \"cerrajero\" },\n];\n\nconst dia = new Date().getDay();\nconst categoria = categorias[dia % categorias.length];\n\nreturn distritos.map((distrito) => ({\n  json: {\n    query: `${categoria.termino} en ${distrito}, Lima`,\n    categoria: categoria.slug,\n    distrito,\n  },\n}));"
+      },
+      "id": "code-02",
+      "name": "Definir búsquedas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-20, 120]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://maps.googleapis.com/maps/api/place/textsearch/json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "query", "value": "={{ $json.query }}" },
+            { "name": "key", "value": "={{ $env.GOOGLE_PLACES_API_KEY }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-textsearch-02",
+      "name": "Google Places Text Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 120]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "id": "split-02",
+      "name": "Dividir resultados",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [460, 120]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://maps.googleapis.com/maps/api/place/details/json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "place_id", "value": "={{ $json.place_id }}" },
+            { "name": "fields", "value": "name,formatted_phone_number,formatted_address,website" },
+            { "name": "key", "value": "={{ $env.GOOGLE_PLACES_API_KEY }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-details-02",
+      "name": "Google Places Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 120]
+    },
+    {
+      "parameters": {
+        "jsCode": "const details = $json.result || {};\nconst busqueda = $('Definir búsquedas').item.json;\nconst lugar = $('Dividir resultados').item.json;\n\nreturn [{\n  json: {\n    tipo: \"PROFESIONAL\",\n    nombre: details.name || lugar.name || null,\n    telefono: details.formatted_phone_number || null,\n    direccion: details.formatted_address || lugar.formatted_address || null,\n    categoria: busqueda.categoria,\n    distrito: busqueda.distrito,\n    fuente: \"google_places\",\n    fuenteRef: lugar.place_id,\n  },\n}];"
+      },
+      "id": "code-map-02",
+      "name": "Mapear a lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 120]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chambape.pe/api/agente/leads",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-agent-secret", "value": "={{ $env.AGENT_API_SECRET }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "http-save-02",
+      "name": "Guardar lead en ChambaPe",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1180, 120]
+    }
+  ],
+  "connections": {
+    "Cada día 8am": {
+      "main": [[{ "node": "Definir búsquedas", "type": "main", "index": 0 }]]
+    },
+    "Definir búsquedas": {
+      "main": [[{ "node": "Google Places Text Search", "type": "main", "index": 0 }]]
+    },
+    "Google Places Text Search": {
+      "main": [[{ "node": "Dividir resultados", "type": "main", "index": 0 }]]
+    },
+    "Dividir resultados": {
+      "main": [[{ "node": "Google Places Details", "type": "main", "index": 0 }]]
+    },
+    "Google Places Details": {
+      "main": [[{ "node": "Mapear a lead", "type": "main", "index": 0 }]]
+    },
+    "Mapear a lead": {
+      "main": [[{ "node": "Guardar lead en ChambaPe", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

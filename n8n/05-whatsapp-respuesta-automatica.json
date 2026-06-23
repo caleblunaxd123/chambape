@@ -1,0 +1,121 @@
+{
+  "name": "ChambaPe - 05 Respuesta automática WhatsApp (solo entrante)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Respuesta automática de WhatsApp — SOLO mensajes entrantes\n\nMeta prohíbe enviar plantillas de WhatsApp a quien no dio opt-in,\nincluso con su número en la mano. Por eso este flujo NUNCA inicia\nconversaciones: solo responde cuando alguien te escribe primero\n(por ejemplo, al hacer clic en un anuncio \"Click-to-WhatsApp\" o en\nel número de tu perfil de negocio).\n\n**Setup en Meta for Developers:**\n1. Crea/usa tu app de WhatsApp Business Platform.\n2. En Webhooks, suscribe el campo `messages` y apunta la URL al\n   webhook de este workflow (la verás al activar el nodo Webhook).\n3. La verificación inicial de Meta es una request GET con\n   `hub.challenge` que debes devolver tal cual — actívalo brevemente\n   como GET, verifica, y luego vuelve a dejarlo en POST para producción.\n\n**Variables de entorno en n8n:** `WHATSAPP_TOKEN` (token permanente\nde la app de Meta).",
+        "height": 360,
+        "width": 440
+      },
+      "id": "sticky-05",
+      "name": "Notas",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-280, -180]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-chambape",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-05",
+      "name": "Webhook WhatsApp",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-280, 100]
+    },
+    {
+      "parameters": { "respondWith": "text", "responseBody": "OK", "options": {} },
+      "id": "respond-05",
+      "name": "Responder 200 a Meta",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-40, -40]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.body.entry[0].changes[0].value.messages[0].text.body }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-05",
+      "name": "¿Tiene mensaje de texto?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-40, 220]
+    },
+    {
+      "parameters": {
+        "jsCode": "const value = $json.body.entry[0].changes[0].value;\nconst msg = value.messages[0];\n\nreturn [{\n  json: {\n    from: msg.from,\n    texto: (msg.text && msg.text.body || \"\").toLowerCase(),\n    phoneNumberId: value.metadata.phone_number_id,\n  },\n}];"
+      },
+      "id": "code-extraer-05",
+      "name": "Extraer mensaje",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 220]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { texto } = $json;\n\nlet respuesta;\nif (texto.includes(\"tecnico\") || texto.includes(\"técnico\") || texto.includes(\"trabajo\") || texto.includes(\"chamba\")) {\n  respuesta = \"¡Hola! 👋 Soy el asistente de ChambaPe. Si quieres recibir clientes en tu zona, regístrate gratis aquí: https://chambape.pe/registrarse\";\n} else {\n  respuesta = \"¡Hola! 👋 Gracias por escribirnos a ChambaPe. Publica gratis lo que necesitas aquí: https://chambape.pe/solicitudes/nueva o regístrate como técnico aquí: https://chambape.pe/registrarse\";\n}\n\nreturn [{ json: { ...$json, respuesta } }];"
+      },
+      "id": "code-respuesta-05",
+      "name": "Generar respuesta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 220]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $json.phoneNumberId }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"messaging_product\": \"whatsapp\",\n  \"to\": $json.from,\n  \"type\": \"text\",\n  \"text\": { \"body\": $json.respuesta }\n} }}",
+        "options": {}
+      },
+      "id": "http-enviar-05",
+      "name": "Responder por WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 220],
+      "credentials": {
+        "httpHeaderAuth": { "id": "REEMPLAZAR_CREDENCIAL_WHATSAPP", "name": "WhatsApp Cloud API Token" }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook WhatsApp": {
+      "main": [
+        [
+          { "node": "Responder 200 a Meta", "type": "main", "index": 0 },
+          { "node": "¿Tiene mensaje de texto?", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "¿Tiene mensaje de texto?": {
+      "main": [[{ "node": "Extraer mensaje", "type": "main", "index": 0 }]]
+    },
+    "Extraer mensaje": {
+      "main": [[{ "node": "Generar respuesta", "type": "main", "index": 0 }]]
+    },
+    "Generar respuesta": {
+      "main": [[{ "node": "Responder por WhatsApp", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

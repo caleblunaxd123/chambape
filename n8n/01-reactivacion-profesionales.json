@@ -1,0 +1,77 @@
+{
+  "name": "ChambaPe - 01 Reactivación de profesionales inactivos",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Reactivación de profesionales (warm, sin riesgo)\n\nBusca profesionales que se registraron hace 2-9 días y siguen en\n`PENDING_VERIFICATION` (no completaron verificación). Les manda un\nrecordatorio una sola vez (la ventana de 2-9 días es la que evita\nreenviar el mismo correo cada día sin necesitar una columna extra).\n\n**Credenciales necesarias:**\n- Postgres → usa el mismo DATABASE_URL de tu app.\n- HTTP Header Auth (Resend) → header `Authorization` = `Bearer TU_RESEND_API_KEY`.",
+        "height": 280,
+        "width": 380
+      },
+      "id": "sticky-01",
+      "name": "Notas",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-200, -120]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "0 9 * * *" }
+          ]
+        }
+      },
+      "id": "trigger-01",
+      "name": "Cada día 9am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-200, 100]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT u.id AS user_id, u.name, u.email, p.status\nFROM professional_profiles p\nJOIN users u ON u.id = p.\"userId\"\nWHERE p.status = 'PENDING_VERIFICATION'\n  AND p.\"createdAt\" BETWEEN NOW() - INTERVAL '9 days' AND NOW() - INTERVAL '2 days'\n  AND u.active = true\nLIMIT 30;",
+        "options": {}
+      },
+      "id": "pg-01",
+      "name": "Buscar profesionales sin verificar",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [40, 100],
+      "credentials": {
+        "postgres": { "id": "REEMPLAZAR_CREDENCIAL_POSTGRES", "name": "ChambaPe Postgres" }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"from\": \"ChambaPe <hola@chambape.pe>\",\n  \"to\": $json.email,\n  \"subject\": \"Te falta un paso para empezar a recibir clientes 🔧\",\n  \"html\": \"<h2>Hola \" + $json.name + \",</h2><p>Vimos que aún no terminas de verificar tu perfil en ChambaPe. Solo te toma unos minutos y, en cuanto lo completes, empiezas a ver solicitudes de clientes reales en tu zona.</p><p><a href='https://chambape.pe/profesional/dashboard' style='background:#f97316;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block'>Completar mi verificación</a></p><p style='color:#9ca3af;font-size:12px;margin-top:24px'>Si ya no te interesa, ignora este correo.</p>\"\n} }}",
+        "options": {}
+      },
+      "id": "resend-01",
+      "name": "Enviar email (Resend)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [280, 100],
+      "credentials": {
+        "httpHeaderAuth": { "id": "REEMPLAZAR_CREDENCIAL_RESEND", "name": "Resend API Key" }
+      }
+    }
+  ],
+  "connections": {
+    "Cada día 9am": {
+      "main": [[{ "node": "Buscar profesionales sin verificar", "type": "main", "index": 0 }]]
+    },
+    "Buscar profesionales sin verificar": {
+      "main": [[{ "node": "Enviar email (Resend)", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

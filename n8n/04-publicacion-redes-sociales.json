@@ -1,0 +1,119 @@
+{
+  "name": "ChambaPe - 04 Publicación orgánica en redes sociales",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Contenido orgánico programado\n\nPublica 3 veces por semana en la página de Facebook y en Instagram\n(cuenta business vinculada a la página). Es contenido propio, no\nmensajes a desconocidos, así que no tiene riesgo de spam/baneo.\n\nEdita el array `posts` dentro del nodo \"Elegir contenido del día\"\npara renovar el calendario cuando se acabe (rota por semana del año).\n\n**Configurar en n8n (Variables de entorno):**\n- `FB_PAGE_ID`, `FB_PAGE_ACCESS_TOKEN` (Meta for Developers > tu app > Página).\n- `IG_BUSINESS_ID` (mismo token de la página sirve para Instagram si\n  la cuenta de Instagram está vinculada a la página de Facebook).",
+        "height": 320,
+        "width": 420
+      },
+      "id": "sticky-04",
+      "name": "Notas",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-260, -160]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "0 11 * * 1,3,5" }
+          ]
+        }
+      },
+      "id": "trigger-04",
+      "name": "Lun/Mié/Vie 11am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-260, 120]
+    },
+    {
+      "parameters": {
+        "jsCode": "const posts = [\n  { caption: \"¿Eres gasfitero, electricista o pintor en Lima? 🔧 Únete gratis a ChambaPe y recibe clientes reales de tu zona, sin comisiones. Link en el perfil.\", imageUrl: \"https://chambape.pe/og-tecnicos.jpg\" },\n  { caption: \"¿Se te dañó algo en casa? En ChambaPe publicas tu solicitud gratis y técnicos verificados te cotizan en minutos. 🏠\", imageUrl: \"https://chambape.pe/og-clientes.jpg\" },\n  { caption: \"Tú pones el precio, tú decides qué trabajos tomar. Así funciona ChambaPe para profesionales independientes. Regístrate gratis 👷\", imageUrl: \"https://chambape.pe/og-tecnicos.jpg\" },\n  { caption: \"Más de 500 técnicos verificados ya están en ChambaPe. ¿Y tú qué esperas para encontrar al experto que necesitas? ⭐\", imageUrl: \"https://chambape.pe/og-clientes.jpg\" },\n];\n\nconst semana = Math.floor((Date.now() / (1000 * 60 * 60 * 24 * 7)));\nconst post = posts[semana % posts.length];\n\nreturn [{ json: post }];"
+      },
+      "id": "code-04",
+      "name": "Elegir contenido del día",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [0, 120]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $env.FB_PAGE_ID }}/photos",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "url", "value": "={{ $json.imageUrl }}" },
+            { "name": "caption", "value": "={{ $json.caption }}" },
+            { "name": "access_token", "value": "={{ $env.FB_PAGE_ACCESS_TOKEN }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-fb-04",
+      "name": "Publicar foto en Facebook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $env.IG_BUSINESS_ID }}/media",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "image_url", "value": "={{ $json.imageUrl }}" },
+            { "name": "caption", "value": "={{ $json.caption }}" },
+            { "name": "access_token", "value": "={{ $env.FB_PAGE_ACCESS_TOKEN }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-ig-create-04",
+      "name": "Crear media Instagram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [240, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $env.IG_BUSINESS_ID }}/media_publish",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "creation_id", "value": "={{ $json.id }}" },
+            { "name": "access_token", "value": "={{ $env.FB_PAGE_ACCESS_TOKEN }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-ig-publish-04",
+      "name": "Publicar media Instagram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 240]
+    }
+  ],
+  "connections": {
+    "Lun/Mié/Vie 11am": {
+      "main": [[{ "node": "Elegir contenido del día", "type": "main", "index": 0 }]]
+    },
+    "Elegir contenido del día": {
+      "main": [
+        [
+          { "node": "Publicar foto en Facebook", "type": "main", "index": 0 },
+          { "node": "Crear media Instagram", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Crear media Instagram": {
+      "main": [[{ "node": "Publicar media Instagram", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}
