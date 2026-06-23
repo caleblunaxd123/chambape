@@ -383,6 +383,48 @@ model SupportTicket {
   @@map("support_tickets")
 }
 
+// Leads externos descubiertos por el agente de captación (n8n) — técnicos
+// o clientes potenciales que aún no se registraron en ChambaPe.
+model AcquisitionLead {
+  id           String     @id @default(cuid())
+  tipo         LeadTipo   @default(PROFESIONAL)
+  nombre       String?
+  telefono     String?
+  email        String?
+  categoria    String?
+  distrito     String?
+  direccion    String?
+  fuente       String
+  fuenteRef    String?    @unique
+  estado       LeadEstado @default(NUEVO)
+  contactCount Int        @default(0)
+  lastChannel  String?
+  contactedAt  DateTime?
+  optedOutAt   DateTime?
+  convertedAt  DateTime?
+  notas        String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([estado, tipo])
+  @@index([categoria, distrito])
+  @@map("acquisition_leads")
+}
+
+enum LeadTipo {
+  PROFESIONAL
+  CLIENTE
+}
+
+enum LeadEstado {
+  NUEVO
+  CONTACTADO
+  RESPONDIO
+  CONVERTIDO
+  OPT_OUT
+  DESCARTADO
+}
+
 enum UserRole {
   CLIENT
   PROFESSIONAL
